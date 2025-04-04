@@ -93,6 +93,7 @@ def resolve_code_source(
             filt_iter(TextFiles(code_src_rootdir), filt=keys_filt), keys_cache=sorted
         )
 
+
 Filepath = str
 
 
@@ -154,7 +155,8 @@ def code_aggregate(
 
     >>> from tempfile import NamedTemporaryFile
     >>> temp_file_name = NamedTemporaryFile().name
-    >>> import aix
+    >>> import aix  # doctest: +ELLIPSIS
+    ...
     >>> _  = code_aggregate(aix, egress=temp_file_name)
     >>> print(open(temp_file_name).read(15))
     ## __init__.py
