@@ -26,6 +26,11 @@ from contaix.util import (
     fullpath,
     url_to_contents,
     save_to_file_and_return_file,
+    # from scraped:
+    markdown_of_site,
+    download_site,
+    scrape_multiple_sites,
+    acquire_content,
 )
 from contaix.aggregation import aggregate_store
 from contaix.code import code_aggregate, PackageCodeContexts
@@ -42,10 +47,4 @@ from contaix.markdown import (
     add_dflt_converter,
     truncate_text,
     notebook_to_markdown,
-)
-from scraped import (
-    markdown_of_site, 
-    download_site, 
-    scrape_multiple_sites, 
-    acquire_content
 )

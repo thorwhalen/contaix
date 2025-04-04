@@ -13,6 +13,13 @@ from typing import Union, Callable, Optional
 import requests
 from dol import written_key
 
+# imports just to have these functions available in the contaix namespace
+from scraped import (  # noqa: F401
+    markdown_of_site, 
+    download_site, 
+    scrape_multiple_sites, 
+    acquire_content
+)
 
 def identity(x):
     """
