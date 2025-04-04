@@ -1,8 +1,4 @@
 """
-Tools for working with AI contexts
-"""
-
-"""
 Tools to make contexts (knowledge bases for AI agents)
 
 Examples:
@@ -46,4 +42,10 @@ from contaix.markdown import (
     add_dflt_converter,
     truncate_text,
     notebook_to_markdown,
+)
+from scraped import (
+    markdown_of_site, 
+    download_site, 
+    scrape_multiple_sites, 
+    acquire_content
 )

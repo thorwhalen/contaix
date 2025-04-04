@@ -30,16 +30,17 @@ def test_bytes_to_markdown_with_explicit_format():
     User story: I have a PDF file as bytes and I know its format.
     I want to convert it directly to markdown without any guessing.
     """
+    test_key = "test.pdf"
     # Get the PDF file content
     src_files = Files(test_data_dir)
-    pdf_bytes = src_files["test.pdf"]
+    pdf_bytes = src_files[test_key]
 
     # Convert with explicit format
     markdown_content = bytes_to_markdown(pdf_bytes, "pdf")
 
     # Verify it worked correctly
-    assert "Page 1" in markdown_content
-    assert "This  is  a  title" in markdown_content
+    assert "Page 1" in markdown_content, f"md conversion of {test_key} not as expected"
+    assert "This  is  a  title" in markdown_content, f"md conversion of {test_key} not as expected"
 
 
 def test_bytes_to_markdown_with_key_detection():
@@ -47,16 +48,17 @@ def test_bytes_to_markdown_with_key_detection():
     User story: I have a DOCX file and its filename, but I don't want to
     manually specify the format. I want the function to extract the format from the filename.
     """
+    test_key = "test.docx"
     # Get the DOCX file content
     src_files = Files(test_data_dir)
-    docx_bytes = src_files["test.docx"]
+    docx_bytes = src_files[test_key]
 
     # Convert using the key (filename) for format detection
     markdown_content = bytes_to_markdown(docx_bytes, input_format=None, key="test.docx")
 
     # Verify it worked correctly
-    assert "This is a title" in markdown_content
-    assert "This is Heading 1" in markdown_content
+    assert "This is a title" in markdown_content, f"md conversion of {test_key} not as expected"
+    assert "This is Heading 1" in markdown_content, f"md conversion of {test_key} not as expected"
 
 
 def test_bytes_to_markdown_with_content_detection():
@@ -64,9 +66,10 @@ def test_bytes_to_markdown_with_content_detection():
     User story: I have a file as bytes but I don't know its format or original filename.
     I want the function to analyze the bytes and determine the format automatically.
     """
+    test_key = "test.html"
     # Get the HTML file content
     src_files = Files(test_data_dir)
-    html_bytes = src_files["test.html"]
+    html_bytes = src_files[test_key]
 
     # Convert using content-based detection
     markdown_content = bytes_to_markdown(
@@ -79,8 +82,8 @@ def test_bytes_to_markdown_with_content_detection():
     )
 
     # Verify it worked correctly
-    assert "Heading 1" in markdown_content
-    assert "This is a paragraph" in markdown_content
+    assert "Heading 1" in markdown_content, f"md conversion of {test_key} not as expected"
+    assert "This is a paragraph" in markdown_content, f"md conversion of {test_key} not as expected"
 
 
 def test_bytes_to_markdown_with_fallback():
@@ -106,18 +109,19 @@ def test_bytes_to_markdown_excel_conversion():
     User story: I have an Excel file with data tables that I want to convert
     to markdown tables for documentation.
     """
+    test_key = "test.xlsx"
     # Get the Excel file content
     src_files = Files(test_data_dir)
-    xlsx_bytes = src_files["test.xlsx"]
+    xlsx_bytes = src_files[test_key]
 
     # Convert with explicit format
     markdown_content = bytes_to_markdown(xlsx_bytes, "xlsx")
 
     # Verify it created markdown tables correctly
-    assert "Sheet: Sheet1" in markdown_content
-    assert "hourly_fee" in markdown_content
-    assert "hours" in markdown_content
-    assert "total" in markdown_content
+    assert "Sheet: Sheet1" in markdown_content, f"md conversion of {test_key} not as expected"
+    assert "hourly_fee" in markdown_content, f"md conversion of {test_key} not as expected"
+    assert "hours" in markdown_content, f"md conversion of {test_key} not as expected"
+    assert "total" in markdown_content, f"md conversion of {test_key} not as expected"
 
 
 def test_bytes_store_to_markdown_store_directory():
@@ -150,8 +154,8 @@ def test_bytes_store_to_markdown_store_directory():
     ]
 
     for filename in supported_files:
-        assert f"{filename}.md" in target_store
-        assert len(target_store[f"{filename}.md"]) > 0
+        assert f"{filename}.md" in target_store, f"{filename} not found in target_store"
+        assert len(target_store[f"{filename}.md"]) > 0, f"{filename} conversion failed"
 
 
 def test_bytes_store_to_markdown_store_selective_conversion():
@@ -301,20 +305,20 @@ def test_file_content_matches_expected():
 
         # Assert content meets basic expectations based on file type
         if "docx" in filename:
-            assert "This is a title" in converted
-            assert "This is Heading 1" in converted
+            assert "This is a title" in converted, f"md conversion of {filename} not as expected"
+            assert "This is Heading 1" in converted, f"md conversion of {filename} not as expected"
         elif "pptx" in filename:
-            assert "Slide" in converted
+            assert "Slide" in converted, f"md conversion of {filename} not as expected"
         elif "pdf" in filename:
-            assert "Page 1" in converted
+            assert "Page 1" in converted, f"md conversion of {filename} not as expected"
         elif "html" in filename:
-            assert "Heading 1" in converted
+            assert "Heading 1" in converted, f"md conversion of {filename} not as expected"
         elif "xlsx" in filename:
-            assert "Sheet:" in converted
-            assert "hourly_fee" in converted
+            assert "Sheet:" in converted, f"md conversion of {filename} not as expected"
+            assert "hourly_fee" in converted, f"md conversion of {filename} not as expected"
         elif "ipynb" in filename:
-            assert "Header 1" in converted
-            assert "code block" in converted
+            assert "Header 1" in converted, f"md conversion of {filename} not as expected"
+            assert "code block" in converted, f"md conversion of {filename} not as expected"
 
 
 def test_bytes_store_to_markdown_store_with_custom_converters():
