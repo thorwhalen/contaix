@@ -60,7 +60,7 @@ with ignore_import_errors:
 
 # Microsoft Office Conversion
 with ignore_import_errors:
-    import mammoth  # for .docx
+    import mammoth  # for .docx  # pip install mammoth
 
     def docx_to_markdown(docx_bytes: bytes) -> str:
         """Convert DOCX to markdown."""
@@ -72,7 +72,7 @@ with ignore_import_errors:
 
 # Excel Conversion
 with ignore_import_errors:
-    import pandas as pd
+    import pandas as pd  # pip install pandas
 
     def excel_to_markdown(
         excel_bytes: bytes, *, md_inner_file_header=dflt_md_inner_file_header
@@ -95,7 +95,7 @@ with ignore_import_errors:
 
 # PowerPoint Conversion
 with ignore_import_errors:
-    import pptx
+    import pptx  # pip install python-pptx
 
     def pptx_to_markdown(
         pptx_bytes: bytes, *, md_inner_file_header=dflt_md_inner_file_header
@@ -121,7 +121,7 @@ with ignore_import_errors:
 
 # HTML Conversion
 with ignore_import_errors:
-    import html2text
+    import html2text  # pip install html2text
 
     def html_to_markdown(html_bytes: bytes) -> str:
         """Convert HTML to markdown."""
