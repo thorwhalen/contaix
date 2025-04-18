@@ -1,5 +1,6 @@
 """Tools for aggregating contexts"""
 
+import os
 from typing import Optional, Mapping, Iterable, Union, Callable
 from dol import TextFiles, filt_iter, wrap_kvs, Pipe, store_aggregate
 from contaix.util import identity
@@ -30,6 +31,12 @@ def aggregate_store(
     if exclude is None:
         exclude = set()
 
+    if isinstance(store, str) and os.path.isdir(store):
+        rootdir = store
+        store = TextFiles(rootdir)
+
+    assert isinstance(store, Mapping), f"store must be a Mapping instance. Was: {store}"
+
     wrappers = []
 
     if exclude is not None:
@@ -45,19 +52,18 @@ def aggregate_store(
                 return_removed_blocks=False,
             )
         )
-    else:
-        remove_duplicate_lines = identity
+        wrappers.append(remove_duplicate_lines)
 
     if max_num_characters is not None:
         wrappers.append(wrap_kvs(value_decoder=lambda v: v[:max_num_characters]))
 
-    capped_num_characters = wrap_kvs(value_decoder=lambda v: v[:max_num_characters])
+    if max_num_characters is not None:
+        capped_num_characters = wrap_kvs(value_decoder=lambda v: v[:max_num_characters])
+        wrappers.append(capped_num_characters)
 
     if len(wrappers) > 0:
         store_wrap = Pipe(
-            filt_iter(filt=lambda x: x.endswith(".md") and x not in exclude),
-            remove_duplicate_lines,
-            capped_num_characters,
+            *wrappers,
         )
     else:
         store_wrap = identity
@@ -65,8 +71,10 @@ def aggregate_store(
     wrapped_store = store_wrap(store)
 
     if isinstance(egress, str):
-        output_template = egress
-        egress = output_template.format
+        if '{}' in egress:
+            output_template = egress
+            egress = output_template.format
+        # else: it's the name of the save file itself
     else:
         assert egress is None or callable(
             egress
