@@ -11,6 +11,7 @@ to markdown format. It includes:
 # Note: This module is also vendored in dn package
 # TODO: Keep in sync and centralize when makes sense
 
+import json
 from functools import partial
 import contextlib
 import base64
@@ -256,6 +257,9 @@ def notebook_to_markdown(
     """
     if "nbconvert" not in installed_packages or "nbformat" not in installed_packages:
         raise ImportError("nbconvert and nbformat must both be installed.")
+
+    if isinstance(src_notebook, dict):
+        src_notebook = json.dumps(src_notebook)
 
     if is_url(src_notebook):
         src_content = url_to_contents(src_notebook)
