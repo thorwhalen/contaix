@@ -8,6 +8,9 @@ to markdown format. It includes:
 - Store-based converters for processing multiple files
 """
 
+# Note: This module is also vendored in dn package
+# TODO: Keep in sync and centralize when makes sense
+
 from functools import partial
 import contextlib
 import base64
