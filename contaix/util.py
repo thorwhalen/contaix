@@ -8,6 +8,8 @@ This module provides core utility functions used throughout the contaix package,
 - Basic helper functions (identity)
 """
 
+# TODO: A lot of these were for contaix.markdown, which has moved to dn.src. Get rid of unnecessary definitions
+
 import os
 from typing import Union, Callable, Optional
 import requests
