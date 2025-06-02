@@ -85,6 +85,27 @@ def resolve_code_source(
         keys_filt (Callable): A function to filter the keys. Defaults to lambda x: x.endswith('.py').
 
     """
+    # handle a ModuleType that is a single .py file
+    if isinstance(code_src, ModuleType):
+        if hasattr(code_src, "__file__") and not hasattr(code_src, "__path__"):
+            path = os.path.abspath(code_src.__file__)
+            with open(path, "r") as f:
+                return {os.path.basename(path): f.read()}
+
+    # handle a string that points to a single-file module
+    if isinstance(code_src, str):
+        try:
+            mod = importlib.import_module(code_src)
+        except ImportError:
+            pass
+        else:
+            if hasattr(mod, "__file__") and not hasattr(mod, "__path__"):
+                path = os.path.abspath(mod.__file__)
+                with open(path, "r") as f:
+                    return {os.path.basename(path): f.read()}
+            # if it's a package, fall through with the module object
+            code_src = mod
+
     if isinstance(code_src, Mapping):
         return code_src
     else:
