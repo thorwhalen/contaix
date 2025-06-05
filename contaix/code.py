@@ -27,8 +27,11 @@ def is_local_pkg_name(name: str) -> bool:
 def resolve_code_source_dir_path(code_src: CodeSource) -> DirectoryPathString:
     """
     Resolves code_src to a directory path string.
+    If the input is a package object or name, it will return the local path where
+    the package is located.
+    If the input is a github URL, this repository will be DOWNLOAD to a local
+    temporary directory and the path of that directory will be returned.
 
-    I
     Args:
         code_src (Any): The source of the code. Can be
             a directory path string,
@@ -273,3 +276,10 @@ class PackageCodeContexts:
                 f.write(md_string)
 
     save_multiple_pkgs_code = multiple_pkgs_code  # backwards compatibility alias
+
+
+from functools import partial
+from types import SimpleNamespace
+from hubcap import github_repo_markdown_of
+
+get_github = github_repo_markdown_of
