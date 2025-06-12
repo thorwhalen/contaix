@@ -121,11 +121,26 @@ def resolve_code_source(
 Filepath = str
 
 
+def _readme_from_parent_dir(code_store: Mapping) -> Optional[str]:
+    """
+    Attempts to read a README file from the parent directory of the code store.
+    If a README file is found, it returns its content; otherwise, it returns None.
+    """
+    if (rootdir := getattr(code_store, "rootdir", None)) is not None:
+        parent_dir = os.path.dirname(os.path.normpath(rootdir))
+        readme_path = os.path.join(parent_dir, "README.md")
+        if os.path.exists(readme_path):
+            with open(readme_path, "r") as f:
+                return f.read()
+    return None
+
+
 def code_aggregate(
     code_src: CodeSource,
     *,
     egress: Union[Callable, Filepath] = identity,
     kv_to_item=lambda k, v: f"## {k}\n\n```python\n{v.strip()}\n```",
+    include_readme: Callable = _readme_from_parent_dir,
     **store_aggregate_kwargs,
 ) -> Any:
     """
@@ -198,6 +213,14 @@ def code_aggregate(
 
     """
     code_store = resolve_code_source(code_src)
+    if include_readme:
+        readme_content = include_readme(code_store)
+        if readme_content:
+            from collections import ChainMap
+
+            # Note: ChainMap's keys iteration starts with second store, so we put the
+            # readme content as the second store to have it appear first in the output.
+            code_store = ChainMap(code_store, {"README.md": readme_content})
     return store_aggregate(
         code_store, egress=egress, kv_to_item=kv_to_item, **store_aggregate_kwargs
     )
