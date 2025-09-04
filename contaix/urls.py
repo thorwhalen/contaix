@@ -346,3 +346,39 @@ def verify_urls(md_string):
             url_status_codes[url] = str(e)
 
     return url_status_codes
+
+
+def remove_hyperlink_crap(string=None, copy_to_clipboard=True):
+    """
+    Remove unwanted hyperlinks and citations from a string.
+    Typically used to clean up text copied from ChatGPT (only case supported, for now).
+
+    If no string is specified,
+
+    remove:
+        "?utm_source=chatgpt.com"
+        "&utm_source=chatgpt.com"
+        "oai_citation:\d*‡"
+
+    """
+    import re
+
+    if string is None:  # if no string is given, take it from the clipboard
+        import pyperclip
+
+        string = pyperclip.paste()
+
+    string = string.replace("?utm_source=chatgpt.com", "")
+    string = string.replace("&utm_source=chatgpt.com", "")
+    string = re.sub(r"oai_citation:\d*‡", "", string)
+
+    if copy_to_clipboard:
+        try:
+            import pyperclip
+
+            pyperclip.copy(string)
+        except ImportError:
+            print(
+                "pyperclip module not found (pip install pyperclip) so can't copy to clipboard"
+            )
+    return string

@@ -36,13 +36,14 @@ from contaix.aggregation import aggregate_store
 from contaix.code import (
     get_github,  # get markdown aggregates from github (files, wiki, discussions, issues)
     code_aggregate,  # get markdown aggregate of code from a directory, package, or GitHub URL
-    PackageCodeContexts
+    PackageCodeContexts,
 )
 from contaix.urls import (
     extract_urls,
     verify_urls,
     download_articles,
     download_articles_by_section,
+    remove_hyperlink_crap,
 )
 from contaix.markdown import (
     bytes_to_markdown,
