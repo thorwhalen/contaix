@@ -363,6 +363,10 @@ def remove_hyperlink_crap(string=None, copy_to_clipboard=True):
     """
     import re
 
+    if isinstance(string, bool):
+        # assume the user mistakingly was trying to control copy_to_clipboard
+        copy_to_clipboard = string  # that's what they meant
+        string = None  # because no string was actually given
     if string is None:  # if no string is given, take it from the clipboard
         import pyperclip
 
