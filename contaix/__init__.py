@@ -31,6 +31,7 @@ from contaix.util import (
     download_site,
     scrape_multiple_sites,
     acquire_content,
+    remove_improperly_double_newlines,
 )
 from contaix.aggregation import aggregate_store
 from contaix.code import (

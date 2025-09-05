@@ -17,11 +17,12 @@ from dol import written_key
 
 # imports just to have these functions available in the contaix namespace
 from scraped import (  # noqa: F401
-    markdown_of_site, 
-    download_site, 
-    scrape_multiple_sites, 
-    acquire_content
+    markdown_of_site,
+    download_site,
+    scrape_multiple_sites,
+    acquire_content,
 )
+
 
 def identity(x):
     """
@@ -129,3 +130,25 @@ def save_to_file_and_return_file(
     """
     # Note: Yes, it's just written_key from dol, but with a context-sensitive name
     return written_key(obj, encoder=encoder, key=key)
+
+
+def remove_improperly_double_newlines(string: str) -> str:
+    r"""
+    Remove improperly double newlines from a string.
+
+    Args:
+        string (str): The input string.
+
+    Returns:
+        str: The string with improperly double newlines removed.
+
+    Example:
+
+    >>> text = "This is a test.\n\nThis should be one newline.\n  \nThis too."
+    >>> assert remove_improperly_double_newlines(text) == 'This is a test.\n\nThis should be one newline.\nThis too.'
+
+    """
+    import re
+
+    double_newlines = re.compile(r'\n\ +\n')
+    return double_newlines.sub('\n', string.replace('\n\r', '\n').replace('\r\n', '\n'))
