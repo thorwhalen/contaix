@@ -11,6 +11,8 @@ This module provides core utility functions used throughout the contaix package,
 # TODO: A lot of these were for contaix.markdown, which has moved to dn.src. Get rid of unnecessary definitions
 
 import os
+import functools
+import inspect
 from typing import Union, Callable, Optional
 import requests
 from dol import written_key
@@ -132,7 +134,63 @@ def save_to_file_and_return_file(
     return written_key(obj, encoder=encoder, key=key)
 
 
-def remove_improperly_double_newlines(string: str) -> str:
+def source_first_arg_from_clipboard_if_none(func):
+    """Decorator that sources a `string` argument from the clipboard when it's
+    None and copies the function's return value back to the clipboard when the
+    keyword argument `copy_to_clipboard` is truthy.
+
+    The wrapped function must accept a parameter named `string`. It may also
+    accept a keyword-only parameter named `copy_to_clipboard` (default True).
+    """
+
+    sig = inspect.signature(func)
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        bound = sig.bind_partial(*args, **kwargs)
+
+        # If the function declares a `string` parameter and it is None,
+        # attempt to paste from the clipboard. Let ImportError propagate for
+        # the paste operation to match previous behavior.
+        if 'string' in sig.parameters:
+            if bound.arguments.get('string') is None:
+                import pyperclip
+
+                bound.arguments['string'] = pyperclip.paste()
+
+        # Call the original function with the bound arguments
+        result = func(**bound.arguments)
+
+        # Determine whether to copy result to clipboard. Prefer the provided
+        # argument, else fall back to the function's default if available.
+        if 'copy_to_clipboard' in sig.parameters:
+            copy = bound.arguments.get(
+                'copy_to_clipboard', sig.parameters['copy_to_clipboard'].default
+            )
+        else:
+            copy = True
+
+        if copy:
+            try:
+                import pyperclip
+
+                pyperclip.copy(result)
+            except ImportError:
+                print(
+                    "pyperclip module not found (pip install pyperclip) so can't copy to clipboard"
+                )
+
+        return result
+
+    return wrapper
+
+
+@source_first_arg_from_clipboard_if_none
+def remove_improperly_double_newlines(
+    string: Optional[str],
+    *,
+    copy_to_clipboard=True  # Note: Yes, it's used, but obfuscated by the decorator
+) -> str:
     r"""
     Remove improperly double newlines from a string.
 
@@ -151,4 +209,8 @@ def remove_improperly_double_newlines(string: str) -> str:
     import re
 
     double_newlines = re.compile(r'\n\ +\n')
-    return double_newlines.sub('\n', string.replace('\n\r', '\n').replace('\r\n', '\n'))
+    new_string = double_newlines.sub(
+        '\n', string.replace('\n\r', '\n').replace('\r\n', '\n')
+    )
+
+    return new_string
