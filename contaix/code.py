@@ -148,6 +148,25 @@ def _readme_from_parent_dir(code_store: Mapping) -> Optional[str]:
     return None
 
 
+def _readme_first_chainmap(code_store: Mapping, readme_content: str) -> Mapping:
+    """Create a ChainMap with README first, handling Python 3.11+ iteration changes.
+
+    >>> cm = _readme_first_chainmap({'a.py': 'code'}, 'readme text')
+    >>> list(cm.keys())
+    ['README.md', 'a.py']
+    """
+    from collections import ChainMap
+
+    class ReadmeFirstChainMap(ChainMap):
+        def keys(self):
+            """Ensure README.md appears first, then code store keys."""
+            readme_key = "README.md"
+            yield readme_key
+            yield from (k for k in self.maps[1] if k != readme_key)
+
+    return ReadmeFirstChainMap({"README.md": readme_content}, code_store)
+
+
 def code_aggregate(
     code_src: CodeSource,
     *,
@@ -236,11 +255,8 @@ def code_aggregate(
     if include_readme:
         readme_content = include_readme(code_store)
         if readme_content:
-            from collections import ChainMap
+            code_store = _readme_first_chainmap(code_store, readme_content)
 
-            # Note: ChainMap's keys iteration starts with second store, so we put the
-            # readme content as the second store to have it appear first in the output.
-            code_store = ChainMap(code_store, {"README.md": readme_content})
     return store_aggregate(
         code_store, egress=egress, kv_to_item=kv_to_item, **store_aggregate_kwargs
     )
