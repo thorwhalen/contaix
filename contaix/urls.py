@@ -13,7 +13,9 @@ Work with urls
 
 import os
 import re
-from typing import Callable, Iterator, Pattern, Tuple, Optional
+from typing import Tuple, Optional
+from collections.abc import Callable, Iterator
+from re import Pattern
 import requests
 
 DFLT_SAVE_DIR = os.path.expanduser("~/Downloads")
@@ -21,9 +23,9 @@ DFLT_SAVE_DIR = os.path.expanduser("~/Downloads")
 
 def extract_urls(
     markdown: str,
-    pattern: Optional[Pattern] = None,
-    extractor: Optional[Callable[[re.Match], Tuple[str, str]]] = None,
-) -> Iterator[Tuple[str, str]]:
+    pattern: Pattern | None = None,
+    extractor: Callable[[re.Match], tuple[str, str]] | None = None,
+) -> Iterator[tuple[str, str]]:
     """
     Extract URLs and their context from a markdown string.
 
@@ -47,7 +49,7 @@ def extract_urls(
 
     if extractor is None:
         # Default extractor for markdown hyperlinks
-        def extractor(match: re.Match) -> Tuple[str, str]:
+        def extractor(match: re.Match) -> tuple[str, str]:
             return match.group(1), match.group(2)
 
     for match in pattern.finditer(markdown):
@@ -58,8 +60,8 @@ def extract_urls(
 
 
 def extract_markdown_links(
-    markdown: str, pattern: Optional[Pattern] = None
-) -> Iterator[Tuple[str, str]]:
+    markdown: str, pattern: Pattern | None = None
+) -> Iterator[tuple[str, str]]:
     """
     Extract markdown links from a string.
 
@@ -79,7 +81,7 @@ def extract_markdown_links(
 
 def extract_with_surrounding_context(
     markdown: str, context_chars: int = 30
-) -> Iterator[Tuple[str, str]]:
+) -> Iterator[tuple[str, str]]:
     """
     Extract URLs with surrounding text as context.
 
@@ -98,7 +100,7 @@ def extract_with_surrounding_context(
     # Pattern to match URLs with a simple validation
     pattern = re.compile(r"https?://[^\s]+")
 
-    def surrounding_context_extractor(match: re.Match) -> Tuple[str, str]:
+    def surrounding_context_extractor(match: re.Match) -> tuple[str, str]:
         url = match.group(0)
         start = max(0, match.start() - context_chars)
         end = min(len(markdown), match.end() + context_chars)
@@ -135,7 +137,7 @@ def extract_urls_only(markdown: str) -> Iterator[tuple[str, str]]:
     return extract_urls(markdown, pattern, url_only_extractor)
 
 
-def extract_html_links(markdown: str) -> Iterator[Tuple[str, str]]:
+def extract_html_links(markdown: str) -> Iterator[tuple[str, str]]:
     """
     Extract URLs from HTML anchor tags.
 
@@ -148,7 +150,7 @@ def extract_html_links(markdown: str) -> Iterator[Tuple[str, str]]:
     # Simple pattern for HTML anchor tags
     pattern = re.compile(r'<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)</a>')
 
-    def html_link_extractor(match: re.Match) -> Tuple[str, str]:
+    def html_link_extractor(match: re.Match) -> tuple[str, str]:
         # Note the order is reversed in HTML: href first, then text
         return match.group(2), match.group(1)
 
@@ -298,7 +300,7 @@ def download_articles_by_section(
     os.makedirs(rootdir, exist_ok=True)
 
     # Parse sections and their content
-    section_pattern = section_marker + r" (.*?)\n(.*?)(?=\n" + section_marker + "|\Z)"
+    section_pattern = section_marker + r" (.*?)\n(.*?)(?=\n" + section_marker + r"|\Z)"
     sections = re.findall(section_pattern, md_string, re.DOTALL)
 
     failed_urls_by_section = {}
@@ -349,7 +351,7 @@ def verify_urls(md_string):
 
 
 def remove_hyperlink_crap(string=None, copy_to_clipboard=True):
-    """
+    r"""
     Remove unwanted hyperlinks and citations from a string.
     Typically used to clean up text copied from ChatGPT (only case supported, for now).
 

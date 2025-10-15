@@ -1,7 +1,8 @@
 """Tools for aggregating contexts"""
 
 import os
-from typing import Optional, Mapping, Iterable, Union, Callable
+from typing import Optional, Union
+from collections.abc import Mapping, Iterable, Callable
 from dol import TextFiles, filt_iter, wrap_kvs, Pipe, store_aggregate
 from contaix.util import identity
 
@@ -9,11 +10,11 @@ from contaix.util import identity
 def aggregate_store(
     store: Mapping,
     *,
-    min_number_of_duplicated_lines: Optional[int] = None,
-    max_num_characters: Optional[int] = None,
-    exclude: Optional[Iterable] = None,
+    min_number_of_duplicated_lines: int | None = None,
+    max_num_characters: int | None = None,
+    exclude: Iterable | None = None,
     chk_size=None,
-    egress: Optional[Union[str, Callable]] = None,
+    egress: str | Callable | None = None,
     **store_aggregate_kwargs,
 ):
     """

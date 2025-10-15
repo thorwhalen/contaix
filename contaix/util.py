@@ -13,7 +13,8 @@ This module provides core utility functions used throughout the contaix package,
 import os
 import functools
 import inspect
-from typing import Union, Callable, Optional
+from typing import Union, Optional
+from collections.abc import Callable
 import requests
 from dol import written_key
 
@@ -93,7 +94,7 @@ def url_to_contents(url: str):
 
 
 def save_to_file_and_return_file(
-    obj=None, *, encoder=identity, key: Union[str, Callable] = None
+    obj=None, *, encoder=identity, key: str | Callable = None
 ):
     """
     Save `encoder(obj)` to a file using a random name in `rootdir` (or a temp directory if not provided).
@@ -187,7 +188,7 @@ def source_first_arg_from_clipboard_if_none(func):
 
 @source_first_arg_from_clipboard_if_none
 def remove_improperly_double_newlines(
-    string: Optional[str],
+    string: str | None,
     *,
     copy_to_clipboard=True  # Note: Yes, it's used, but obfuscated by the decorator
 ) -> str:
