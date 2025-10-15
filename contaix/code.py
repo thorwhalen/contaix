@@ -85,9 +85,22 @@ def resolve_code_source(
             a directory path string,
             a GitHub URL,
             or an imported package (must contain a __path__ atribute)
+        keys_filt (Union[Callable, str]): A function or regex string to filter the keys of the code store.
+                                        If a string, it will be compiled to a regex pattern.
         keys_filt (Callable): A function to filter the keys. Defaults to lambda x: x.endswith('.py').
 
     """
+    if keys_filt:
+        if isinstance(keys_filt, str):
+            import re
+
+            key_pattern = re.compile(keys_filt)
+            keys_filt = key_pattern.search
+        elif not callable(keys_filt):
+            raise ValueError(f"keys_filt should be callable or string. Was {keys_filt}")
+    else:
+        keys_filt = lambda x: True
+
     # handle a ModuleType that is a single .py file
     if isinstance(code_src, ModuleType):
         if hasattr(code_src, "__file__") and not hasattr(code_src, "__path__"):
@@ -140,7 +153,7 @@ def code_aggregate(
     *,
     egress: Union[Callable, Filepath] = identity,
     kv_to_item=lambda k, v: f"## {k}\n\n```python\n{v.strip()}\n```",
-    key_filt: Union[Callable, str] = None,
+    keys_filt: Union[Callable, str] = None,
     include_readme: Callable = _readme_from_parent_dir,
     **store_aggregate_kwargs,
 ) -> Any:
@@ -157,7 +170,7 @@ def code_aggregate(
                                        If a string, the aggregate will be saved to the file.
         kv_to_item (Callable): A function that converts a key-value pairs to the
                                items that should be aggregated.
-        key_filt (Union[Callable, str]): A function or regex string to filter the keys of the code store.
+        keys_filt (Union[Callable, str]): A function or regex string to filter the keys of the code store.
                                         If a string, it will be compiled to a regex pattern.
         include_readme (Callable): A function that takes the code_store as input and returns
                                    the content of a README file to include in the aggregate.
@@ -218,21 +231,7 @@ def code_aggregate(
 
 
     """
-    if key_filt:
-        if isinstance(key_filt, str):
-            import re
-
-            key_pattern = re.compile(key_filt)
-            _filt_iter = filt_iter(filt=key_pattern.search)
-        else:
-            assert callable(
-                key_filt
-            ), f"key_filt should be callable or string. Was {key_filt}"
-            _filt_iter = filt_iter(filt=key_filt)
-    else:
-        _filt_iter = lambda x: x
-
-    code_store = _filt_iter(resolve_code_source(code_src))
+    code_store = resolve_code_source(code_src, keys_filt=keys_filt)
 
     if include_readme:
         readme_content = include_readme(code_store)
