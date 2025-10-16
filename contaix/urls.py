@@ -22,7 +22,7 @@ DFLT_SAVE_DIR = os.path.expanduser("~/Downloads")
 
 
 def get_from_clipboard():
-    import pyperclip. # pip install pyperclip
+    import pyperclip  # pip install pyperclip
 
     return pyperclip.paste()
 
@@ -291,7 +291,11 @@ def download_articles(
 
 
 def download_articles_by_section(
-    md_string: str | None = None, rootdir=None, save_non_pdf: bool = False, *, section_marker: str = r"###"
+    md_string: str | None = None,
+    rootdir=None,
+    save_non_pdf: bool = False,
+    *,
+    section_marker: str = r"###",
 ):
     """
     Downloads articles from a markdown string organized by sections into subdirectories.
@@ -387,8 +391,10 @@ def remove_hyperlink_crap(string=None, copy_to_clipboard=True):
         # assume the user mistakingly was trying to control copy_to_clipboard
         copy_to_clipboard = string  # that's what they meant
         string = None  # because no string was actually given
-    
-    string = string or get_from_clipboard()  # if no string is given, take it from the clipboard
+
+    string = (
+        string or get_from_clipboard()
+    )  # if no string is given, take it from the clipboard
 
     string = string.replace("?utm_source=chatgpt.com", "")
     string = string.replace("&utm_source=chatgpt.com", "")
