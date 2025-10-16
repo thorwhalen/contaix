@@ -75,22 +75,38 @@ def is_url(path: str) -> bool:
     return isinstance(path, str) and path.startswith(("http://", "https://"))
 
 
-def url_to_contents(url: str):
+DFLT_URL_TO_CONTENTS_KIND = 'binary'
+DFLT_URL_TO_CONTENTS_TIMEOUT = 10  # seconds
+
+
+def url_to_contents(
+    url: str,
+    *,
+    kind=DFLT_URL_TO_CONTENTS_KIND,
+    timeout: int = DFLT_URL_TO_CONTENTS_TIMEOUT
+) -> Optional[bytes]:
     """
-    Fetch the content of a URL.
+    Fetch the content from a URL.
 
     Args:
-        url (str): URL to fetch
+        url (str): The URL to fetch.
+        kind (str): The kind of content to fetch ('text' or 'binary' or 'response'). Defaults to 'text'.
+        timeout (int): Timeout for the request in seconds. Default is 10 seconds.
 
     Returns:
-        bytes: Content of the URL
-
-    Raises:
-        HTTPError: If the request fails
+        Optional[bytes]: The content of the URL if successful, None otherwise.
     """
-    response = requests.get(url)
-    response.raise_for_status()
-    return response.content
+    response = requests.get(url, timeout=timeout)
+    response.raise_for_status()  # Raise an error for bad responses
+    if kind in {'text', 'str'}:
+        return response.text
+    elif kind in {'binary', 'bytes'}:
+        return response.content
+    elif kind == 'response':
+        return response
+    else:
+        raise ValueError("Invalid kind. Use 'text', 'binary', or 'response'.")
+        raise ValueError("Invalid kind. Use 'text', 'binary', or 'response'.")
 
 
 def save_to_file_and_return_file(
