@@ -21,8 +21,14 @@ import requests
 DFLT_SAVE_DIR = os.path.expanduser("~/Downloads")
 
 
+def get_from_clipboard():
+    import pyperclip. # pip install pyperclip
+
+    return pyperclip.paste()
+
+
 def extract_urls(
-    markdown: str,
+    markdown: str | None = None,
     pattern: Pattern | None = None,
     extractor: Callable[[re.Match], tuple[str, str]] | None = None,
 ) -> Iterator[tuple[str, str]]:
@@ -43,6 +49,8 @@ def extract_urls(
     >>> list(extract_urls(text))
     [('Google', 'https://google.com'), ('GitHub', 'https://github.com')]
     """
+    markdown = markdown or get_from_clipboard()
+
     if pattern is None:
         # Default pattern matches markdown hyperlinks: [context](url)
         pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
@@ -60,7 +68,7 @@ def extract_urls(
 
 
 def extract_markdown_links(
-    markdown: str, pattern: Pattern | None = None
+    markdown: str | None = None, pattern: Pattern | None = None
 ) -> Iterator[tuple[str, str]]:
     """
     Extract markdown links from a string.
@@ -76,11 +84,13 @@ def extract_markdown_links(
     >>> list(extract_markdown_links(text))
     [('Google', 'https://google.com'), ('GitHub', 'https://github.com')]
     """
-    return extract_urls(markdown, pattern=re.compile(r"\[([^\]]+)\]\(([^)]+)\)"))
+    markdown = markdown or get_from_clipboard()
+    pattern = pattern or re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+    return extract_urls(markdown, pattern=pattern)
 
 
 def extract_with_surrounding_context(
-    markdown: str, context_chars: int = 30
+    markdown: str | None = None, context_chars: int = 30
 ) -> Iterator[tuple[str, str]]:
     """
     Extract URLs with surrounding text as context.
@@ -97,6 +107,7 @@ def extract_with_surrounding_context(
     [('gle](https://google.com) and', 'https://google.com)'), ('Hub](https://github.com)', 'https://github.com)')]
 
     """
+    markdown = markdown or get_from_clipboard()
     # Pattern to match URLs with a simple validation
     pattern = re.compile(r"https?://[^\s]+")
 
@@ -110,7 +121,7 @@ def extract_with_surrounding_context(
     return extract_urls(markdown, pattern, surrounding_context_extractor)
 
 
-def extract_urls_only(markdown: str) -> Iterator[tuple[str, str]]:
+def extract_urls_only(markdown: str | None = None) -> Iterator[tuple[str, str]]:
     """
     Extract URLs with empty context.
 
@@ -123,6 +134,7 @@ def extract_urls_only(markdown: str) -> Iterator[tuple[str, str]]:
     >>> list(extract_urls_only("Check [this link](https://example.com) and https://github.com/user/repo)"))
     [('', 'https://example.com'), ('', 'https://github.com/user/repo')]
     """
+    markdown = markdown or get_from_clipboard()
     # Improved URL pattern that stops at common ending characters
     pattern = re.compile(
         r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+(?:/[^\s()<>[\]{},"\']*)?'
@@ -137,7 +149,7 @@ def extract_urls_only(markdown: str) -> Iterator[tuple[str, str]]:
     return extract_urls(markdown, pattern, url_only_extractor)
 
 
-def extract_html_links(markdown: str) -> Iterator[tuple[str, str]]:
+def extract_html_links(markdown: str | None = None) -> Iterator[tuple[str, str]]:
     """
     Extract URLs from HTML anchor tags.
 
@@ -147,6 +159,7 @@ def extract_html_links(markdown: str) -> Iterator[tuple[str, str]]:
     Returns:
         Iterator of (anchor_text, url) pairs
     """
+    markdown = markdown or get_from_clipboard()
     # Simple pattern for HTML anchor tags
     pattern = re.compile(r'<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)</a>')
 
@@ -166,7 +179,7 @@ DFLT_SAVE_DIR = os.path.expanduser("~/Downloads")
 
 
 def download_articles(
-    md_string: str,
+    md_string: str | None = None,
     save_dir: str = DFLT_SAVE_DIR,
     *,
     save_non_pdf: bool = False,
@@ -203,6 +216,8 @@ def download_articles(
 
 
     """
+    md_string = md_string or get_from_clipboard()
+    save_dir = os.path.expanduser(save_dir)
     # Assert the save_dir exists
     assert os.path.exists(save_dir), f"Directory not found: {save_dir}"
 
@@ -276,7 +291,7 @@ def download_articles(
 
 
 def download_articles_by_section(
-    md_string, rootdir=None, save_non_pdf: bool = False, *, section_marker: str = r"###"
+    md_string: str | None = None, rootdir=None, save_non_pdf: bool = False, *, section_marker: str = r"###"
 ):
     """
     Downloads articles from a markdown string organized by sections into subdirectories.
@@ -293,6 +308,8 @@ def download_articles_by_section(
     Returns:
         dict: A dictionary with section names as keys and lists of failed URLs as values.
     """
+    md_string = md_string or get_from_clipboard()
+
     if rootdir is None:
         rootdir = os.path.expanduser("~/Downloads")
 
@@ -324,7 +341,7 @@ def download_articles_by_section(
     return failed_urls_by_section
 
 
-def verify_urls(md_string):
+def verify_urls(md_string: str | None = None) -> dict[str, int | str]:
     """
     Verifies URLs in a markdown string by checking their status codes.
 
@@ -334,6 +351,7 @@ def verify_urls(md_string):
     Returns:
         dict: A dictionary with URLs as keys and their status codes as values.
     """
+    md_string = md_string or get_from_clipboard()
     # Regex to extract URLs from the markdown string
     pattern = r"\[(.*?)\]\((.*?)\)"
     matches = re.findall(pattern, md_string)
@@ -369,10 +387,8 @@ def remove_hyperlink_crap(string=None, copy_to_clipboard=True):
         # assume the user mistakingly was trying to control copy_to_clipboard
         copy_to_clipboard = string  # that's what they meant
         string = None  # because no string was actually given
-    if string is None:  # if no string is given, take it from the clipboard
-        import pyperclip
-
-        string = pyperclip.paste()
+    
+    string = string or get_from_clipboard()  # if no string is given, take it from the clipboard
 
     string = string.replace("?utm_source=chatgpt.com", "")
     string = string.replace("&utm_source=chatgpt.com", "")
