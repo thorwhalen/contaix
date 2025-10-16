@@ -172,7 +172,7 @@ def code_aggregate(
     *,
     egress: Union[Callable, Filepath] = identity,
     kv_to_item=lambda k, v: f"## {k}\n\n```python\n{v.strip()}\n```",
-    keys_filt: Union[Callable, str] = None,
+    keys_filt: Union[Callable, str] = r'\.py$',
     include_readme: Callable = _readme_from_parent_dir,
     **store_aggregate_kwargs,
 ) -> Any:
