@@ -400,6 +400,13 @@ def remove_hyperlink_crap(string=None, copy_to_clipboard=True):
     string = string.replace("&utm_source=chatgpt.com", "")
     string = re.sub(r"oai_citation:\d*‡", "", string)
 
+    # Remove double hyperlinks of the form [[X](Y)](Y) -> [X](Y)
+    # (Happens sometimes when copying from Claude)
+    pattern = r'\[\[([^\]]+)\]\(([^)]+)\)\]\(\2\)'
+    # Replacement string: [\1](\2) uses Group 1 (X) and Group 2 (Y)
+    replacement = r'[\1](\2)'
+    string = re.sub(pattern, replacement, string)
+
     if copy_to_clipboard:
         try:
             import pyperclip
