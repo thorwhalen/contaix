@@ -250,7 +250,10 @@ def code_aggregate(
 
 
     """
+    from dol.trans import warn_and_ignore_if_error
+
     code_store = resolve_code_source(code_src, keys_filt=keys_filt)
+    code_store = warn_and_ignore_if_error(code_store)
 
     if include_readme:
         readme_content = include_readme(code_store)
