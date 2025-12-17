@@ -21,6 +21,31 @@ import requests
 DFLT_SAVE_DIR = os.path.expanduser("~/Downloads")
 
 
+def _get_head_with_headers(
+    url: str, *, timeout: int = 10, headers: dict | None = None
+) -> requests.Response:
+    """
+    Make a HEAD request with proper headers to avoid 403 blocks.
+
+    Args:
+        url: The URL to request
+        timeout: Request timeout in seconds
+        headers: Optional additional headers to merge in
+
+    Returns:
+        Response object
+    """
+    default_headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; URLVerifier/1.0; +https://github.com/thorwhalen/contaix)"
+    }
+    if headers:
+        default_headers.update(headers)
+
+    return requests.head(
+        url, allow_redirects=True, timeout=timeout, headers=default_headers
+    )
+
+
 def get_from_clipboard():
     import pyperclip  # pip install pyperclip
 
@@ -238,7 +263,13 @@ def download_articles(
         filepath = os.path.join(save_dir, filename)
 
         try:
-            response = requests.get(url, stream=True)
+            response = requests.get(
+                url,
+                stream=True,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (compatible; URLVerifier/1.0; +https://github.com/thorwhalen/contaix)"
+                },
+            )
             response.raise_for_status()
 
             # Check Content-Type header
@@ -345,26 +376,34 @@ def download_articles_by_section(
     return failed_urls_by_section
 
 
-def verify_urls(md_string: str | None = None) -> dict[str, int | str]:
+def verify_urls(src: str | list | None = None) -> dict[str, int | str]:
     """
     Verifies URLs in a markdown string by checking their status codes.
 
     Args:
-        md_string (str): The markdown string containing URLs.
+        src (str | list): The markdown string or list containing URLs.
 
     Returns:
         dict: A dictionary with URLs as keys and their status codes as values.
     """
-    md_string = md_string or get_from_clipboard()
-    # Regex to extract URLs from the markdown string
-    pattern = r"\[(.*?)\]\((.*?)\)"
-    matches = re.findall(pattern, md_string)
+    src = src or get_from_clipboard()
 
+    if isinstance(src, list):
+        urls = src
+    else:
+        if src.startswith("["):
+            # assume it's a list of urls, and resolve to list
+            urls = eval(src)
+        else:  # it's an actual md_string, so need to etract the urls
+            # Regex to extract URLs from the markdown string
+            pattern = r"\[(.*?)\]\((.*?)\)"
+            matches = re.findall(pattern, src)
+            urls = list(matches.values())
     url_status_codes = {}
 
-    for title, url in matches:
+    for url in urls:
         try:
-            response = requests.head(url, allow_redirects=True)
+            response = _get_head_with_headers(url)
             url_status_codes[url] = response.status_code
         except Exception as e:
             url_status_codes[url] = str(e)
