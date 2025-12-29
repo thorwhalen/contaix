@@ -21,6 +21,32 @@ import requests
 DFLT_SAVE_DIR = os.path.expanduser("~/Downloads")
 
 
+def _strip_trailing_url_punctuation(url: str) -> str:
+    """Strip common trailing punctuation from a URL.
+
+    This is useful when URLs appear in prose like "see https://example.com).".
+
+    >>> _strip_trailing_url_punctuation('https://example.com).')
+    'https://example.com'
+    >>> _strip_trailing_url_punctuation('https://example.com/path?a=1&b=2')
+    'https://example.com/path?a=1&b=2'
+    """
+
+    return url.rstrip(")].,;:!?*\"'\"")
+
+
+# Default URL matching:
+# - Markdown links: [context](https://example.com/...)
+# - Bare URLs in prose: https://example.com/...
+DFLT_BARE_URL_PATTERN = (
+    r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+(?::\d+)?" r"(?:/[^\s()<>\[\]{}\",\']*)?"
+)
+
+DFLT_URL_EXTRACTION_PATTERN = re.compile(
+    rf"\[([^\]]+)\]\(({DFLT_BARE_URL_PATTERN})\)|({DFLT_BARE_URL_PATTERN})"
+)
+
+
 def _get_head_with_headers(
     url: str, *, timeout: int = 10, headers: dict | None = None
 ) -> requests.Response:
@@ -62,28 +88,41 @@ def extract_urls(
 
     Args:
         markdown: The markdown string to process
-        pattern: A compiled regex pattern to match URLs and their context
-                 Defaults to matching markdown hyperlinks [context](url)
-        extractor: A function that extracts (context, url) from a match
-                  Defaults to extracting from markdown hyperlinks
+        pattern: A compiled regex pattern to match URLs and their context.
+            Defaults to matching both markdown hyperlinks ``[context](url)``
+            and bare ``http(s)://...`` URLs.
+        extractor: A function that extracts ``(context, url)`` from a match.
+            Defaults to:
+            - ``(context, url)`` for markdown hyperlinks
+            - ``(url, url)`` for bare URLs
 
     Returns:
         Iterator of (context, url) pairs
 
-    >>> text = "[Google](https://google.com) and [GitHub](https://github.com)"
+    >>> text = "[Google](https://google.com) and https://github.com"
     >>> list(extract_urls(text))
-    [('Google', 'https://google.com'), ('GitHub', 'https://github.com')]
+    [('Google', 'https://google.com'), ('https://github.com', 'https://github.com')]
     """
     markdown = markdown or get_from_clipboard()
 
     if pattern is None:
-        # Default pattern matches markdown hyperlinks: [context](url)
-        pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+        pattern = DFLT_URL_EXTRACTION_PATTERN
 
     if extractor is None:
-        # Default extractor for markdown hyperlinks
+        # Default extractor for markdown hyperlinks OR bare urls
         def extractor(match: re.Match) -> tuple[str, str]:
-            return match.group(1), match.group(2)
+            md_context = match.group(1)
+            md_url = match.group(2)
+            bare_url = match.group(3)
+
+            url = md_url or bare_url or ""
+            url = _strip_trailing_url_punctuation(url)
+
+            if md_context is not None and md_url is not None:
+                return md_context, url
+
+            # For bare URLs, use the URL as the context/name
+            return url, url
 
     for match in pattern.finditer(markdown):
         yield extractor(match)
@@ -98,6 +137,9 @@ def extract_markdown_links(
     """
     Extract markdown links from a string.
 
+    Note: By default this also extracts bare ``http(s)://...`` URLs found in the
+    text. For those, the returned context/name is the URL itself.
+
     Args:
         markdown: The markdown string to process
         pattern: A compiled regex pattern to match markdown links
@@ -105,12 +147,12 @@ def extract_markdown_links(
     Returns:
         Iterator of (context, url) pairs
 
-    >>> text = "[Google](https://google.com) and [GitHub](https://github.com)"
+    >>> text = "[Google](https://google.com) and https://github.com"
     >>> list(extract_markdown_links(text))
-    [('Google', 'https://google.com'), ('GitHub', 'https://github.com')]
+    [('Google', 'https://google.com'), ('https://github.com', 'https://github.com')]
     """
     markdown = markdown or get_from_clipboard()
-    pattern = pattern or re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+    pattern = pattern or DFLT_URL_EXTRACTION_PATTERN
     return extract_urls(markdown, pattern=pattern)
 
 
@@ -161,14 +203,11 @@ def extract_urls_only(markdown: str | None = None) -> Iterator[tuple[str, str]]:
     """
     markdown = markdown or get_from_clipboard()
     # Improved URL pattern that stops at common ending characters
-    pattern = re.compile(
-        r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+(?:/[^\s()<>[\]{},"\']*)?'
-    )
+    pattern = re.compile(DFLT_BARE_URL_PATTERN)
 
     def url_only_extractor(match: re.Match) -> tuple[str, str]:
         url = match.group(0)
-        # Strip trailing punctuation that might have been incorrectly included
-        url = url.rstrip(')].,;:!?*"\'')
+        url = _strip_trailing_url_punctuation(url)
         return "", url
 
     return extract_urls(markdown, pattern, url_only_extractor)
