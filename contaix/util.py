@@ -208,8 +208,10 @@ def remove_improperly_double_newlines(
     *,
     copy_to_clipboard=True  # Note: Yes, it's used, but obfuscated by the decorator
 ) -> str:
-    r"""
-    Remove improperly double newlines from a string.
+    r"""Remove improperly double newlines from a string.
+
+    Delegates to ``dn.repair.remove_improperly_double_newlines`` for the pure
+    transform, adding clipboard integration via the decorator.
 
     Args:
         string (str): The input string.
@@ -223,11 +225,6 @@ def remove_improperly_double_newlines(
     >>> assert remove_improperly_double_newlines(text) == 'This is a test.\n\nThis should be one newline.\nThis too.'
 
     """
-    import re
+    from dn.repair import remove_improperly_double_newlines as _pure_remove
 
-    double_newlines = re.compile(r'\n\ +\n')
-    new_string = double_newlines.sub(
-        '\n', string.replace('\n\r', '\n').replace('\r\n', '\n')
-    )
-
-    return new_string
+    return _pure_remove(string)

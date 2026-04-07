@@ -55,3 +55,15 @@ from contaix.markdown import (
     truncate_text,
     notebook_to_markdown,
 )
+from contaix.web import (
+    site_to_markdown,
+    extract_site_nav,
+    list_site_pages,
+    fetch_page,
+    fetch_pages,
+    fetch_nextjs_rsc,
+    is_nextjs_site,
+    html_to_clean_markdown,
+    extract_rsc_page_content,
+    repair_markdown,
+)
