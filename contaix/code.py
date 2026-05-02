@@ -342,6 +342,14 @@ class PackageCodeContexts:
 
 from functools import partial
 from types import SimpleNamespace
-from hubcap import github_repo_markdown_of
 
-get_github = github_repo_markdown_of
+
+# Lazy re-export of hubcap.github_repo_markdown_of as ``get_github``.
+# hubcap raises OSError at import time when GITHUB_TOKEN is unset; resolving
+# this lazily lets ``import contaix.code`` succeed without a token, with the
+# error deferred until ``get_github`` is actually called.
+def __getattr__(name):
+    if name == 'get_github':
+        from hubcap import github_repo_markdown_of
+        return github_repo_markdown_of
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')

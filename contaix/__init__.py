@@ -26,19 +26,36 @@ from contaix.util import (
     fullpath,
     url_to_contents,
     save_to_file_and_return_file,
-    # from scraped:
-    markdown_of_site,
-    download_site,
-    scrape_multiple_sites,
-    acquire_content,
     remove_improperly_double_newlines,
 )
 from contaix.aggregation import aggregate_store
 from contaix.code import (
-    get_github,  # get markdown aggregates from github (files, wiki, discussions, issues)
     code_aggregate,  # get markdown aggregate of code from a directory, package, or GitHub URL
     PackageCodeContexts,
 )
+
+
+# Lazy re-exports for names whose underlying packages (scraped, hubcap)
+# raise at import time when GITHUB_TOKEN is unset. Resolving these via
+# ``__getattr__`` lets ``import contaix`` succeed without a token; the
+# error surfaces only if a caller actually uses one of these names.
+_LAZY_FROM_UTIL = (
+    'markdown_of_site',
+    'download_site',
+    'scrape_multiple_sites',
+    'acquire_content',
+)
+_LAZY_FROM_CODE = ('get_github',)
+
+
+def __getattr__(name):
+    if name in _LAZY_FROM_UTIL:
+        from contaix import util
+        return getattr(util, name)
+    if name in _LAZY_FROM_CODE:
+        from contaix import code
+        return getattr(code, name)
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
 from contaix.urls import (
     get_from_clipboard,
     extract_urls,

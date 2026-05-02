@@ -18,13 +18,24 @@ from collections.abc import Callable
 import requests
 from dol import written_key
 
-# imports just to have these functions available in the contaix namespace
-from scraped import (  # noqa: F401
-    markdown_of_site,
-    download_site,
-    scrape_multiple_sites,
-    acquire_content,
+# Re-export selected names from scraped at the contaix namespace level.
+# These are loaded lazily because scraped pulls in hubcap, which raises
+# OSError at import time when GITHUB_TOKEN is unset. Lazy resolution lets
+# `import contaix` succeed without a token; the OSError surfaces only when
+# a caller actually touches one of these functions.
+_SCRAPED_REEXPORTS = (
+    'markdown_of_site',
+    'download_site',
+    'scrape_multiple_sites',
+    'acquire_content',
 )
+
+
+def __getattr__(name):
+    if name in _SCRAPED_REEXPORTS:
+        import scraped
+        return getattr(scraped, name)
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
 
 
 def identity(x):
