@@ -1262,10 +1262,18 @@ def _strip_duplicate_title(content: str, title: str) -> str:
 
 
 # Markdown repair utilities are now in dn.repair; re-exported here for
-# backward compatibility and convenience.
-from dn.repair import repair_markdown  # noqa: F401
-from dn.repair import fix_multiline_links  # noqa: F401
-from dn.repair import fix_empty_links  # noqa: F401
+# backward compatibility and convenience. The fallback no-ops only fire on
+# older dn releases (pre-0.0.9) that didn't ship the repair submodule.
+try:
+    from dn.repair import repair_markdown  # noqa: F401
+    from dn.repair import fix_multiline_links  # noqa: F401
+    from dn.repair import fix_empty_links  # noqa: F401
+except ImportError:
+    def repair_markdown(md: str) -> str:
+        """No-op fallback when dn.repair is unavailable."""
+        return md
+    fix_multiline_links = repair_markdown
+    fix_empty_links = repair_markdown
 
 
 # ---------------------------------------------------------------------------
