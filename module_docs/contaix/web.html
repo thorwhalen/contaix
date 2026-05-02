@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>contaix.web &mdash; contaix 0.0.2 documentation</title>
+  <title>contaix.web &mdash; contaix 0.0.12 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/documentation_options.js?v=3bbcec59"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -63,13 +63,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.fetch_page"><code class="docutils literal notranslate"><span class="pre">fetch_page()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.fetch_pages"><code class="docutils literal notranslate"><span class="pre">fetch_pages()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.find_llms_full_url"><code class="docutils literal notranslate"><span class="pre">find_llms_full_url()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#contaix.web.fix_empty_links"><code class="docutils literal notranslate"><span class="pre">fix_empty_links()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#contaix.web.fix_multiline_links"><code class="docutils literal notranslate"><span class="pre">fix_multiline_links()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.html_to_clean_markdown"><code class="docutils literal notranslate"><span class="pre">html_to_clean_markdown()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.is_nextjs_site"><code class="docutils literal notranslate"><span class="pre">is_nextjs_site()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.list_site_pages"><code class="docutils literal notranslate"><span class="pre">list_site_pages()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.parse_rsc_flight"><code class="docutils literal notranslate"><span class="pre">parse_rsc_flight()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#contaix.web.repair_markdown"><code class="docutils literal notranslate"><span class="pre">repair_markdown()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.rsc_tree_to_markdown"><code class="docutils literal notranslate"><span class="pre">rsc_tree_to_markdown()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.site_to_markdown"><code class="docutils literal notranslate"><span class="pre">site_to_markdown()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.web.url_to_cache_key"><code class="docutils literal notranslate"><span class="pre">url_to_cache_key()</span></code></a></li>
@@ -252,18 +249,6 @@ scraping page-by-page.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="contaix.web.fix_empty_links">
-<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fix_empty_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#contaix.web.fix_empty_links" title="Link to this definition"></a></dt>
-<dd><p>No-op fallback when dn.repair is unavailable.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="contaix.web.fix_multiline_links">
-<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fix_multiline_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#contaix.web.fix_multiline_links" title="Link to this definition"></a></dt>
-<dd><p>No-op fallback when dn.repair is unavailable.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="contaix.web.html_to_clean_markdown">
 <span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">html_to_clean_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_links</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">html2text_options</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#html_to_clean_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.html_to_clean_markdown" title="Link to this definition"></a></dt>
 <dd><p>Convert HTML to clean markdown using html2text.</p>
@@ -325,12 +310,6 @@ may contain newlines, so we read by byte count rather than splitting on
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="contaix.web.repair_markdown">
-<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">repair_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#repair_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.repair_markdown" title="Link to this definition"></a></dt>
-<dd><p>No-op fallback when dn.repair is unavailable.</p>
 </dd></dl>
 
 <dl class="py function">
