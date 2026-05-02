@@ -132,6 +132,7 @@ jobs:
         uses: i2mint/wads/actions/run-tests-uv@master
         with:
           root-dir: ${{ needs.setup.outputs.project-name }}
+          exclude-paths: ${{ needs.setup.outputs.exclude-paths }}
 
   # Publishing job
   publish:
