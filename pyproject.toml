@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "contaix"
-version = "0.0.12"
+version = "0.0.13"
 description = "Tools to make contexts for AI"
 readme = "README.md"
 requires-python = ">=3.10"
