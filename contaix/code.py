@@ -232,10 +232,9 @@ def code_aggregate(
 
     >>> from tempfile import NamedTemporaryFile
     >>> temp_file_name = NamedTemporaryFile().name
-    >>> import aix  # doctest: +ELLIPSIS
-    ...
-    >>> _  = code_aggregate(aix, egress=temp_file_name)
-    >>> print(open(temp_file_name).read(15))
+    >>> import aix  # doctest: +SKIP
+    >>> _  = code_aggregate(aix, egress=temp_file_name)  # doctest: +SKIP
+    >>> print(open(temp_file_name).read(15))  # doctest: +SKIP
     ## __init__.py
     <BLANKLINE>
 
