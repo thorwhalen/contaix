@@ -1,0 +1,201 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>contaix.skills &mdash; contaix 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="contaix.urls" href="urls.html" />
+    <link rel="prev" title="contaix.markdown" href="markdown.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            contaix
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../contaix.html">contaix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregation.html">contaix.aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">contaix.code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown.html">contaix.markdown</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">contaix.skills</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.skills.discover_skills"><code class="docutils literal notranslate"><span class="pre">discover_skills()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.skills.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.skills.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.skills.uninstall_skills"><code class="docutils literal notranslate"><span class="pre">uninstall_skills()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="urls.html">contaix.urls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">contaix.util</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web.html">contaix.web</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">contaix</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">contaix.skills</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/contaix/skills.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-contaix.skills">
+<span id="contaix-skills"></span><h1>contaix.skills<a class="headerlink" href="#module-contaix.skills" title="Link to this heading"></a></h1>
+<p>Skill discovery and installation for the contaix ecosystem.</p>
+<p>Claude Code skills are stored in <code class="docutils literal notranslate"><span class="pre">~/.claude/skills/</span></code> as folders containing
+<code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> files. When packages are pip-installed, their skills live in
+<code class="docutils literal notranslate"><span class="pre">&lt;package&gt;/data/skills/</span></code> and need to be symlinked into the global directory.</p>
+<p>This module discovers skills from installed packages and creates those symlinks.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># From the command line:</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">contaix</span><span class="o">.</span><span class="n">skills</span>
+
+<span class="c1"># From Python:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contaix.skills</span><span class="w"> </span><span class="kn">import</span> <span class="n">install_skills</span>
+<span class="n">install_skills</span><span class="p">()</span>
+
+<span class="c1"># List available skills without installing:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contaix.skills</span><span class="w"> </span><span class="kn">import</span> <span class="n">discover_skills</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">discover_skills</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.skills.discover_skills">
+<span class="sig-prename descclassname"><span class="pre">contaix.skills.</span></span><span class="sig-name descname"><span class="pre">discover_skills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('contaix',</span> <span class="pre">'dn',</span> <span class="pre">'pdfdol')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/skills.html#discover_skills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.skills.discover_skills" title="Link to this definition"></a></dt>
+<dd><p>Discover skills from installed ecosystem packages.</p>
+<p>Scans each package’s <code class="docutils literal notranslate"><span class="pre">data/skills/</span></code> directory for folders containing
+a <code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packages</strong> (<em>tuple</em><em> of </em><em>str</em>) – Package names to scan.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping of skill name to its <code class="docutils literal notranslate"><span class="pre">Path</span></code> in the installed package.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.skills.install_skills">
+<span class="sig-prename descclassname"><span class="pre">contaix.skills.</span></span><span class="sig-name descname"><span class="pre">install_skills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('contaix',</span> <span class="pre">'dn',</span> <span class="pre">'pdfdol')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/skills.html#install_skills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.skills.install_skills" title="Link to this definition"></a></dt>
+<dd><p>Create symlinks in <code class="docutils literal notranslate"><span class="pre">~/.claude/skills/</span></code> for discovered skills.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packages</strong> (<em>tuple</em><em> of </em><em>str</em>) – Package names to scan for skills.</p></li>
+<li><p><strong>force</strong> (<em>bool</em>) – If True, replace existing symlinks (but not regular directories).</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Print progress.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.skills.main">
+<span class="sig-prename descclassname"><span class="pre">contaix.skills.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/skills.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.skills.main" title="Link to this definition"></a></dt>
+<dd><p>CLI entry point: discover and install skills.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.skills.uninstall_skills">
+<span class="sig-prename descclassname"><span class="pre">contaix.skills.</span></span><span class="sig-name descname"><span class="pre">uninstall_skills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('contaix',</span> <span class="pre">'dn',</span> <span class="pre">'pdfdol')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/skills.html#uninstall_skills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.skills.uninstall_skills" title="Link to this definition"></a></dt>
+<dd><p>Remove symlinks created by <a class="reference internal" href="#contaix.skills.install_skills" title="contaix.skills.install_skills"><code class="xref py py-func docutils literal notranslate"><span class="pre">install_skills()</span></code></a>.</p>
+<p>Only removes symlinks (not regular directories) to avoid data loss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packages</strong> (<em>tuple</em><em> of </em><em>str</em>) – Package names whose skills should be removed.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Print progress.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="markdown.html" class="btn btn-neutral float-left" title="contaix.markdown" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="urls.html" class="btn btn-neutral float-right" title="contaix.urls" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

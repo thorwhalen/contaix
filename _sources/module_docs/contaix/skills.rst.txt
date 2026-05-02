@@ -1,0 +1,4 @@
+contaix.skills
+==============
+.. automodule:: contaix.skills
+   :members:

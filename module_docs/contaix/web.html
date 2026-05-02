@@ -1,0 +1,424 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>contaix.web &mdash; contaix 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="contaix.util" href="util.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            contaix
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../contaix.html">contaix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregation.html">contaix.aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">contaix.code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown.html">contaix.markdown</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skills.html">contaix.skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="urls.html">contaix.urls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">contaix.util</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">contaix.web</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.extract_rsc_page_content"><code class="docutils literal notranslate"><span class="pre">extract_rsc_page_content()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.extract_site_nav"><code class="docutils literal notranslate"><span class="pre">extract_site_nav()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.fetch_llms_full"><code class="docutils literal notranslate"><span class="pre">fetch_llms_full()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.fetch_nextjs_rsc"><code class="docutils literal notranslate"><span class="pre">fetch_nextjs_rsc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.fetch_page"><code class="docutils literal notranslate"><span class="pre">fetch_page()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.fetch_pages"><code class="docutils literal notranslate"><span class="pre">fetch_pages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.find_llms_full_url"><code class="docutils literal notranslate"><span class="pre">find_llms_full_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.fix_empty_links"><code class="docutils literal notranslate"><span class="pre">fix_empty_links()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.fix_multiline_links"><code class="docutils literal notranslate"><span class="pre">fix_multiline_links()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.html_to_clean_markdown"><code class="docutils literal notranslate"><span class="pre">html_to_clean_markdown()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.is_nextjs_site"><code class="docutils literal notranslate"><span class="pre">is_nextjs_site()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.list_site_pages"><code class="docutils literal notranslate"><span class="pre">list_site_pages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.parse_rsc_flight"><code class="docutils literal notranslate"><span class="pre">parse_rsc_flight()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.repair_markdown"><code class="docutils literal notranslate"><span class="pre">repair_markdown()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.rsc_tree_to_markdown"><code class="docutils literal notranslate"><span class="pre">rsc_tree_to_markdown()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.site_to_markdown"><code class="docutils literal notranslate"><span class="pre">site_to_markdown()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.web.url_to_cache_key"><code class="docutils literal notranslate"><span class="pre">url_to_cache_key()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">contaix</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">contaix.web</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/contaix/web.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-contaix.web">
+<span id="contaix-web"></span><h1>contaix.web<a class="headerlink" href="#module-contaix.web" title="Link to this heading"></a></h1>
+<p>Web content extraction and aggregation tools.</p>
+<p>Functions for extracting structured content from websites and converting to markdown,
+with support for navigation discovery, caching, and content aggregation.</p>
+<p>Main entry points:</p>
+<blockquote>
+<div><p>site_to_markdown(url)  # Full pipeline: discover nav, fetch pages, aggregate
+extract_site_nav(url)  # Get ordered navigation structure from a doc site
+fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">md</span> <span class="o">=</span> <span class="n">site_to_markdown</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s1">&#39;https://platform.claude.com/docs/en/home&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">cache_dir</span><span class="o">=</span><span class="s1">&#39;/tmp/claude_docs_cache&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">output_file</span><span class="o">=</span><span class="s1">&#39;~/Downloads/claude_docs.md&#39;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>  
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.extract_rsc_page_content">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">extract_rsc_page_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rsc_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#extract_rsc_page_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.extract_rsc_page_content" title="Link to this definition"></a></dt>
+<dd><p>Extract page content from RSC flight data.</p>
+<p>Works on both:
+- RSC flight endpoint responses (<code class="docutils literal notranslate"><span class="pre">text/x-component</span></code>)
+- Inline RSC payloads extracted from HTML</p>
+<p>Returns markdown text if content was found, None otherwise.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.extract_site_nav">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">extract_site_nav</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#extract_site_nav"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.extract_site_nav" title="Link to this definition"></a></dt>
+<dd><p>Extract navigation structure from a documentation site.</p>
+<dl class="simple">
+<dt>Returns a dict with keys:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">base_url</span></code>: The base URL of the site</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tabs</span></code>: List of tab dicts, each with <code class="docutils literal notranslate"><span class="pre">label</span></code> and <code class="docutils literal notranslate"><span class="pre">groups</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pages</span></code>: Flat ordered list of <code class="docutils literal notranslate"><span class="pre">{path,</span> <span class="pre">title}</span></code> dicts (all tabs)</p></li>
+</ul>
+</dd>
+<dt>Tries, in order:</dt><dd><ol class="arabic simple">
+<li><p>Next.js RSC payload (embedded in SSR HTML)</p></li>
+<li><p>HTML <code class="docutils literal notranslate"><span class="pre">&lt;a&gt;</span></code> link extraction with path-based grouping</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – The documentation site URL (e.g. a homepage or any page on the site).</p></li>
+<li><p><strong>html</strong> (<em>str</em><em>, </em><em>optional</em>) – Pre-fetched HTML. If None, fetches from <code class="docutils literal notranslate"><span class="pre">url</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fetch_llms_full">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fetch_llms_full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#fetch_llms_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.fetch_llms_full" title="Link to this definition"></a></dt>
+<dd><p>Fetch a publisher-provided single-doc bundle if available.</p>
+<p>See <a class="reference internal" href="#contaix.web.find_llms_full_url" title="contaix.web.find_llms_full_url"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_llms_full_url()</span></code></a> for how the URL is discovered.</p>
+<p>Returns the markdown text, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no bundle was found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fetch_nextjs_rsc">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fetch_nextjs_rsc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#fetch_nextjs_rsc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.fetch_nextjs_rsc" title="Link to this definition"></a></dt>
+<dd><p>Fetch page content via Next.js RSC flight endpoint.</p>
+<p>Next.js App Router sites serve React Server Component payloads when the
+<code class="docutils literal notranslate"><span class="pre">RSC:</span> <span class="pre">1</span></code> header is present. These contain the full page content that
+would otherwise require JavaScript rendering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – The page URL.</p></li>
+<li><p><strong>cache_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory to cache RSC responses.</p></li>
+<li><p><strong>force</strong> (<em>bool</em>) – Re-fetch even if cached.</p></li>
+<li><p><strong>timeout</strong> (<em>int</em>) – Request timeout.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The RSC flight data as text.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fetch_page">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fetch_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#fetch_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.fetch_page" title="Link to this definition"></a></dt>
+<dd><p>Fetch a page’s HTML content, with optional disk caching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – The URL to fetch.</p></li>
+<li><p><strong>cache_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory to cache HTML files. If None, no caching.</p></li>
+<li><p><strong>force</strong> (<em>bool</em>) – If True, re-fetch even if cached.</p></li>
+<li><p><strong>timeout</strong> (<em>int</em>) – Request timeout in seconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The page’s HTML content.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fetch_pages">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fetch_pages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">urls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#fetch_pages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.fetch_pages" title="Link to this definition"></a></dt>
+<dd><p>Fetch multiple pages with caching.</p>
+<p>Returns a dict mapping URL -&gt; HTML content.
+Pages that fail to fetch are skipped with a warning.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.find_llms_full_url">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">find_llms_full_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#find_llms_full_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.find_llms_full_url" title="Link to this definition"></a></dt>
+<dd><p>Probe for a publisher-provided single-doc bundle.</p>
+<p>Many documentation generators (Mintlify, Docusaurus, Fern, etc.) expose
+the entire docs as a single markdown file at <code class="docutils literal notranslate"><span class="pre">/llms-full.txt</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">/llms.txt</span></code> for an index). When present, this is far better than
+scraping page-by-page.</p>
+<p>Tries, in order:</p>
+<ol class="arabic simple">
+<li><p>Same path as the input URL with the doc-root replaced (e.g.
+<code class="docutils literal notranslate"><span class="pre">https://site.com/docs/foo</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">https://site.com/docs/llms-full.txt</span></code>).</p></li>
+<li><p>Site root (e.g. <code class="docutils literal notranslate"><span class="pre">https://site.com/llms-full.txt</span></code>).</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – Any URL on the documentation site.</p></li>
+<li><p><strong>timeout</strong> (<em>int</em>) – HEAD request timeout.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The first URL that returns HTTP 200 with non-trivial content, or
+<code class="docutils literal notranslate"><span class="pre">None</span></code> if none of the candidates exist.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fix_empty_links">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fix_empty_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#contaix.web.fix_empty_links" title="Link to this definition"></a></dt>
+<dd><p>No-op fallback when dn.repair is unavailable.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fix_multiline_links">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fix_multiline_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#contaix.web.fix_multiline_links" title="Link to this definition"></a></dt>
+<dd><p>No-op fallback when dn.repair is unavailable.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.html_to_clean_markdown">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">html_to_clean_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_links</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">html2text_options</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#html_to_clean_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.html_to_clean_markdown" title="Link to this definition"></a></dt>
+<dd><p>Convert HTML to clean markdown using html2text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>html</strong> (<em>str</em>) – Raw HTML content.</p></li>
+<li><p><strong>body_width</strong> (<em>int</em>) – Line width for wrapping. 0 = no wrapping.</p></li>
+<li><p><strong>ignore_images</strong> (<em>bool</em>) – Whether to skip image tags.</p></li>
+<li><p><strong>include_links</strong> (<em>bool</em>) – Whether to include hyperlinks in output.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.is_nextjs_site">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">is_nextjs_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#is_nextjs_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.is_nextjs_site" title="Link to this definition"></a></dt>
+<dd><p>Detect if a page is served by Next.js (App Router).</p>
+<p>Looks for <code class="docutils literal notranslate"><span class="pre">self.__next_f.push</span></code> in the HTML, which is the RSC
+streaming payload signature.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.list_site_pages">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">list_site_pages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#list_site_pages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.list_site_pages" title="Link to this definition"></a></dt>
+<dd><p>List all pages found in a documentation site’s navigation.</p>
+<p>Returns a list of dicts with keys: path, title, url, group, tab.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pages</span> <span class="o">=</span> <span class="n">list_site_pages</span><span class="p">(</span><span class="s1">&#39;https://platform.claude.com/docs/en/home&#39;</span><span class="p">)</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">pages</span><span class="p">)</span>  
+<span class="go">89</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.parse_rsc_flight">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">parse_rsc_flight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rsc_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#parse_rsc_flight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.parse_rsc_flight" title="Link to this definition"></a></dt>
+<dd><p>Parse RSC flight data into a dict mapping keys to parsed JSON data.</p>
+<p>Each RSC record starts with <code class="docutils literal notranslate"><span class="pre">&lt;hex_key&gt;:&lt;payload&gt;</span></code>. Records come in three
+flavors:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">I[...]</span></code>: module import descriptors (skipped here).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T&lt;hex_size&gt;,&lt;bytes&gt;</span></code>: a raw text chunk whose payload occupies exactly
+<code class="docutils literal notranslate"><span class="pre">hex_size</span></code> bytes (often markdown, code, or compiled MDX). The payload
+may contain newlines, so we read by byte count rather than splitting on
+<code class="docutils literal notranslate"><span class="pre">\n</span></code>.</p></li>
+<li><p>Anything else: a JSON value terminated by the next record header
+(<code class="docutils literal notranslate"><span class="pre">\n&lt;hex&gt;:</span></code>) or end-of-text.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rsc_text</strong> (<em>str</em>) – Raw RSC flight response text (<code class="docutils literal notranslate"><span class="pre">text/x-component</span></code>).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping of hex keys to their parsed payloads.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.repair_markdown">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">repair_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#repair_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.repair_markdown" title="Link to this definition"></a></dt>
+<dd><p>No-op fallback when dn.repair is unavailable.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.rsc_tree_to_markdown">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">rsc_tree_to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#rsc_tree_to_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.rsc_tree_to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Recursively extract markdown from a React Server Component tree node.</p>
+<p>The RSC tree uses the format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s2">&quot;$&quot;</span><span class="p">,</span> <span class="s2">&quot;tagName&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;children&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span> <span class="s2">&quot;className&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">}]</span>
+</pre></div>
+</div>
+<p>or plain strings for text nodes. Component references like <code class="docutils literal notranslate"><span class="pre">&quot;$L2a&quot;</span></code>
+are resolved via <code class="docutils literal notranslate"><span class="pre">_registry</span></code> (from <a class="reference internal" href="#contaix.web.parse_rsc_flight" title="contaix.web.parse_rsc_flight"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_rsc_flight()</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.site_to_markdown">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">site_to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tab_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_fetcher</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_separator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\n\n---\n\n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collapse_blank_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_llms_full</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#site_to_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.site_to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Download a documentation site and produce a single aggregated markdown.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em>) – The documentation site’s root URL.</p></li>
+<li><p><strong>cache_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory for caching fetched HTML. Defaults to <code class="docutils literal notranslate"><span class="pre">~/.cache/contaix/web</span></code>.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to save the markdown file. If None, returns the string.</p></li>
+<li><p><strong>tab_filter</strong> (<em>str</em><em> or </em><em>callable</em><em>, </em><em>optional</em>) – If a string, only include pages from tabs whose label contains this
+string (case-insensitive). If a callable, <code class="docutils literal notranslate"><span class="pre">tab_filter(tab_label)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code>.</p></li>
+<li><p><strong>page_fetcher</strong> (<em>callable</em><em>, </em><em>optional</em>) – Custom <code class="docutils literal notranslate"><span class="pre">(url)</span> <span class="pre">-&gt;</span> <span class="pre">html</span></code> function. Defaults to <code class="docutils literal notranslate"><span class="pre">fetch_page</span></code>.</p></li>
+<li><p><strong>content_extractor</strong> (<em>callable</em><em>, </em><em>optional</em>) – Custom <code class="docutils literal notranslate"><span class="pre">(html)</span> <span class="pre">-&gt;</span> <span class="pre">markdown</span></code> function. Defaults to auto-detection.</p></li>
+<li><p><strong>section_separator</strong> (<em>str</em>) – Separator between page sections in the output.</p></li>
+<li><p><strong>use_llms_full</strong> (<em>bool</em>) – If True (default), first try to find a publisher-provided
+<code class="docutils literal notranslate"><span class="pre">/llms-full.txt</span></code> bundle (Mintlify, Docusaurus, etc. ship these).
+When found, returns it directly instead of scraping page-by-page.
+Disable to force the scraping pipeline. Skipped automatically when
+<code class="docutils literal notranslate"><span class="pre">page_fetcher</span></code> or <code class="docutils literal notranslate"><span class="pre">tab_filter</span></code> is set, since those imply the
+caller wants the scraping path.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Print progress information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">output_file</span></code> is None, returns the markdown string.
+Otherwise, returns the output file path.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.url_to_cache_key">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">url_to_cache_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/web.html#url_to_cache_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.url_to_cache_key" title="Link to this definition"></a></dt>
+<dd><p>Convert a URL to a filesystem-safe cache key.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url_to_cache_key</span><span class="p">(</span><span class="s1">&#39;https://example.com/docs/en/foo&#39;</span><span class="p">)</span>
+<span class="go">&#39;example.com__docs__en__foo.html&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="util.html" class="btn btn-neutral float-left" title="contaix.util" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

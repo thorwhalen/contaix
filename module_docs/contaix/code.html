@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>contaix.code &mdash; contaix 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="contaix.markdown" href="markdown.html" />
+    <link rel="prev" title="contaix.aggregation" href="aggregation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            contaix
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../contaix.html">contaix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregation.html">contaix.aggregation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">contaix.code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.code.PackageCodeContexts"><code class="docutils literal notranslate"><span class="pre">PackageCodeContexts</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#contaix.code.PackageCodeContexts.multiple_pkgs_code"><code class="docutils literal notranslate"><span class="pre">PackageCodeContexts.multiple_pkgs_code()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#contaix.code.PackageCodeContexts.save_multiple_pkgs_code"><code class="docutils literal notranslate"><span class="pre">PackageCodeContexts.save_multiple_pkgs_code()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#contaix.code.PackageCodeContexts.save_single"><code class="docutils literal notranslate"><span class="pre">PackageCodeContexts.save_single()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.code.code_aggregate"><code class="docutils literal notranslate"><span class="pre">code_aggregate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.code.is_local_pkg_name"><code class="docutils literal notranslate"><span class="pre">is_local_pkg_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.code.resolve_code_source"><code class="docutils literal notranslate"><span class="pre">resolve_code_source()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.code.resolve_code_source_dir_path"><code class="docutils literal notranslate"><span class="pre">resolve_code_source_dir_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="markdown.html">contaix.markdown</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skills.html">contaix.skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="urls.html">contaix.urls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">contaix.util</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web.html">contaix.web</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">contaix</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">contaix.code</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/contaix/code.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-contaix.code">
+<span id="contaix-code"></span><h1>contaix.code<a class="headerlink" href="#module-contaix.code" title="Link to this heading"></a></h1>
+<p>Tools to make AI contexts from code bases</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="contaix.code.PackageCodeContexts">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">PackageCodeContexts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/code.html#PackageCodeContexts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.PackageCodeContexts" title="Link to this definition"></a></dt>
+<dd><p>Manages aggregation and saves of the code of local packages</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="contaix.code.PackageCodeContexts.multiple_pkgs_code">
+<span class="sig-name descname"><span class="pre">multiple_pkgs_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkgs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkg_secion_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_sepator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\n\n\n'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/code.html#PackageCodeContexts.multiple_pkgs_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.PackageCodeContexts.multiple_pkgs_code" title="Link to this definition"></a></dt>
+<dd><p>Aggregates the code of multiple local packages in separate sections.
+Saves the result to a file if a name is provided.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contaix.code.PackageCodeContexts.save_multiple_pkgs_code">
+<span class="sig-name descname"><span class="pre">save_multiple_pkgs_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkgs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkg_secion_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_sepator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\n\n\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#contaix.code.PackageCodeContexts.save_multiple_pkgs_code" title="Link to this definition"></a></dt>
+<dd><p>Aggregates the code of multiple local packages in separate sections.
+Saves the result to a file if a name is provided.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="contaix.code.PackageCodeContexts.save_single">
+<span class="sig-name descname"><span class="pre">save_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ModuleType</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/code.html#PackageCodeContexts.save_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.PackageCodeContexts.save_single" title="Link to this definition"></a></dt>
+<dd><p>Aggregates and saves the code of a single local package.</p>
+<p>Example:</p>
+<p>To save a single package’s code in a single file, in the current folder:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PackageCodeContexts</span><span class="p">()</span><span class="o">.</span><span class="n">save_single</span><span class="p">(</span><span class="s1">&#39;aix&#39;</span><span class="p">)</span>  
+</pre></div>
+</div>
+<p>or, to save multiple package’s code in a single file, in a specific folder.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PackageCodeContexts</span><span class="p">(</span><span class="s1">&#39;some/folder/path&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">save_multiple_pkgs_code</span><span class="p">([</span><span class="s1">&#39;aix&#39;</span><span class="p">,</span> <span class="s1">&#39;dol&#39;</span><span class="p">])</span>  
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.code.code_aggregate">
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">code_aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_src:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~typing.Mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">identity&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kv_to_item=&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_filt:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'\\.py$'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_readme:</span> <span class="pre">~typing.Callable</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">_readme_from_parent_dir&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**store_aggregate_kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#code_aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.code_aggregate" title="Link to this definition"></a></dt>
+<dd><p>Aggregates all code segments from the given code source (folder, github url, store).</p>
+<p>This is useful when you want to use AI to search and respond to questions about a
+specific code base.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code_src</strong> (<em>dict</em>) – A dictionary where keys are references to the code (e.g., paths)
+and values are code snippets or content.</p></li>
+<li><p><strong>egress</strong> (<em>Union</em><em>[</em><em>Callable</em><em>, </em><em>str</em><em>]</em>) – A function to apply to the aggregate before returning.
+If a string, the aggregate will be saved to the file.</p></li>
+<li><p><strong>kv_to_item</strong> (<em>Callable</em>) – A function that converts a key-value pairs to the
+items that should be aggregated.</p></li>
+<li><p><strong>keys_filt</strong> (<em>Union</em><em>[</em><em>Callable</em><em>, </em><em>str</em><em>]</em>) – A function or regex string to filter the keys of the code store.
+If a string, it will be compiled to a regex pattern.</p></li>
+<li><p><strong>include_readme</strong> (<em>Callable</em>) – A function that takes the code_store as input and returns
+the content of a README file to include in the aggregate.
+If None, no README will be included.</p></li>
+<li><p><strong>**store_aggregate_kwargs</strong> – Additional keyword arguments to pass to store_aggregate.</p></li>
+</ul>
+</dd>
+</dl>
+<p>See dol.store_aggregate for more details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The aggregated code content, or the result of the egress function.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">code_src</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s1">&#39;module1.py&#39;</span><span class="p">:</span> <span class="s1">&#39;def foo(): pass&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;module2.py&#39;</span><span class="p">:</span> <span class="s1">&#39;def bar(): pass&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;module3.py&#39;</span><span class="p">:</span> <span class="s1">&#39;class Baz: pass&#39;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">code_aggregate</span><span class="p">(</span><span class="n">code_src</span><span class="p">))</span>
+<span class="go">## module1.py</span>
+
+<span class="go">```python</span>
+<span class="go">def foo(): pass</span>
+<span class="go">```</span>
+
+<span class="go">## module2.py</span>
+
+<span class="go">```python</span>
+<span class="go">def bar(): pass</span>
+<span class="go">```</span>
+
+<span class="go">## module3.py</span>
+
+<span class="go">```python</span>
+<span class="go">class Baz: pass</span>
+<span class="go">```</span>
+</pre></div>
+</div>
+<p>Here, let’s input an imported (third party) package, and have the function save the
+result to a temporary file</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">temp_file_name</span> <span class="o">=</span> <span class="n">NamedTemporaryFile</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">aix</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span>  <span class="o">=</span> <span class="n">code_aggregate</span><span class="p">(</span><span class="n">aix</span><span class="p">,</span> <span class="n">egress</span><span class="o">=</span><span class="n">temp_file_name</span><span class="p">)</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span>  
+<span class="go">## __init__.py</span>
+</pre></div>
+</div>
+<p>Tip: You can also import directly from the name (string) of the package by doing
+<cite>code_aggregate(__import__(‘aix’))</cite> or more robustly,
+<cite>importlib.import_module(‘aix’)</cite>.</p>
+<p>If you have hubcap installed, you can even get an aggregate of code from a GitHub
+repository.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">string</span> <span class="o">=</span> <span class="n">code_aggregate</span><span class="p">(</span><span class="s1">&#39;https://github.com/thorwhalen/aix&#39;</span><span class="p">)</span>  
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.code.is_local_pkg_name">
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">is_local_pkg_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#is_local_pkg_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.is_local_pkg_name" title="Link to this definition"></a></dt>
+<dd><p>Returns True if and only if name is the name of a local package.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.code.resolve_code_source">
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">resolve_code_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_src:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~typing.Mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_filt:</span> <span class="pre">~typing.Callable</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mapping</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#resolve_code_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.resolve_code_source" title="Link to this definition"></a></dt>
+<dd><p>Will resolve code_src to a Mapping whose values are the code strings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code_src</strong> – The source of the code. Can be an explicit <cite>Mapping</cite>,
+a directory path string,
+a GitHub URL,
+or an imported package (must contain a __path__ atribute)</p></li>
+<li><p><strong>keys_filt</strong> (<em>Callable</em>) – A function or regex string to filter the keys of the code store.
+If a string, it will be compiled to a regex pattern.</p></li>
+<li><p><strong>keys_filt</strong> – A function to filter the keys. Defaults to lambda x: x.endswith(‘.py’).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.code.resolve_code_source_dir_path">
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">resolve_code_source_dir_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mapping</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#resolve_code_source_dir_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.resolve_code_source_dir_path" title="Link to this definition"></a></dt>
+<dd><p>Resolves code_src to a directory path string.
+If the input is a package object or name, it will return the local path where
+the package is located.
+If the input is a github URL, this repository will be DOWNLOAD to a local
+temporary directory and the path of that directory will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>code_src</strong> (<em>Any</em>) – The source of the code. Can be
+a directory path string,
+a GitHub URL,
+or an imported package (must contain a __path__ atribute)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resolved directory path.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AssertionError</strong> – If the resolved path is not a valid directory.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aggregation.html" class="btn btn-neutral float-left" title="contaix.aggregation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="markdown.html" class="btn btn-neutral float-right" title="contaix.markdown" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

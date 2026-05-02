@@ -1,0 +1,1451 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>contaix.web &mdash; contaix 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            contaix
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix.html">contaix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/aggregation.html">contaix.aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/code.html">contaix.code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/markdown.html">contaix.markdown</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/skills.html">contaix.skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/urls.html">contaix.urls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/util.html">contaix.util</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/web.html">contaix.web</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">contaix</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">contaix.web</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for contaix.web</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Web content extraction and aggregation tools.</span>
+
+<span class="sd">Functions for extracting structured content from websites and converting to markdown,</span>
+<span class="sd">with support for navigation discovery, caching, and content aggregation.</span>
+
+<span class="sd">Main entry points:</span>
+
+<span class="sd">    site_to_markdown(url)  # Full pipeline: discover nav, fetch pages, aggregate</span>
+<span class="sd">    extract_site_nav(url)  # Get ordered navigation structure from a doc site</span>
+<span class="sd">    fetch_page(url)        # Fetch a single page&#39;s HTML with optional caching</span>
+
+<span class="sd">Example::</span>
+
+<span class="sd">    &gt;&gt;&gt; md = site_to_markdown(</span>
+<span class="sd">    ...     &#39;https://platform.claude.com/docs/en/home&#39;,</span>
+<span class="sd">    ...     cache_dir=&#39;/tmp/claude_docs_cache&#39;,</span>
+<span class="sd">    ...     output_file=&#39;~/Downloads/claude_docs.md&#39;,</span>
+<span class="sd">    ... )  # doctest: +SKIP</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">urljoin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">html2text</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Defaults</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="n">DFLT_CACHE_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">),</span> <span class="s1">&#39;.cache&#39;</span><span class="p">,</span> <span class="s1">&#39;contaix&#39;</span><span class="p">,</span> <span class="s1">&#39;web&#39;</span>
+<span class="p">)</span>
+
+<span class="n">DFLT_REQUEST_TIMEOUT</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># seconds</span>
+
+<span class="n">DFLT_USER_AGENT</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">&#39;Mozilla/5.0 (compatible; contaix/0.1; &#39;</span>
+    <span class="s1">&#39;+https://github.com/thorwhalen/contaix)&#39;</span>
+<span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Navigation extraction</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="extract_site_nav">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.extract_site_nav">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_site_nav</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">html</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract navigation structure from a documentation site.</span>
+
+<span class="sd">    Returns a dict with keys:</span>
+<span class="sd">        - ``base_url``: The base URL of the site</span>
+<span class="sd">        - ``tabs``: List of tab dicts, each with ``label`` and ``groups``</span>
+<span class="sd">        - ``pages``: Flat ordered list of ``{path, title}`` dicts (all tabs)</span>
+
+<span class="sd">    Tries, in order:</span>
+<span class="sd">        1. Next.js RSC payload (embedded in SSR HTML)</span>
+<span class="sd">        2. HTML ``&lt;a&gt;`` link extraction with path-based grouping</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        The documentation site URL (e.g. a homepage or any page on the site).</span>
+<span class="sd">    html : str, optional</span>
+<span class="sd">        Pre-fetched HTML. If None, fetches from ``url``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">scheme</span><span class="si">}</span><span class="s1">://</span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">netloc</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">if</span> <span class="n">html</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">_fetch_html</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+    <span class="c1"># Strategy 1: Next.js RSC payload</span>
+    <span class="n">nav</span> <span class="o">=</span> <span class="n">_extract_nextjs_nav</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">base_url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nav</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">nav</span>
+
+    <span class="c1"># Strategy 2: Generic HTML link extraction</span>
+    <span class="k">return</span> <span class="n">_extract_html_nav</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">base_url</span><span class="p">,</span> <span class="n">start_url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_nextjs_nav</span><span class="p">(</span><span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract navigation from Next.js RSC inline payload.</span>
+
+<span class="sd">    Looks for ``self.__next_f.push([1, &quot;...&quot;])`` chunks containing</span>
+<span class="sd">    ``navigationData``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;self\.__next_f\.push\(\[1,&quot;(.*?)&quot;\]\)&#39;</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;navigationData&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">unescaped</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;unicode_escape&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Find the JSON object containing navigationData</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">unescaped</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;{&quot;navigationData&quot;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Find matching closing brace</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unescaped</span><span class="p">[</span><span class="n">start</span><span class="p">:],</span> <span class="n">start</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;{&#39;</span><span class="p">:</span>
+                <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;}&#39;</span><span class="p">:</span>
+                <span class="n">depth</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">break</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">unescaped</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">])</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">nav_data</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;navigationData&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">tabs</span> <span class="o">=</span> <span class="n">nav_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tabs&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="c1"># Build flat ordered page list</span>
+        <span class="n">pages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tab</span> <span class="ow">in</span> <span class="n">tabs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">tab</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;groups&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pages&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pageTitle&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">page</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sidebarTitle&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+                        <span class="n">pages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                            <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+                            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+                            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">base_url</span> <span class="o">+</span> <span class="n">path</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">path</span><span class="p">,</span>
+                            <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                            <span class="s1">&#39;tab&#39;</span><span class="p">:</span> <span class="n">tab</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                        <span class="p">})</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;base_url&#39;</span><span class="p">:</span> <span class="n">base_url</span><span class="p">,</span>
+            <span class="s1">&#39;tabs&#39;</span><span class="p">:</span> <span class="n">tabs</span><span class="p">,</span>
+            <span class="s1">&#39;pages&#39;</span><span class="p">:</span> <span class="n">pages</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_html_nav</span><span class="p">(</span>
+    <span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_url</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract navigation from HTML links as a fallback.</span>
+
+<span class="sd">    Finds all internal ``&lt;a&gt;`` links that share a common path prefix with</span>
+<span class="sd">    ``start_url`` and orders them by first occurrence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">bs4</span><span class="w"> </span><span class="kn">import</span> <span class="n">BeautifulSoup</span>
+
+    <span class="n">parsed_start</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">start_url</span><span class="p">)</span>
+    <span class="c1"># Determine the &quot;doc root&quot; path prefix from the start URL</span>
+    <span class="c1"># e.g. /docs/en/home -&gt; /docs/en/</span>
+    <span class="n">path_parts</span> <span class="o">=</span> <span class="n">parsed_start</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">doc_prefix</span> <span class="o">=</span> <span class="n">path_parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path_parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;/&#39;</span>
+
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">pages</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">href</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+        <span class="c1"># Normalize relative URLs</span>
+        <span class="k">if</span> <span class="n">href</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+            <span class="n">full_url</span> <span class="o">=</span> <span class="n">base_url</span> <span class="o">+</span> <span class="n">href</span>
+        <span class="k">elif</span> <span class="n">href</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
+            <span class="n">full_url</span> <span class="o">=</span> <span class="n">href</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Only include links under the doc prefix on the same domain</span>
+        <span class="n">parsed_href</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">full_url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parsed_href</span><span class="o">.</span><span class="n">netloc</span> <span class="o">!=</span> <span class="n">parsed_start</span><span class="o">.</span><span class="n">netloc</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed_href</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">doc_prefix</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">parsed_href</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">title</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">pages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+            <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">full_url</span><span class="p">,</span>
+            <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="n">_infer_group_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">doc_prefix</span><span class="p">),</span>
+            <span class="s1">&#39;tab&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="p">})</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;base_url&#39;</span><span class="p">:</span> <span class="n">base_url</span><span class="p">,</span>
+        <span class="s1">&#39;tabs&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;pages&#39;</span><span class="p">:</span> <span class="n">pages</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_infer_group_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Infer a group name from a URL path segment.&quot;&quot;&quot;</span>
+    <span class="n">relative</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):]</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">relative</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Page fetching with caching</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="url_to_cache_key">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.url_to_cache_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">url_to_cache_key</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a URL to a filesystem-safe cache key.</span>
+
+<span class="sd">    &gt;&gt;&gt; url_to_cache_key(&#39;https://example.com/docs/en/foo&#39;)</span>
+<span class="sd">    &#39;example.com__docs__en__foo.html&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">netloc</span> <span class="o">+</span> <span class="n">parsed</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">safe</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;__&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">safe</span> <span class="o">+</span> <span class="s1">&#39;.html&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="fetch_page">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.fetch_page">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_page</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_REQUEST_TIMEOUT</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch a page&#39;s HTML content, with optional disk caching.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        The URL to fetch.</span>
+<span class="sd">    cache_dir : str, optional</span>
+<span class="sd">        Directory to cache HTML files. If None, no caching.</span>
+<span class="sd">    force : bool</span>
+<span class="sd">        If True, re-fetch even if cached.</span>
+<span class="sd">    timeout : int</span>
+<span class="sd">        Request timeout in seconds.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        The page&#39;s HTML content.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cache_dir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+        <span class="n">cache_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">url_to_cache_key</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cache_path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_fetch_html</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cache_dir</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cache_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">url_to_cache_key</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">cache_path</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">html</span></div>
+
+
+
+<div class="viewcode-block" id="fetch_pages">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.fetch_pages">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_pages</span><span class="p">(</span>
+    <span class="n">urls</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch multiple pages with caching.</span>
+
+<span class="sd">    Returns a dict mapping URL -&gt; HTML content.</span>
+<span class="sd">    Pages that fail to fetch are skipped with a warning.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">urls</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">urls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  [</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span><span class="si">}</span><span class="s1">] Fetching </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">url</span><span class="p">]</span> <span class="o">=</span> <span class="n">fetch_page</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    WARNING: Failed to fetch </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fetch_html</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_REQUEST_TIMEOUT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch HTML from a URL with standard headers.&quot;&quot;&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;User-Agent&#39;</span><span class="p">:</span> <span class="n">DFLT_USER_AGENT</span><span class="p">}</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+
+
+<div class="viewcode-block" id="fetch_nextjs_rsc">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.fetch_nextjs_rsc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_nextjs_rsc</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_REQUEST_TIMEOUT</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch page content via Next.js RSC flight endpoint.</span>
+
+<span class="sd">    Next.js App Router sites serve React Server Component payloads when the</span>
+<span class="sd">    ``RSC: 1`` header is present. These contain the full page content that</span>
+<span class="sd">    would otherwise require JavaScript rendering.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        The page URL.</span>
+<span class="sd">    cache_dir : str, optional</span>
+<span class="sd">        Directory to cache RSC responses.</span>
+<span class="sd">    force : bool</span>
+<span class="sd">        Re-fetch even if cached.</span>
+<span class="sd">    timeout : int</span>
+<span class="sd">        Request timeout.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        The RSC flight data as text.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cache_key</span> <span class="o">=</span> <span class="n">url_to_cache_key</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.html&#39;</span><span class="p">,</span> <span class="s1">&#39;.rsc&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cache_dir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+        <span class="n">cache_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cache_path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;User-Agent&#39;</span><span class="p">:</span> <span class="n">DFLT_USER_AGENT</span><span class="p">,</span>
+        <span class="s1">&#39;RSC&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Next-Url&#39;</span><span class="p">:</span> <span class="n">parsed</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+
+    <span class="k">if</span> <span class="n">cache_dir</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cache_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">)</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">cache_path</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">text</span></div>
+
+
+
+<div class="viewcode-block" id="is_nextjs_site">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.is_nextjs_site">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_nextjs_site</span><span class="p">(</span><span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect if a page is served by Next.js (App Router).</span>
+
+<span class="sd">    Looks for ``self.__next_f.push`` in the HTML, which is the RSC</span>
+<span class="sd">    streaming payload signature.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;self.__next_f.push&#39;</span> <span class="ow">in</span> <span class="n">html</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Content extraction: HTML -&gt; Markdown</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="html_to_clean_markdown">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.html_to_clean_markdown">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">html_to_clean_markdown</span><span class="p">(</span>
+    <span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">body_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">ignore_images</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_links</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">html2text_options</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert HTML to clean markdown using html2text.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    html : str</span>
+<span class="sd">        Raw HTML content.</span>
+<span class="sd">    body_width : int</span>
+<span class="sd">        Line width for wrapping. 0 = no wrapping.</span>
+<span class="sd">    ignore_images : bool</span>
+<span class="sd">        Whether to skip image tags.</span>
+<span class="sd">    include_links : bool</span>
+<span class="sd">        Whether to include hyperlinks in output.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">converter</span> <span class="o">=</span> <span class="n">html2text</span><span class="o">.</span><span class="n">HTML2Text</span><span class="p">()</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">body_width</span> <span class="o">=</span> <span class="n">body_width</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">ignore_images</span> <span class="o">=</span> <span class="n">ignore_images</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">ignore_links</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">include_links</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">protect_links</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">wrap_links</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">html2text_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">converter</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">converter</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">html</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Content extraction: RSC payload -&gt; Markdown</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="n">_RSC_RECORD_HEAD</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(?:^|\n)([0-9a-f]{1,4}):&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="parse_rsc_flight">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.parse_rsc_flight">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_rsc_flight</span><span class="p">(</span><span class="n">rsc_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse RSC flight data into a dict mapping keys to parsed JSON data.</span>
+
+<span class="sd">    Each RSC record starts with ``&lt;hex_key&gt;:&lt;payload&gt;``. Records come in three</span>
+<span class="sd">    flavors:</span>
+
+<span class="sd">    - ``I[...]``: module import descriptors (skipped here).</span>
+<span class="sd">    - ``T&lt;hex_size&gt;,&lt;bytes&gt;``: a raw text chunk whose payload occupies exactly</span>
+<span class="sd">      ``hex_size`` bytes (often markdown, code, or compiled MDX). The payload</span>
+<span class="sd">      may contain newlines, so we read by byte count rather than splitting on</span>
+<span class="sd">      ``\\n``.</span>
+<span class="sd">    - Anything else: a JSON value terminated by the next record header</span>
+<span class="sd">      (``\\n&lt;hex&gt;:``) or end-of-text.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rsc_text : str</span>
+<span class="sd">        Raw RSC flight response text (``text/x-component``).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Mapping of hex keys to their parsed payloads.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Find every record header (key:) position; we&#39;ll slice payloads between them.</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_RSC_RECORD_HEAD</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">rsc_text</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">headers</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">payload_start</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+        <span class="n">next_start</span> <span class="o">=</span> <span class="n">headers</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">rsc_text</span><span class="p">)</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">rsc_text</span><span class="p">[</span><span class="n">payload_start</span><span class="p">:</span><span class="n">next_start</span><span class="p">]</span>
+
+        <span class="c1"># Skip module imports</span>
+        <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;I[&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># T-chunks: payload begins with &quot;T&lt;hex&gt;,&lt;bytes...&gt;&quot; where &lt;hex&gt; is the</span>
+        <span class="c1"># byte-length of the chunk. Read exactly that many bytes; the rest of</span>
+        <span class="c1"># ``payload`` may be trailing whitespace before the next header.</span>
+        <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">):</span>
+            <span class="n">t_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;T([0-9a-f]+),&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">t_match</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">16</span><span class="p">)</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">t_match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+                <span class="n">raw</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s1">&#39;&lt;pre&#39;</span> <span class="ow">in</span> <span class="n">raw</span> <span class="ow">and</span> <span class="s1">&#39;&lt;code&#39;</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">:</span>
+                    <span class="n">code_text</span> <span class="o">=</span> <span class="n">_html_code_block_to_text</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">code_text</span><span class="p">:</span>
+                        <span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">code_text</span>
+                <span class="k">elif</span> <span class="n">raw</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                    <span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw</span>
+                <span class="k">continue</span>
+
+        <span class="c1"># JSON payload: it may span multiple lines, but stops at the next</span>
+        <span class="c1"># record header. Strip any trailing whitespace that came along.</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">registry</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_html_code_block_to_text</span><span class="p">(</span><span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract plain text from an HTML &lt;pre&gt;&lt;code&gt; block.&quot;&quot;&quot;</span>
+    <span class="c1"># Remove all HTML tags</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;[^&gt;]+&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">html</span><span class="p">)</span>
+    <span class="c1"># Decode HTML entities</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;amp;&#39;</span><span class="p">,</span> <span class="s1">&#39;&amp;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;nbsp;&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="rsc_tree_to_markdown">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.rsc_tree_to_markdown">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rsc_tree_to_markdown</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_registry</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively extract markdown from a React Server Component tree node.</span>
+
+<span class="sd">    The RSC tree uses the format::</span>
+
+<span class="sd">        [&quot;$&quot;, &quot;tagName&quot;, key, {&quot;children&quot;: ..., &quot;className&quot;: ...}]</span>
+
+<span class="sd">    or plain strings for text nodes. Component references like ``&quot;$L2a&quot;``</span>
+<span class="sd">    are resolved via ``_registry`` (from :func:`parse_rsc_flight`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">_registry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_registry</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Order matters: bool check MUST come before int/float because</span>
+    <span class="c1"># bool is a subclass of int in Python (False == 0, True == 1)</span>
+    <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">node</span> <span class="o">==</span> <span class="s1">&#39;$undefined&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># Resolve $L references</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$L&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">ref_key</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>  <span class="c1"># strip &quot;$L&quot;</span>
+            <span class="k">if</span> <span class="n">ref_key</span> <span class="ow">in</span> <span class="n">_registry</span><span class="p">:</span>
+                <span class="n">resolved</span> <span class="o">=</span> <span class="n">_registry</span><span class="p">[</span><span class="n">ref_key</span><span class="p">]</span>
+                <span class="c1"># If it resolved to a plain string (e.g. from T-chunk),</span>
+                <span class="c1"># wrap it as a code block if it looks like code</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">resolved</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">```</span><span class="se">\n</span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="se">\n</span><span class="s1">```</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+                    <span class="k">return</span> <span class="n">resolved</span>
+                <span class="k">return</span> <span class="n">rsc_tree_to_markdown</span><span class="p">(</span>
+                    <span class="n">resolved</span><span class="p">,</span> <span class="n">_registry</span><span class="o">=</span><span class="n">_registry</span><span class="p">,</span> <span class="n">_depth</span><span class="o">=</span><span class="n">_depth</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">node</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="c1"># Check if this is a React element: [&quot;$&quot;, tag, key, props]</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span>
+            <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;$&#39;</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">_rsc_element_to_markdown</span><span class="p">(</span>
+                <span class="n">tag</span><span class="o">=</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">props</span><span class="o">=</span><span class="n">node</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{},</span>
+                <span class="n">registry</span><span class="o">=</span><span class="n">_registry</span><span class="p">,</span>
+                <span class="n">depth</span><span class="o">=</span><span class="n">_depth</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># Otherwise it&#39;s an array of children</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">rsc_tree_to_markdown</span><span class="p">(</span>
+                <span class="n">child</span><span class="p">,</span> <span class="n">_registry</span><span class="o">=</span><span class="n">_registry</span><span class="p">,</span> <span class="n">_depth</span><span class="o">=</span><span class="n">_depth</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">rsc_tree_to_markdown</span><span class="p">(</span>
+                <span class="n">children</span><span class="p">,</span> <span class="n">_registry</span><span class="o">=</span><span class="n">_registry</span><span class="p">,</span> <span class="n">_depth</span><span class="o">=</span><span class="n">_depth</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rsc_element_to_markdown</span><span class="p">(</span>
+    <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a single RSC element to markdown.&quot;&quot;&quot;</span>
+    <span class="n">children_md</span> <span class="o">=</span> <span class="n">rsc_tree_to_markdown</span><span class="p">(</span>
+        <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">_registry</span><span class="o">=</span><span class="n">registry</span><span class="p">,</span> <span class="n">_depth</span><span class="o">=</span><span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Handle $L components (React component references)</span>
+    <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$L&#39;</span><span class="p">):</span>
+        <span class="c1"># Check if this is a link component (has href prop)</span>
+        <span class="n">href</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">href</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+            <span class="c1"># If children span multiple lines (card-style link),</span>
+            <span class="c1"># use the first line as link text and append the rest</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s1">](</span><span class="si">{</span><span class="n">href</span><span class="si">}</span><span class="s1">) — </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">](</span><span class="si">{</span><span class="n">href</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="c1"># Check if this is a model-ID / code-copy component (has id prop as text)</span>
+        <span class="n">id_val</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">id_val</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;`</span><span class="si">{</span><span class="n">id_val</span><span class="si">}</span><span class="s1">`&#39;</span>
+        <span class="c1"># Check if this is a code block component</span>
+        <span class="k">if</span> <span class="s1">&#39;language&#39;</span> <span class="ow">in</span> <span class="n">props</span> <span class="ow">or</span> <span class="s1">&#39;code&#39;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
+            <span class="n">lang</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="n">children_md</span><span class="p">)</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">```</span><span class="si">{</span><span class="n">lang</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">```</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+        <span class="c1"># Otherwise, pass through children</span>
+        <span class="k">return</span> <span class="n">children_md</span>
+
+    <span class="c1"># Heading tags</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;h1&#39;</span><span class="p">,</span> <span class="s1">&#39;h2&#39;</span><span class="p">,</span> <span class="s1">&#39;h3&#39;</span><span class="p">,</span> <span class="s1">&#39;h4&#39;</span><span class="p">,</span> <span class="s1">&#39;h5&#39;</span><span class="p">,</span> <span class="s1">&#39;h6&#39;</span><span class="p">):</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="si">{</span><span class="s2">&quot;#&quot;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">level</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+    <span class="c1"># Paragraph</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="c1"># Lists</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;ul&#39;</span><span class="p">,</span> <span class="s1">&#39;ol&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">{</span><span class="n">children_md</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;li&#39;</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;- </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="c1"># Code blocks</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;pre&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">```</span><span class="se">\n</span><span class="si">{</span><span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">```</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;code&#39;</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text</span>  <span class="c1"># Already in a pre block</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;`</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">`&#39;</span>
+
+    <span class="c1"># Inline elements</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;strong&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;**</span><span class="si">{</span><span class="n">children_md</span><span class="si">}</span><span class="s1">**&#39;</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;em&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;*</span><span class="si">{</span><span class="n">children_md</span><span class="si">}</span><span class="s1">*&#39;</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
+        <span class="n">href</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">href</span> <span class="ow">and</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">](</span><span class="si">{</span><span class="n">href</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="n">text</span>
+
+    <span class="c1"># Block-level elements</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;hr&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">---</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;br&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="s1">&#39;section&#39;</span><span class="p">,</span> <span class="s1">&#39;article&#39;</span><span class="p">,</span> <span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="s1">&#39;nav&#39;</span><span class="p">,</span> <span class="s1">&#39;aside&#39;</span><span class="p">):</span>
+        <span class="c1"># For block-level containers, check if className suggests a grid/card layout</span>
+        <span class="c1"># and add newlines between children if so</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;className&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;grid&#39;</span> <span class="ow">in</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="s1">&#39;flex&#39;</span> <span class="ow">in</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="s1">&#39;gap&#39;</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">:</span>
+            <span class="c1"># Re-render children with newlines between them</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span>
+                <span class="ow">and</span> <span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;$&#39;</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="n">rsc_tree_to_markdown</span><span class="p">(</span>
+                        <span class="n">child</span><span class="p">,</span> <span class="n">_registry</span><span class="o">=</span><span class="n">registry</span><span class="p">,</span> <span class="n">_depth</span><span class="o">=</span><span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">text</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">children_md</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;span&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">children_md</span>
+
+    <span class="c1"># Table elements</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;table&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_rsc_table_to_markdown</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;thead&#39;</span><span class="p">,</span> <span class="s1">&#39;tbody&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">children_md</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;tr&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">children_md</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;th&#39;</span><span class="p">,</span> <span class="s1">&#39;td&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c1"># Blockquote</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;blockquote&#39;</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">children_md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&gt; </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="c1"># Default: just return children</span>
+    <span class="k">return</span> <span class="n">children_md</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rsc_table_to_markdown</span><span class="p">(</span>
+    <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an RSC table element to markdown table format.&quot;&quot;&quot;</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+    <span class="c1"># Collect rows by walking the tree</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">_collect_table_rows</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rsc_tree_to_markdown</span><span class="p">(</span>
+            <span class="n">children</span><span class="p">,</span> <span class="n">_registry</span><span class="o">=</span><span class="n">registry</span><span class="p">,</span> <span class="n">_depth</span><span class="o">=</span><span class="n">depth</span>
+        <span class="p">)</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;| &#39;</span> <span class="o">+</span> <span class="s1">&#39; | &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; |&#39;</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="c1"># Add header separator after first row</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;| &#39;</span> <span class="o">+</span> <span class="s1">&#39; | &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;---&#39;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; |&#39;</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_collect_table_rows</span><span class="p">(</span>
+    <span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Walk an RSC tree and collect table rows as lists of cell strings.&quot;&quot;&quot;</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$L&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">ref_key</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="n">ref_key</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">_collect_table_rows</span><span class="p">(</span><span class="n">registry</span><span class="p">[</span><span class="n">ref_key</span><span class="p">],</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rows</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">rows</span>
+
+    <span class="c1"># Is this a React element?</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;$&#39;</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$L&#39;</span><span class="p">):</span>
+            <span class="c1"># Wrapper component - recurse into children</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_collect_table_rows</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">rows</span>
+
+        <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;tr&#39;</span><span class="p">:</span>
+            <span class="c1"># Collect cells from this row</span>
+            <span class="n">cells</span> <span class="o">=</span> <span class="n">_collect_table_cells</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cells</span><span class="p">:</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">rows</span>
+
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;thead&#39;</span><span class="p">,</span> <span class="s1">&#39;tbody&#39;</span><span class="p">,</span> <span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="s1">&#39;section&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_collect_table_rows</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rows</span>
+
+    <span class="c1"># Array of children</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_collect_table_rows</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">rows</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_collect_table_cells</span><span class="p">(</span>
+    <span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collect cell text from a table row&#39;s children.&quot;&quot;&quot;</span>
+    <span class="n">cells</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$L&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">ref_key</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="n">ref_key</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">_collect_table_cells</span><span class="p">(</span>
+                    <span class="n">registry</span><span class="p">[</span><span class="n">ref_key</span><span class="p">],</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">cells</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">cells</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;$&#39;</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$L&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_collect_table_cells</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">,</span> <span class="s1">&#39;th&#39;</span><span class="p">):</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">rsc_tree_to_markdown</span><span class="p">(</span>
+                <span class="n">children</span><span class="p">,</span> <span class="n">_registry</span><span class="o">=</span><span class="n">registry</span><span class="p">,</span> <span class="n">_depth</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="k">return</span> <span class="n">cells</span>
+
+        <span class="k">return</span> <span class="n">_collect_table_cells</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+        <span class="n">cells</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_collect_table_cells</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">cells</span>
+
+
+<div class="viewcode-block" id="extract_rsc_page_content">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.extract_rsc_page_content">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_rsc_page_content</span><span class="p">(</span><span class="n">rsc_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract page content from RSC flight data.</span>
+
+<span class="sd">    Works on both:</span>
+<span class="sd">    - RSC flight endpoint responses (``text/x-component``)</span>
+<span class="sd">    - Inline RSC payloads extracted from HTML</span>
+
+<span class="sd">    Returns markdown text if content was found, None otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># If this looks like HTML with inline RSC, extract the chunks first</span>
+    <span class="k">if</span> <span class="n">rsc_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&lt;!DOCTYPE&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&lt;html&#39;</span> <span class="ow">in</span> <span class="n">rsc_text</span><span class="p">[:</span><span class="mi">200</span><span class="p">]:</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s1">&#39;self\.__next_f\.push\(\[1,&quot;(.*?)&quot;\]\)&#39;</span><span class="p">,</span> <span class="n">rsc_text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span>
+        <span class="p">)</span>
+        <span class="n">rsc_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">rsc_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;unicode_escape&#39;</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="n">rsc_text</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rsc_lines</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rsc_text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Parse all RSC data into a registry for reference resolution</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">parse_rsc_flight</span><span class="p">(</span><span class="n">rsc_text</span><span class="p">)</span>
+
+    <span class="c1"># Find the content node: look for lists that contain content elements</span>
+    <span class="n">content_parts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_looks_like_page_content</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="n">rsc_tree_to_markdown</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">md</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+                <span class="n">content_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">content_parts</span><span class="p">:</span>
+        <span class="c1"># Return the longest content part (likely the page body)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">content_parts</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_clean_rsc_markdown</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="c1"># Fallback: no list-tree content found. Some sites (e.g. Mintlify) keep the</span>
+    <span class="c1"># prose content in T-chunk strings rather than RSC component trees. Pick the</span>
+    <span class="c1"># T-chunk that looks most like markdown prose (skipping CSS/JS/JSX).</span>
+    <span class="n">prose_chunks</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_looks_like_markdown_prose</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">prose_chunks</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">prose_chunks</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_clean_rsc_markdown</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_clean_rsc_markdown</span><span class="p">(</span><span class="n">md</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Post-process markdown from RSC extraction to fix common artifacts.&quot;&quot;&quot;</span>
+    <span class="c1"># Remove unresolved $L references (component placeholders)</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\$L[0-9a-f]+&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">md</span><span class="p">)</span>
+    <span class="c1"># Fix double-dollar (RSC escaping for literal $)</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\$\$&#39;</span><span class="p">,</span> <span class="s1">&#39;$&#39;</span><span class="p">,</span> <span class="n">md</span><span class="p">)</span>
+    <span class="c1"># Remove $undefined artifacts</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\$undefined&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">md</span><span class="p">)</span>
+    <span class="c1"># Fix mojibake: common UTF-8 misinterpretation patterns</span>
+    <span class="c1"># These occur when UTF-8 multi-byte chars are decoded as latin-1/cp1252</span>
+    <span class="n">_mojibake_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u0080\u0094</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u2014</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># — (em dash)</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u0080\u0093</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u2013</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># – (en dash)</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u0080\u0099</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u2019</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># &#39; (right single quote)</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u0080\u009c</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u201c</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># &quot; (left double quote)</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u0080\u009d</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u201d</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># &quot; (right double quote)</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u0080\u0098</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u2018</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># &#39; (left single quote)</span>
+        <span class="s1">&#39;</span><span class="se">\u00c2\u00a0</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39; &#39;</span><span class="p">,</span>             <span class="c1"># non-breaking space</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u0080\u00a6</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u2026</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># … (ellipsis)</span>
+        <span class="s1">&#39;</span><span class="se">\u00c3\u00a9</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u00e9</span><span class="s1">&#39;</span><span class="p">,</span>        <span class="c1"># é</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u0080\u008b</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>        <span class="c1"># zero-width space</span>
+        <span class="s1">&#39;</span><span class="se">\u00e2\u00a0\u00af\u00ef\u00b8\u008f</span><span class="s1">&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\u26a0\ufe0f</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># ⚠️</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">bad</span><span class="p">,</span> <span class="n">good</span> <span class="ow">in</span> <span class="n">_mojibake_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">bad</span><span class="p">,</span> <span class="n">good</span><span class="p">)</span>
+    <span class="c1"># Collapse double blank lines to single (keeps markdown valid)</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\n{3,}&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">md</span><span class="p">)</span>
+    <span class="c1"># Clean up lines that are just whitespace</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\n[ \t]+\n&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">md</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">md</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_looks_like_page_content</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Heuristic: does this RSC node look like page content?</span>
+
+<span class="sd">    Checks if the data contains HTML content elements (h1-h6, p, ul, etc.).</span>
+<span class="sd">    Uses Python repr which uses single quotes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">data</span><span class="p">)[:</span><span class="mi">8000</span><span class="p">]</span>
+    <span class="n">content_indicators</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&#39;h1&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;h2&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;h3&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;p&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;ul&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;ol&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;pre&#39;&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">ind</span> <span class="ow">in</span> <span class="n">text</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">content_indicators</span><span class="p">)</span>
+
+
+<span class="c1"># T-chunks that are obviously CSS/JS/MDX-compiled JSX rather than prose.</span>
+<span class="n">_CODE_CHUNK_INDICATORS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">&#39;use strict&#39;</span><span class="p">,</span> <span class="s1">&#39;_provideComponents&#39;</span><span class="p">,</span> <span class="s1">&#39;arguments[0]&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;@font-face&#39;</span><span class="p">,</span> <span class="s1">&#39;function &#39;</span><span class="p">,</span> <span class="s1">&#39;() =&gt; {&#39;</span><span class="p">,</span> <span class="s1">&#39;window.&#39;</span><span class="p">,</span> <span class="s1">&#39;document.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;addEventListener&#39;</span><span class="p">,</span> <span class="s1">&#39;querySelector&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Markdown-prose markers (cheap signal vs the heavy code markers above).</span>
+<span class="n">_PROSE_CHUNK_INDICATORS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;# &#39;</span><span class="p">,</span> <span class="s1">&#39;## &#39;</span><span class="p">,</span> <span class="s1">&#39;**&#39;</span><span class="p">,</span> <span class="s1">&#39;- &#39;</span><span class="p">,</span> <span class="s1">&#39;`&#39;</span><span class="p">,</span> <span class="s1">&#39;http&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_looks_like_markdown_prose</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Heuristic: is this T-chunk markdown prose rather than CSS/JS/JSX?</span>
+
+<span class="sd">    Used as a fallback for sites that ship page content as raw markdown in</span>
+<span class="sd">    T-chunks instead of as RSC component trees.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">head</span> <span class="o">=</span> <span class="n">text</span><span class="p">[:</span><span class="mi">600</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">marker</span> <span class="ow">in</span> <span class="n">head</span> <span class="k">for</span> <span class="n">marker</span> <span class="ow">in</span> <span class="n">_CODE_CHUNK_INDICATORS</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">marker</span> <span class="ow">in</span> <span class="n">text</span> <span class="k">for</span> <span class="n">marker</span> <span class="ow">in</span> <span class="n">_PROSE_CHUNK_INDICATORS</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># llms.txt / llms-full.txt fast path</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="c1"># Common locations where doc-site generators (Mintlify, Docusaurus, etc.)</span>
+<span class="c1"># publish a single-document version of their docs for LLM consumption.</span>
+<span class="n">LLMS_FULL_CANDIDATES</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;/llms-full.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;/llms.txt&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="find_llms_full_url">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.find_llms_full_url">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_llms_full_url</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_REQUEST_TIMEOUT</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Probe for a publisher-provided single-doc bundle.</span>
+
+<span class="sd">    Many documentation generators (Mintlify, Docusaurus, Fern, etc.) expose</span>
+<span class="sd">    the entire docs as a single markdown file at ``/llms-full.txt`` (or</span>
+<span class="sd">    ``/llms.txt`` for an index). When present, this is far better than</span>
+<span class="sd">    scraping page-by-page.</span>
+
+<span class="sd">    Tries, in order:</span>
+
+<span class="sd">    1. Same path as the input URL with the doc-root replaced (e.g.</span>
+<span class="sd">       ``https://site.com/docs/foo`` -&gt; ``https://site.com/docs/llms-full.txt``).</span>
+<span class="sd">    2. Site root (e.g. ``https://site.com/llms-full.txt``).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        Any URL on the documentation site.</span>
+<span class="sd">    timeout : int</span>
+<span class="sd">        HEAD request timeout.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str or None</span>
+<span class="sd">        The first URL that returns HTTP 200 with non-trivial content, or</span>
+<span class="sd">        ``None`` if none of the candidates exist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">scheme</span><span class="si">}</span><span class="s1">://</span><span class="si">{</span><span class="n">parsed</span><span class="o">.</span><span class="n">netloc</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="c1"># Build candidate prefix list: longest path prefix first, then root.</span>
+    <span class="n">prefixes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">prefixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+            <span class="k">break</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">prefixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>  <span class="c1"># site root</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;User-Agent&#39;</span><span class="p">:</span> <span class="n">DFLT_USER_AGENT</span><span class="p">}</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">prefixes</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">LLMS_FULL_CANDIDATES</span><span class="p">:</span>
+            <span class="n">probe</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">candidate</span>
+            <span class="k">if</span> <span class="n">probe</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">probe</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span>
+                    <span class="n">probe</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">allow_redirects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">ctype</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content-type&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="c1"># Reject HTML 200 responses (some sites return their 404 page as 200).</span>
+            <span class="k">if</span> <span class="s1">&#39;html&#39;</span> <span class="ow">in</span> <span class="n">ctype</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content-length&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># Anything under 500 bytes is almost certainly not a real bundle.</span>
+            <span class="k">if</span> <span class="n">size</span> <span class="ow">and</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">500</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">url</span>  <span class="c1"># follow redirects to canonical URL</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="fetch_llms_full">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.fetch_llms_full">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fetch_llms_full</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_REQUEST_TIMEOUT</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch a publisher-provided single-doc bundle if available.</span>
+
+<span class="sd">    See :func:`find_llms_full_url` for how the URL is discovered.</span>
+
+<span class="sd">    Returns the markdown text, or ``None`` if no bundle was found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bundle_url</span> <span class="o">=</span> <span class="n">find_llms_full_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bundle_url</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;User-Agent&#39;</span><span class="p">:</span> <span class="n">DFLT_USER_AGENT</span><span class="p">}</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bundle_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># High-level pipeline</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="site_to_markdown">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.site_to_markdown">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">site_to_markdown</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tab_filter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">page_fetcher</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">content_extractor</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">section_separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">---</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="n">collapse_blank_lines</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">use_llms_full</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download a documentation site and produce a single aggregated markdown.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        The documentation site&#39;s root URL.</span>
+<span class="sd">    cache_dir : str, optional</span>
+<span class="sd">        Directory for caching fetched HTML. Defaults to ``~/.cache/contaix/web``.</span>
+<span class="sd">    output_file : str, optional</span>
+<span class="sd">        Path to save the markdown file. If None, returns the string.</span>
+<span class="sd">    tab_filter : str or callable, optional</span>
+<span class="sd">        If a string, only include pages from tabs whose label contains this</span>
+<span class="sd">        string (case-insensitive). If a callable, ``tab_filter(tab_label) -&gt; bool``.</span>
+<span class="sd">    page_fetcher : callable, optional</span>
+<span class="sd">        Custom ``(url) -&gt; html`` function. Defaults to ``fetch_page``.</span>
+<span class="sd">    content_extractor : callable, optional</span>
+<span class="sd">        Custom ``(html) -&gt; markdown`` function. Defaults to auto-detection.</span>
+<span class="sd">    section_separator : str</span>
+<span class="sd">        Separator between page sections in the output.</span>
+<span class="sd">    use_llms_full : bool</span>
+<span class="sd">        If True (default), first try to find a publisher-provided</span>
+<span class="sd">        ``/llms-full.txt`` bundle (Mintlify, Docusaurus, etc. ship these).</span>
+<span class="sd">        When found, returns it directly instead of scraping page-by-page.</span>
+<span class="sd">        Disable to force the scraping pipeline. Skipped automatically when</span>
+<span class="sd">        ``page_fetcher`` or ``tab_filter`` is set, since those imply the</span>
+<span class="sd">        caller wants the scraping path.</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print progress information.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        If ``output_file`` is None, returns the markdown string.</span>
+<span class="sd">        Otherwise, returns the output file path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cache_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">DFLT_CACHE_DIR</span>
+
+    <span class="c1"># Fast path: many doc generators expose the whole site as a single markdown</span>
+    <span class="c1"># bundle at /llms-full.txt. When available, prefer it over scraping.</span>
+    <span class="k">if</span> <span class="n">use_llms_full</span> <span class="ow">and</span> <span class="n">page_fetcher</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tab_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Probing </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1"> for llms-full.txt bundle...&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bundle</span> <span class="o">=</span> <span class="n">fetch_llms_full</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  llms-full probe failed (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">); falling back to scrape&#39;</span><span class="p">)</span>
+            <span class="n">bundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">bundle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;  Found publisher bundle (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundle</span><span class="p">)</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1"> chars) — &#39;</span>
+                    <span class="s1">&#39;skipping per-page scrape&#39;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
+                <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">bundle</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saved to </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundle</span><span class="p">)</span><span class="si">}</span><span class="s1"> chars)&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">output_file</span>
+            <span class="k">return</span> <span class="n">bundle</span>
+        <span class="k">elif</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  No bundle found, falling back to page-by-page scrape&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Extracting navigation from </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">)</span>
+
+    <span class="n">nav</span> <span class="o">=</span> <span class="n">extract_site_nav</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">pages</span> <span class="o">=</span> <span class="n">nav</span><span class="p">[</span><span class="s1">&#39;pages&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pages</span><span class="p">)</span><span class="si">}</span><span class="s1"> pages&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Apply tab filter</span>
+    <span class="k">if</span> <span class="n">tab_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tab_filter</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">filter_str</span> <span class="o">=</span> <span class="n">tab_filter</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">pages</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pages</span> <span class="k">if</span> <span class="n">filter_str</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tab&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pages</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pages</span> <span class="k">if</span> <span class="n">tab_filter</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tab&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))]</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;After tab filter: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pages</span><span class="p">)</span><span class="si">}</span><span class="s1"> pages&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pages</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No pages found!&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="c1"># Detect if this is a Next.js site (check the first page&#39;s HTML)</span>
+    <span class="n">_is_nextjs</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">page_fetcher</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">test_html</span> <span class="o">=</span> <span class="n">fetch_page</span><span class="p">(</span><span class="n">pages</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;url&#39;</span><span class="p">],</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">)</span>
+        <span class="n">_is_nextjs</span> <span class="o">=</span> <span class="n">is_nextjs_site</span><span class="p">(</span><span class="n">test_html</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">_is_nextjs</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Detected Next.js site - using RSC flight endpoint&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Set up fetcher and extractor based on site type</span>
+    <span class="k">if</span> <span class="n">page_fetcher</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_fetcher</span> <span class="o">=</span> <span class="n">page_fetcher</span>
+        <span class="n">_extractor</span> <span class="o">=</span> <span class="n">content_extractor</span> <span class="ow">or</span> <span class="n">_auto_extract_content</span>
+    <span class="k">elif</span> <span class="n">_is_nextjs</span><span class="p">:</span>
+        <span class="n">_fetcher</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">fetch_nextjs_rsc</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">)</span>
+        <span class="n">_extractor</span> <span class="o">=</span> <span class="n">content_extractor</span> <span class="ow">or</span> <span class="n">extract_rsc_page_content</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_fetcher</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">fetch_page</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">)</span>
+        <span class="n">_extractor</span> <span class="o">=</span> <span class="n">content_extractor</span> <span class="ow">or</span> <span class="n">_auto_extract_content</span>
+
+    <span class="c1"># Fetch and convert all pages</span>
+    <span class="n">sections</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_group</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">page</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pages</span><span class="p">):</span>
+        <span class="n">page_url</span> <span class="o">=</span> <span class="n">page</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  [</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pages</span><span class="p">)</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">title</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">page_url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw</span> <span class="o">=</span> <span class="n">_fetcher</span><span class="p">(</span><span class="n">page_url</span><span class="p">)</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">_extractor</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">content</span> <span class="ow">and</span> <span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                <span class="c1"># Add group header when group changes</span>
+                <span class="n">header_parts</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">group</span> <span class="ow">and</span> <span class="n">group</span> <span class="o">!=</span> <span class="n">current_group</span><span class="p">:</span>
+                    <span class="n">current_group</span> <span class="o">=</span> <span class="n">group</span>
+                    <span class="n">header_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;!-- group: </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s1"> --&gt;&#39;</span><span class="p">)</span>
+                <span class="n">header_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;# </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">title</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;# </span><span class="si">{</span><span class="n">page_url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header_parts</span><span class="p">)</span>
+
+                <span class="c1"># Remove any leading h1 from content if it duplicates the title</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">_strip_duplicate_title</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+
+                <span class="n">sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    WARNING: Failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Aggregate</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="n">section_separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sections</span><span class="p">)</span>
+
+    <span class="c1"># Clean up whitespace and repair markdown artifacts</span>
+    <span class="k">if</span> <span class="n">collapse_blank_lines</span><span class="p">:</span>
+        <span class="n">markdown</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\n{3,}&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">markdown</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\n{4,}&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">markdown</span><span class="p">)</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="n">repair_markdown</span><span class="p">(</span><span class="n">markdown</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saved to </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">markdown</span><span class="p">)</span><span class="si">}</span><span class="s1"> chars)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output_file</span>
+
+    <span class="k">return</span> <span class="n">markdown</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_auto_extract_content</span><span class="p">(</span><span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatically choose the best content extraction method.</span>
+
+<span class="sd">    1. Try RSC payload extraction (for Next.js sites)</span>
+<span class="sd">    2. Fall back to html2text on the full HTML</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rsc_content</span> <span class="o">=</span> <span class="n">extract_rsc_page_content</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rsc_content</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">rsc_content</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rsc_content</span>
+
+    <span class="c1"># Fallback: html2text on full HTML, trying to extract main content</span>
+    <span class="k">return</span> <span class="n">_extract_main_content_html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_main_content_html</span><span class="p">(</span><span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract main content area from HTML and convert to markdown.</span>
+
+<span class="sd">    Tries to find ``&lt;article&gt;``, ``&lt;main&gt;``, or ``[role=main]`` elements</span>
+<span class="sd">    before falling back to the full HTML.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">bs4</span><span class="w"> </span><span class="kn">import</span> <span class="n">BeautifulSoup</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Try progressively broader selectors</span>
+        <span class="k">for</span> <span class="n">selector</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;article&#39;</span><span class="p">,</span> <span class="s1">&#39;main&#39;</span><span class="p">,</span> <span class="s1">&#39;[role=&quot;main&quot;]&#39;</span><span class="p">,</span> <span class="s1">&#39;.content&#39;</span><span class="p">,</span> <span class="s1">&#39;#content&#39;</span><span class="p">]:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">element</span><span class="p">:</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">html_to_clean_markdown</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
+
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Full HTML fallback</span>
+    <span class="k">return</span> <span class="n">html_to_clean_markdown</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_strip_duplicate_title</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a leading H1 from content if it duplicates the page title.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">content</span>
+    <span class="c1"># Match a leading # Title line</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^#\s+(.+?)(?:\n|$)&#39;</span><span class="p">,</span> <span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+        <span class="n">h1_text</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">h1_text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">title</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">():]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">content</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Markdown repair utilities</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="c1"># Markdown repair utilities are now in dn.repair; re-exported here for</span>
+<span class="c1"># backward compatibility and convenience. The fallback no-ops only fire on</span>
+<span class="c1"># older dn releases (pre-0.0.9) that didn&#39;t ship the repair submodule.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dn.repair</span><span class="w"> </span><span class="kn">import</span> <span class="n">repair_markdown</span>  <span class="c1"># noqa: F401</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dn.repair</span><span class="w"> </span><span class="kn">import</span> <span class="n">fix_multiline_links</span>  <span class="c1"># noqa: F401</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dn.repair</span><span class="w"> </span><span class="kn">import</span> <span class="n">fix_empty_links</span>  <span class="c1"># noqa: F401</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+<div class="viewcode-block" id="repair_markdown">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.repair_markdown">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">repair_markdown</span><span class="p">(</span><span class="n">md</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;No-op fallback when dn.repair is unavailable.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">md</span></div>
+
+    <span class="n">fix_multiline_links</span> <span class="o">=</span> <span class="n">repair_markdown</span>
+    <span class="n">fix_empty_links</span> <span class="o">=</span> <span class="n">repair_markdown</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Convenience functions</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="list_site_pages">
+<a class="viewcode-back" href="../../module_docs/contaix/web.html#contaix.web.list_site_pages">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_site_pages</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all pages found in a documentation site&#39;s navigation.</span>
+
+<span class="sd">    Returns a list of dicts with keys: path, title, url, group, tab.</span>
+
+<span class="sd">    &gt;&gt;&gt; pages = list_site_pages(&#39;https://platform.claude.com/docs/en/home&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; len(pages)  # doctest: +SKIP</span>
+<span class="sd">    89</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">extract_site_nav</span><span class="p">(</span><span class="n">url</span><span class="p">)[</span><span class="s1">&#39;pages&#39;</span><span class="p">]</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

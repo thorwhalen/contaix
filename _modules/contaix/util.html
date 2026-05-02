@@ -1,0 +1,375 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>contaix.util &mdash; contaix 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            contaix
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix.html">contaix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/aggregation.html">contaix.aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/code.html">contaix.code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/markdown.html">contaix.markdown</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/skills.html">contaix.skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/urls.html">contaix.urls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/util.html">contaix.util</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/web.html">contaix.web</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">contaix</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">contaix.util</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for contaix.util</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">General utilities for contaix</span>
+
+<span class="sd">This module provides core utility functions used throughout the contaix package, including:</span>
+<span class="sd">- File path handling (fullpath)</span>
+<span class="sd">- URL detection and content retrieval (is_url, url_to_contents)</span>
+<span class="sd">- File saving utilities (save_to_file_and_return_file)</span>
+<span class="sd">- Basic helper functions (identity)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># TODO: A lot of these were for contaix.markdown, which has moved to dn.src. Get rid of unnecessary definitions</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dol</span><span class="w"> </span><span class="kn">import</span> <span class="n">written_key</span>
+
+<span class="c1"># Re-export selected names from scraped at the contaix namespace level.</span>
+<span class="c1"># These are loaded lazily because scraped pulls in hubcap, which raises</span>
+<span class="c1"># OSError at import time when GITHUB_TOKEN is unset. Lazy resolution lets</span>
+<span class="c1"># `import contaix` succeed without a token; the OSError surfaces only when</span>
+<span class="c1"># a caller actually touches one of these functions.</span>
+<span class="n">_SCRAPED_REEXPORTS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">&#39;markdown_of_site&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;download_site&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;scrape_multiple_sites&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;acquire_content&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_SCRAPED_REEXPORTS</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">scraped</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">scraped</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="identity">
+<a class="viewcode-back" href="../../module_docs/contaix/util.html#contaix.util.identity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">identity</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the input unchanged.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: Any input</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The input unchanged</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<div class="viewcode-block" id="fullpath">
+<a class="viewcode-back" href="../../module_docs/contaix/util.html#contaix.util.fullpath">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fullpath</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the full path of the given path.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (str): The path to convert to a full path.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The full path.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; fullpath(&#39;~/Downloads&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &#39;/home/user/Downloads&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; fullpath(&#39;.&#39;)  # doctest: +SKIP</span>
+<span class="sd">    &#39;/home/user/python_projects/aix/aix&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="is_url">
+<a class="viewcode-back" href="../../module_docs/contaix/util.html#contaix.util.is_url">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_url</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if the given path is a URL.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (str): Path to check</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the path is a URL, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;http://&quot;</span><span class="p">,</span> <span class="s2">&quot;https://&quot;</span><span class="p">))</span></div>
+
+
+
+<span class="n">DFLT_URL_TO_CONTENTS_KIND</span> <span class="o">=</span> <span class="s1">&#39;binary&#39;</span>
+<span class="n">DFLT_URL_TO_CONTENTS_TIMEOUT</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># seconds</span>
+
+
+<div class="viewcode-block" id="url_to_contents">
+<a class="viewcode-back" href="../../module_docs/contaix/util.html#contaix.util.url_to_contents">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">url_to_contents</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">kind</span><span class="o">=</span><span class="n">DFLT_URL_TO_CONTENTS_KIND</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_URL_TO_CONTENTS_TIMEOUT</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetch the content from a URL.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): The URL to fetch.</span>
+<span class="sd">        kind (str): The kind of content to fetch (&#39;text&#39;, &#39;binary&#39;, or &#39;response&#39;). Defaults to &#39;binary&#39;.</span>
+<span class="sd">        timeout (int): Timeout for the request in seconds. Default is 10 seconds.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[bytes]: The content of the URL if successful, None otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>  <span class="c1"># Raise an error for bad responses</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">}:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;bytes&#39;</span><span class="p">}:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;response&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid kind. Use &#39;text&#39;, &#39;binary&#39;, or &#39;response&#39;.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="save_to_file_and_return_file">
+<a class="viewcode-back" href="../../module_docs/contaix/util.html#contaix.util.save_to_file_and_return_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_to_file_and_return_file</span><span class="p">(</span>
+    <span class="n">obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoder</span><span class="o">=</span><span class="n">identity</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save `encoder(obj)` to a file using a random name in `rootdir` (or a temp directory if not provided).</span>
+<span class="sd">    Returns the full path to the saved file.</span>
+<span class="sd">    If `obj` is None, returns a partial function with preconfigured `encoder` and</span>
+<span class="sd">    `rootdir`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj: The object to save. If None, return a partial function.</span>
+<span class="sd">        encoder: A function to encode the object into text or bytes. Defaults to identity.</span>
+<span class="sd">        key: The key (by default, filepath) to write to.</span>
+<span class="sd">            If None, a temporary file is created.</span>
+<span class="sd">            If a string starting with &#39;*&#39;, the &#39;*&#39; is replaced with a unique temporary filename.</span>
+<span class="sd">            If a string that has a &#39;*&#39; somewhere in the middle, what&#39;s on the left of if is used as a directory</span>
+<span class="sd">            and the &#39;*&#39; is replaced with a unique temporary filename. For example</span>
+<span class="sd">            &#39;/tmp/*_file.ext&#39; would be replaced with &#39;/tmp/oiu8fj9873_file.ext&#39;.</span>
+<span class="sd">            If a callable, it will be called with obj as input to get the key. One use case</span>
+<span class="sd">            is to use a function that generates a key based on the object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Full path to the saved file, or a partial function if `obj` is None.</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; filepath = save_to_file_and_return_file(&quot;hello world&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; Path(filepath).read_text()</span>
+<span class="sd">    &#39;hello world&#39;</span>
+
+<span class="sd">    The default encoder is identity, so you can save binary data as well:</span>
+
+<span class="sd">    &gt;&gt;&gt; filepath = save_to_file_and_return_file(b&quot;binary data&quot;, encoder=lambda x: x)</span>
+<span class="sd">    &gt;&gt;&gt; Path(filepath).read_bytes()</span>
+<span class="sd">    b&#39;binary data&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note: Yes, it&#39;s just written_key from dol, but with a context-sensitive name</span>
+    <span class="k">return</span> <span class="n">written_key</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="source_first_arg_from_clipboard_if_none">
+<a class="viewcode-back" href="../../module_docs/contaix/util.html#contaix.util.source_first_arg_from_clipboard_if_none">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">source_first_arg_from_clipboard_if_none</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator that sources a `string` argument from the clipboard when it&#39;s</span>
+<span class="sd">    None and copies the function&#39;s return value back to the clipboard when the</span>
+<span class="sd">    keyword argument `copy_to_clipboard` is truthy.</span>
+
+<span class="sd">    The wrapped function must accept a parameter named `string`. It may also</span>
+<span class="sd">    accept a keyword-only parameter named `copy_to_clipboard` (default True).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">bound</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">bind_partial</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># If the function declares a `string` parameter and it is None,</span>
+        <span class="c1"># attempt to paste from the clipboard. Let ImportError propagate for</span>
+        <span class="c1"># the paste operation to match previous behavior.</span>
+        <span class="k">if</span> <span class="s1">&#39;string&#39;</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">bound</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">pyperclip</span>
+
+                <span class="n">bound</span><span class="o">.</span><span class="n">arguments</span><span class="p">[</span><span class="s1">&#39;string&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyperclip</span><span class="o">.</span><span class="n">paste</span><span class="p">()</span>
+
+        <span class="c1"># Call the original function with the bound arguments</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">bound</span><span class="o">.</span><span class="n">arguments</span><span class="p">)</span>
+
+        <span class="c1"># Determine whether to copy result to clipboard. Prefer the provided</span>
+        <span class="c1"># argument, else fall back to the function&#39;s default if available.</span>
+        <span class="k">if</span> <span class="s1">&#39;copy_to_clipboard&#39;</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">copy</span> <span class="o">=</span> <span class="n">bound</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;copy_to_clipboard&#39;</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;copy_to_clipboard&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">copy</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">pyperclip</span>
+
+                <span class="n">pyperclip</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;pyperclip module not found (pip install pyperclip) so can&#39;t copy to clipboard&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+
+<div class="viewcode-block" id="remove_improperly_double_newlines">
+<a class="viewcode-back" href="../../module_docs/contaix/util.html#contaix.util.remove_improperly_double_newlines">[docs]</a>
+<span class="nd">@source_first_arg_from_clipboard_if_none</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_improperly_double_newlines</span><span class="p">(</span>
+    <span class="n">string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">copy_to_clipboard</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># Note: Yes, it&#39;s used, but obfuscated by the decorator</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Remove improperly double newlines from a string.</span>
+
+<span class="sd">    Delegates to ``dn.repair.remove_improperly_double_newlines`` for the pure</span>
+<span class="sd">    transform, adding clipboard integration via the decorator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        string (str): The input string.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The string with improperly double newlines removed.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &quot;This is a test.\n\nThis should be one newline.\n  \nThis too.&quot;</span>
+<span class="sd">    &gt;&gt;&gt; remove_improperly_double_newlines(text)  # doctest: +SKIP</span>
+<span class="sd">    &#39;This is a test.\n\nThis should be one newline.\nThis too.&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dn.repair</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_improperly_double_newlines</span> <span class="k">as</span> <span class="n">_pure_remove</span>
+
+    <span class="k">return</span> <span class="n">_pure_remove</span><span class="p">(</span><span class="n">string</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

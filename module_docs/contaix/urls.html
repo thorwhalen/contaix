@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>contaix.urls &mdash; contaix 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="contaix.util" href="util.html" />
+    <link rel="prev" title="contaix.skills" href="skills.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            contaix
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../contaix.html">contaix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregation.html">contaix.aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">contaix.code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown.html">contaix.markdown</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skills.html">contaix.skills</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">contaix.urls</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.download_articles"><code class="docutils literal notranslate"><span class="pre">download_articles()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.download_articles_by_section"><code class="docutils literal notranslate"><span class="pre">download_articles_by_section()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.extract_html_links"><code class="docutils literal notranslate"><span class="pre">extract_html_links()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.extract_markdown_links"><code class="docutils literal notranslate"><span class="pre">extract_markdown_links()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.extract_urls"><code class="docutils literal notranslate"><span class="pre">extract_urls()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.extract_urls_only"><code class="docutils literal notranslate"><span class="pre">extract_urls_only()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.extract_with_surrounding_context"><code class="docutils literal notranslate"><span class="pre">extract_with_surrounding_context()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.remove_hyperlink_crap"><code class="docutils literal notranslate"><span class="pre">remove_hyperlink_crap()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.urls.verify_urls"><code class="docutils literal notranslate"><span class="pre">verify_urls()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">contaix.util</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web.html">contaix.web</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">contaix</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">contaix.urls</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/contaix/urls.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-contaix.urls">
+<span id="contaix-urls"></span><h1>contaix.urls<a class="headerlink" href="#module-contaix.urls" title="Link to this heading"></a></h1>
+<p>Work with urls</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.download_articles">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">download_articles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/home/runner/Downloads'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_non_pdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/urls.html#download_articles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.download_articles" title="Link to this definition"></a></dt>
+<dd><p>Download PDF articles from markdown text. Wrapper around <code class="docutils literal notranslate"><span class="pre">pdfdol.download</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">md_string</span></code> is None, reads from clipboard (requires pyperclip).
+See <code class="docutils literal notranslate"><span class="pre">pdfdol.download.download_articles</span></code> for full documentation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.download_articles_by_section">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">download_articles_by_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">md_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rootdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_non_pdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_marker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'###'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/urls.html#download_articles_by_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.download_articles_by_section" title="Link to this definition"></a></dt>
+<dd><p>Download articles by markdown section. Wrapper around <code class="docutils literal notranslate"><span class="pre">pdfdol.download</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">md_string</span></code> is None, reads from clipboard (requires pyperclip).
+See <code class="docutils literal notranslate"><span class="pre">pdfdol.download.download_articles_by_section</span></code> for full documentation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.extract_html_links">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">extract_html_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markdown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/urls.html#extract_html_links"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.extract_html_links" title="Link to this definition"></a></dt>
+<dd><p>Extract URLs from HTML anchor tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>markdown</strong> – The markdown or HTML string to process</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator of (anchor_text, url) pairs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.extract_markdown_links">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">extract_markdown_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markdown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Pattern</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/urls.html#extract_markdown_links"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.extract_markdown_links" title="Link to this definition"></a></dt>
+<dd><p>Extract markdown links from a string.</p>
+<p>Note: By default this also extracts bare <code class="docutils literal notranslate"><span class="pre">http(s)://...</span></code> URLs found in the
+text. For those, the returned context/name is the URL itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>markdown</strong> – The markdown string to process</p></li>
+<li><p><strong>pattern</strong> – A compiled regex pattern to match markdown links</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator of (context, url) pairs</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;[Google](https://google.com) and https://github.com&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">extract_markdown_links</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+<span class="go">[(&#39;Google&#39;, &#39;https://google.com&#39;), (&#39;https://github.com&#39;, &#39;https://github.com&#39;)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.extract_urls">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">extract_urls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markdown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Pattern</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Match</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/urls.html#extract_urls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.extract_urls" title="Link to this definition"></a></dt>
+<dd><p>Extract URLs and their context from a markdown string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>markdown</strong> – The markdown string to process</p></li>
+<li><p><strong>pattern</strong> – A compiled regex pattern to match URLs and their context.
+Defaults to matching both markdown hyperlinks <code class="docutils literal notranslate"><span class="pre">[context](url)</span></code>
+and bare <code class="docutils literal notranslate"><span class="pre">http(s)://...</span></code> URLs.</p></li>
+<li><p><strong>extractor</strong> – A function that extracts <code class="docutils literal notranslate"><span class="pre">(context,</span> <span class="pre">url)</span></code> from a match.
+Defaults to:
+- <code class="docutils literal notranslate"><span class="pre">(context,</span> <span class="pre">url)</span></code> for markdown hyperlinks
+- <code class="docutils literal notranslate"><span class="pre">(url,</span> <span class="pre">url)</span></code> for bare URLs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator of (context, url) pairs</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;[Google](https://google.com) and https://github.com&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">extract_urls</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+<span class="go">[(&#39;Google&#39;, &#39;https://google.com&#39;), (&#39;https://github.com&#39;, &#39;https://github.com&#39;)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.extract_urls_only">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">extract_urls_only</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markdown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/urls.html#extract_urls_only"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.extract_urls_only" title="Link to this definition"></a></dt>
+<dd><p>Extract URLs with empty context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>markdown</strong> – String containing markdown text</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator of tuples with empty string and extracted URLs</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">extract_urls_only</span><span class="p">(</span><span class="s2">&quot;Check [this link](https://example.com) and https://github.com/user/repo)&quot;</span><span class="p">))</span>
+<span class="go">[(&#39;&#39;, &#39;https://example.com&#39;), (&#39;&#39;, &#39;https://github.com/user/repo&#39;)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.extract_with_surrounding_context">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">extract_with_surrounding_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markdown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_chars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/urls.html#extract_with_surrounding_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.extract_with_surrounding_context" title="Link to this definition"></a></dt>
+<dd><p>Extract URLs with surrounding text as context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>markdown</strong> – The markdown string to process</p></li>
+<li><p><strong>context_chars</strong> – Number of characters to include before and after URL</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator of (context, url) pairs</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Check this link: [Google](https://google.com) and [GitHub](https://github.com)&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">extract_with_surrounding_context</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">context_chars</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="go">[(&#39;gle](https://google.com) and&#39;, &#39;https://google.com)&#39;), (&#39;Hub](https://github.com)&#39;, &#39;https://github.com)&#39;)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.remove_hyperlink_crap">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">remove_hyperlink_crap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_to_clipboard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/urls.html#remove_hyperlink_crap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.remove_hyperlink_crap" title="Link to this definition"></a></dt>
+<dd><p>Remove unwanted hyperlinks and citations from a string.</p>
+<p>Typically used to clean up text copied from ChatGPT or Claude.
+Delegates to <code class="docutils literal notranslate"><span class="pre">dn.repair.remove_hyperlink_crap</span></code> for the pure transform,
+adding clipboard integration on top.</p>
+<p>If no string is specified, reads from clipboard (requires pyperclip).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.urls.verify_urls">
+<span class="sig-prename descclassname"><span class="pre">contaix.urls.</span></span><span class="sig-name descname"><span class="pre">verify_urls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/urls.html#verify_urls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.urls.verify_urls" title="Link to this definition"></a></dt>
+<dd><p>Verifies URLs in a markdown string by checking their status codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>src</strong> (<em>str</em><em> | </em><em>list</em>) – The markdown string or list containing URLs.
+If a string starting with <code class="docutils literal notranslate"><span class="pre">[</span></code>, parsed as a JSON list of URLs.
+Otherwise, URLs are extracted from the markdown text.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary with URLs as keys and their status codes as values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">verify_urls</span><span class="p">([</span><span class="s1">&#39;https://example.com&#39;</span><span class="p">])</span>  
+<span class="go">{&#39;https://example.com&#39;: 200}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skills.html" class="btn btn-neutral float-left" title="contaix.skills" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="util.html" class="btn btn-neutral float-right" title="contaix.util" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

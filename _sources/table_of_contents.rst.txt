@@ -1,0 +1,12 @@
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   module_docs/contaix
+   module_docs/contaix/aggregation
+   module_docs/contaix/code
+   module_docs/contaix/markdown
+   module_docs/contaix/skills
+   module_docs/contaix/urls
+   module_docs/contaix/util
+   module_docs/contaix/web

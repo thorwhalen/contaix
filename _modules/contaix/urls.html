@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>contaix.urls &mdash; contaix 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            contaix
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix.html">contaix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/aggregation.html">contaix.aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/code.html">contaix.code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/markdown.html">contaix.markdown</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/skills.html">contaix.skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/urls.html">contaix.urls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/util.html">contaix.util</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/contaix/web.html">contaix.web</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">contaix</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">contaix.urls</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for contaix.urls</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Work with urls</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># --------------------------------------------------------------------------------------</span>
+<span class="c1"># Download articles from a markdown string and save them as PDF files</span>
+
+<span class="c1"># TODO: Make download_articles more general:</span>
+<span class="c1">#       - Allowed file types should be handled by plugin dependency injection</span>
+<span class="c1">#       - There should be a separate title/url extractor that can be passed in</span>
+<span class="c1">#       - When title is missing, some url_to_filenae should be used (see graze)?</span>
+<span class="c1">#       - download_articles_by_section should be merged with download_articles</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">re</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pattern</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">DFLT_SAVE_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/Downloads&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_strip_trailing_url_punctuation</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Strip common trailing punctuation from a URL.</span>
+
+<span class="sd">    This is useful when URLs appear in prose like &quot;see https://example.com).&quot;.</span>
+
+<span class="sd">    &gt;&gt;&gt; _strip_trailing_url_punctuation(&#39;https://example.com).&#39;)</span>
+<span class="sd">    &#39;https://example.com&#39;</span>
+<span class="sd">    &gt;&gt;&gt; _strip_trailing_url_punctuation(&#39;https://example.com/path?a=1&amp;b=2&#39;)</span>
+<span class="sd">    &#39;https://example.com/path?a=1&amp;b=2&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;)].,;:!?*</span><span class="se">\&quot;</span><span class="s2">&#39;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># Default URL matching:</span>
+<span class="c1"># - Markdown links: [context](https://example.com/...)</span>
+<span class="c1"># - Bare URLs in prose: https://example.com/...</span>
+<span class="n">DFLT_BARE_URL_PATTERN</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="sa">r</span><span class="s2">&quot;https?://(?:[-\w.]|(?:%[\da-fA-F]</span><span class="si">{2}</span><span class="s2">))+(?::\d+)?&quot;</span> <span class="sa">r</span><span class="s2">&quot;(?:/[^\s()&lt;&gt;\[\]</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2">,\&#39;]*)?&quot;</span>
+<span class="p">)</span>
+
+<span class="n">DFLT_URL_EXTRACTION_PATTERN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">&quot;\[([^\]]+)\]\((</span><span class="si">{</span><span class="n">DFLT_BARE_URL_PATTERN</span><span class="si">}</span><span class="s2">)\)|(</span><span class="si">{</span><span class="n">DFLT_BARE_URL_PATTERN</span><span class="si">}</span><span class="s2">)&quot;</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_head_with_headers</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a HEAD request with proper headers to avoid 403 blocks.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url: The URL to request</span>
+<span class="sd">        timeout: Request timeout in seconds</span>
+<span class="sd">        headers: Optional additional headers to merge in</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Response object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0 (compatible; URLVerifier/1.0; +https://github.com/thorwhalen/contaix)&quot;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">headers</span><span class="p">:</span>
+        <span class="n">default_headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span>
+        <span class="n">url</span><span class="p">,</span> <span class="n">allow_redirects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">default_headers</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_from_clipboard</span><span class="p">():</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pyperclip</span>  <span class="c1"># pip install pyperclip</span>
+
+    <span class="k">return</span> <span class="n">pyperclip</span><span class="o">.</span><span class="n">paste</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="extract_urls">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.extract_urls">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_urls</span><span class="p">(</span>
+    <span class="n">markdown</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">extractor</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">re</span><span class="o">.</span><span class="n">Match</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract URLs and their context from a markdown string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markdown: The markdown string to process</span>
+<span class="sd">        pattern: A compiled regex pattern to match URLs and their context.</span>
+<span class="sd">            Defaults to matching both markdown hyperlinks ``[context](url)``</span>
+<span class="sd">            and bare ``http(s)://...`` URLs.</span>
+<span class="sd">        extractor: A function that extracts ``(context, url)`` from a match.</span>
+<span class="sd">            Defaults to:</span>
+<span class="sd">            - ``(context, url)`` for markdown hyperlinks</span>
+<span class="sd">            - ``(url, url)`` for bare URLs</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Iterator of (context, url) pairs</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &quot;[Google](https://google.com) and https://github.com&quot;</span>
+<span class="sd">    &gt;&gt;&gt; list(extract_urls(text))</span>
+<span class="sd">    [(&#39;Google&#39;, &#39;https://google.com&#39;), (&#39;https://github.com&#39;, &#39;https://github.com&#39;)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="n">markdown</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">pattern</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">DFLT_URL_EXTRACTION_PATTERN</span>
+
+    <span class="k">if</span> <span class="n">extractor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Default extractor for markdown hyperlinks OR bare urls</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">extractor</span><span class="p">(</span><span class="n">match</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">Match</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+            <span class="n">md_context</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">md_url</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">bare_url</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="n">url</span> <span class="o">=</span> <span class="n">md_url</span> <span class="ow">or</span> <span class="n">bare_url</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">_strip_trailing_url_punctuation</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">md_context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">md_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">md_context</span><span class="p">,</span> <span class="n">url</span>
+
+            <span class="c1"># For bare URLs, use the URL as the context/name</span>
+            <span class="k">return</span> <span class="n">url</span><span class="p">,</span> <span class="n">url</span>
+
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">pattern</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">markdown</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">extractor</span><span class="p">(</span><span class="n">match</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Example alternative patterns and extractors</span>
+
+
+<div class="viewcode-block" id="extract_markdown_links">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.extract_markdown_links">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_markdown_links</span><span class="p">(</span>
+    <span class="n">markdown</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="n">Pattern</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract markdown links from a string.</span>
+
+<span class="sd">    Note: By default this also extracts bare ``http(s)://...`` URLs found in the</span>
+<span class="sd">    text. For those, the returned context/name is the URL itself.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markdown: The markdown string to process</span>
+<span class="sd">        pattern: A compiled regex pattern to match markdown links</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Iterator of (context, url) pairs</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &quot;[Google](https://google.com) and https://github.com&quot;</span>
+<span class="sd">    &gt;&gt;&gt; list(extract_markdown_links(text))</span>
+<span class="sd">    [(&#39;Google&#39;, &#39;https://google.com&#39;), (&#39;https://github.com&#39;, &#39;https://github.com&#39;)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="n">markdown</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span> <span class="ow">or</span> <span class="n">DFLT_URL_EXTRACTION_PATTERN</span>
+    <span class="k">return</span> <span class="n">extract_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="n">pattern</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="extract_with_surrounding_context">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.extract_with_surrounding_context">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_with_surrounding_context</span><span class="p">(</span>
+    <span class="n">markdown</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">context_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract URLs with surrounding text as context.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markdown: The markdown string to process</span>
+<span class="sd">        context_chars: Number of characters to include before and after URL</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Iterator of (context, url) pairs</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &quot;Check this link: [Google](https://google.com) and [GitHub](https://github.com)&quot;</span>
+<span class="sd">    &gt;&gt;&gt; list(extract_with_surrounding_context(text, context_chars=5))</span>
+<span class="sd">    [(&#39;gle](https://google.com) and&#39;, &#39;https://google.com)&#39;), (&#39;Hub](https://github.com)&#39;, &#39;https://github.com)&#39;)]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="n">markdown</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+    <span class="c1"># Pattern to match URLs with a simple validation</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;https?://[^\s]+&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">surrounding_context_extractor</span><span class="p">(</span><span class="n">match</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">Match</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="o">-</span> <span class="n">context_chars</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">markdown</span><span class="p">),</span> <span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="o">+</span> <span class="n">context_chars</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">markdown</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">context</span><span class="p">,</span> <span class="n">url</span>
+
+    <span class="k">return</span> <span class="n">extract_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">surrounding_context_extractor</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="extract_urls_only">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.extract_urls_only">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_urls_only</span><span class="p">(</span><span class="n">markdown</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract URLs with empty context.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markdown: String containing markdown text</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Iterator of tuples with empty string and extracted URLs</span>
+
+<span class="sd">    &gt;&gt;&gt; list(extract_urls_only(&quot;Check [this link](https://example.com) and https://github.com/user/repo)&quot;))</span>
+<span class="sd">    [(&#39;&#39;, &#39;https://example.com&#39;), (&#39;&#39;, &#39;https://github.com/user/repo&#39;)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="n">markdown</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+    <span class="c1"># Improved URL pattern that stops at common ending characters</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">DFLT_BARE_URL_PATTERN</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">url_only_extractor</span><span class="p">(</span><span class="n">match</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">Match</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">_strip_trailing_url_punctuation</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">url</span>
+
+    <span class="k">return</span> <span class="n">extract_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">url_only_extractor</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="extract_html_links">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.extract_html_links">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_html_links</span><span class="p">(</span><span class="n">markdown</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract URLs from HTML anchor tags.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        markdown: The markdown or HTML string to process</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Iterator of (anchor_text, url) pairs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="n">markdown</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+    <span class="c1"># Simple pattern for HTML anchor tags</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;a\s+(?:[^&gt;]*?\s+)?href=&quot;([^&quot;]*)&quot;[^&gt;]*&gt;(.*?)&lt;/a&gt;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">html_link_extractor</span><span class="p">(</span><span class="n">match</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">Match</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="c1"># Note the order is reversed in HTML: href first, then text</span>
+        <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">extract_urls</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">html_link_extractor</span><span class="p">)</span></div>
+
+
+
+<span class="n">extract_urls</span><span class="o">.</span><span class="n">markdown_links</span> <span class="o">=</span> <span class="n">extract_markdown_links</span>
+<span class="n">extract_urls</span><span class="o">.</span><span class="n">with_surrounding_context</span> <span class="o">=</span> <span class="n">extract_with_surrounding_context</span>
+<span class="n">extract_urls</span><span class="o">.</span><span class="n">only_urls</span> <span class="o">=</span> <span class="n">extract_urls_only</span>
+<span class="n">extract_urls</span><span class="o">.</span><span class="n">html_links</span> <span class="o">=</span> <span class="n">extract_html_links</span>
+
+<span class="n">DFLT_SAVE_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/Downloads&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="download_articles">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.download_articles">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_articles</span><span class="p">(</span>
+    <span class="n">md_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">save_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_SAVE_DIR</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">save_non_pdf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download PDF articles from markdown text. Wrapper around ``pdfdol.download``.</span>
+
+<span class="sd">    If ``md_string`` is None, reads from clipboard (requires pyperclip).</span>
+<span class="sd">    See ``pdfdol.download.download_articles`` for full documentation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">md_string</span> <span class="o">=</span> <span class="n">md_string</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pdfdol.download</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_articles</span> <span class="k">as</span> <span class="n">_download_articles</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;pdfdol is required for download_articles. &quot;</span>
+            <span class="s2">&quot;Install it with: pip install pdfdol&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_download_articles</span><span class="p">(</span>
+        <span class="n">md_string</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">,</span> <span class="n">save_non_pdf</span><span class="o">=</span><span class="n">save_non_pdf</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="download_articles_by_section">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.download_articles_by_section">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_articles_by_section</span><span class="p">(</span>
+    <span class="n">md_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rootdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">save_non_pdf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">section_marker</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;###&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Download articles by markdown section. Wrapper around ``pdfdol.download``.</span>
+
+<span class="sd">    If ``md_string`` is None, reads from clipboard (requires pyperclip).</span>
+<span class="sd">    See ``pdfdol.download.download_articles_by_section`` for full documentation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">md_string</span> <span class="o">=</span> <span class="n">md_string</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pdfdol.download</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+            <span class="n">download_articles_by_section</span> <span class="k">as</span> <span class="n">_download_by_section</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;pdfdol is required for download_articles_by_section. &quot;</span>
+            <span class="s2">&quot;Install it with: pip install pdfdol&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_download_by_section</span><span class="p">(</span>
+        <span class="n">md_string</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">,</span> <span class="n">save_non_pdf</span><span class="p">,</span> <span class="n">section_marker</span><span class="o">=</span><span class="n">section_marker</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="verify_urls">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.verify_urls">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_urls</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verifies URLs in a markdown string by checking their status codes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src (str | list): The markdown string or list containing URLs.</span>
+<span class="sd">            If a string starting with ``[``, parsed as a JSON list of URLs.</span>
+<span class="sd">            Otherwise, URLs are extracted from the markdown text.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary with URLs as keys and their status codes as values.</span>
+
+<span class="sd">    &gt;&gt;&gt; verify_urls([&#39;https://example.com&#39;])  # doctest: +SKIP</span>
+<span class="sd">    {&#39;https://example.com&#39;: 200}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="n">src</span> <span class="o">=</span> <span class="n">src</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="n">src</span>
+    <span class="k">elif</span> <span class="n">src</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">):</span>
+        <span class="c1"># Parse a JSON list of URLs (safer than eval).</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Extract URLs from markdown / prose using the standard extractor.</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">extract_urls</span><span class="p">(</span><span class="n">src</span><span class="p">)]</span>
+
+    <span class="n">url_status_codes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">_get_head_with_headers</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">url_status_codes</span><span class="p">[</span><span class="n">url</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">url_status_codes</span><span class="p">[</span><span class="n">url</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">url_status_codes</span></div>
+
+
+
+<div class="viewcode-block" id="remove_hyperlink_crap">
+<a class="viewcode-back" href="../../module_docs/contaix/urls.html#contaix.urls.remove_hyperlink_crap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_hyperlink_crap</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy_to_clipboard</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Remove unwanted hyperlinks and citations from a string.</span>
+
+<span class="sd">    Typically used to clean up text copied from ChatGPT or Claude.</span>
+<span class="sd">    Delegates to ``dn.repair.remove_hyperlink_crap`` for the pure transform,</span>
+<span class="sd">    adding clipboard integration on top.</span>
+
+<span class="sd">    If no string is specified, reads from clipboard (requires pyperclip).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dn.repair</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_hyperlink_crap</span> <span class="k">as</span> <span class="n">_remove_hyperlink_crap</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="n">copy_to_clipboard</span> <span class="o">=</span> <span class="n">string</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span> <span class="ow">or</span> <span class="n">get_from_clipboard</span><span class="p">()</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">_remove_hyperlink_crap</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">copy_to_clipboard</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">pyperclip</span>
+
+            <span class="n">pyperclip</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;pyperclip module not found (pip install pyperclip) so can&#39;t copy to clipboard&quot;</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">string</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
