@@ -16,7 +16,7 @@ authors = [
 ]
 dependencies = [
     "dol",
-    "dn[html]",
+    "dn[html]>=0.0.9",
     "lkj",
     "scraped",
     "html2text",
@@ -133,7 +133,7 @@ exclude_paths = [
     "docsrc",
     "misc",
 ]
-test_on_windows = false
+test_on_windows = true
 
 [tool.wads.ci.metrics]
 enabled = true
