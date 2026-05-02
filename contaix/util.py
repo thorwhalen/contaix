@@ -233,7 +233,8 @@ def remove_improperly_double_newlines(
     Example:
 
     >>> text = "This is a test.\n\nThis should be one newline.\n  \nThis too."
-    >>> assert remove_improperly_double_newlines(text) == 'This is a test.\n\nThis should be one newline.\nThis too.'
+    >>> result = remove_improperly_double_newlines(text, copy_to_clipboard=False)
+    >>> assert result == 'This is a test.\n\nThis should be one newline.\nThis too.'
 
     """
     from dn.repair import remove_improperly_double_newlines as _pure_remove
