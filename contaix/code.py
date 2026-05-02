@@ -172,7 +172,7 @@ def code_aggregate(
     *,
     egress: Union[Callable, Filepath] = identity,
     kv_to_item=lambda k, v: f"## {k}\n\n```python\n{v.strip()}\n```",
-    keys_filt: Union[Callable, str] = r'\.py$',
+    keys_filt: Union[Callable, str] = r"\.py$",
     include_readme: Callable = _readme_from_parent_dir,
     **store_aggregate_kwargs,
 ) -> Any:
@@ -348,7 +348,8 @@ from types import SimpleNamespace
 # this lazily lets ``import contaix.code`` succeed without a token, with the
 # error deferred until ``get_github`` is actually called.
 def __getattr__(name):
-    if name == 'get_github':
+    if name == "get_github":
         from hubcap import github_repo_markdown_of
+
         return github_repo_markdown_of
-    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

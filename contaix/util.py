@@ -24,18 +24,19 @@ from dol import written_key
 # `import contaix` succeed without a token; the OSError surfaces only when
 # a caller actually touches one of these functions.
 _SCRAPED_REEXPORTS = (
-    'markdown_of_site',
-    'download_site',
-    'scrape_multiple_sites',
-    'acquire_content',
+    "markdown_of_site",
+    "download_site",
+    "scrape_multiple_sites",
+    "acquire_content",
 )
 
 
 def __getattr__(name):
     if name in _SCRAPED_REEXPORTS:
         import scraped
+
         return getattr(scraped, name)
-    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def identity(x):
@@ -86,7 +87,7 @@ def is_url(path: str) -> bool:
     return isinstance(path, str) and path.startswith(("http://", "https://"))
 
 
-DFLT_URL_TO_CONTENTS_KIND = 'binary'
+DFLT_URL_TO_CONTENTS_KIND = "binary"
 DFLT_URL_TO_CONTENTS_TIMEOUT = 10  # seconds
 
 
@@ -94,7 +95,7 @@ def url_to_contents(
     url: str,
     *,
     kind=DFLT_URL_TO_CONTENTS_KIND,
-    timeout: int = DFLT_URL_TO_CONTENTS_TIMEOUT
+    timeout: int = DFLT_URL_TO_CONTENTS_TIMEOUT,
 ) -> Optional[bytes]:
     """
     Fetch the content from a URL.
@@ -109,11 +110,11 @@ def url_to_contents(
     """
     response = requests.get(url, timeout=timeout)
     response.raise_for_status()  # Raise an error for bad responses
-    if kind in {'text', 'str'}:
+    if kind in {"text", "str"}:
         return response.text
-    elif kind in {'binary', 'bytes'}:
+    elif kind in {"binary", "bytes"}:
         return response.content
-    elif kind == 'response':
+    elif kind == "response":
         return response
     else:
         raise ValueError("Invalid kind. Use 'text', 'binary', or 'response'.")
@@ -179,20 +180,20 @@ def source_first_arg_from_clipboard_if_none(func):
         # If the function declares a `string` parameter and it is None,
         # attempt to paste from the clipboard. Let ImportError propagate for
         # the paste operation to match previous behavior.
-        if 'string' in sig.parameters:
-            if bound.arguments.get('string') is None:
+        if "string" in sig.parameters:
+            if bound.arguments.get("string") is None:
                 import pyperclip
 
-                bound.arguments['string'] = pyperclip.paste()
+                bound.arguments["string"] = pyperclip.paste()
 
         # Call the original function with the bound arguments
         result = func(**bound.arguments)
 
         # Determine whether to copy result to clipboard. Prefer the provided
         # argument, else fall back to the function's default if available.
-        if 'copy_to_clipboard' in sig.parameters:
+        if "copy_to_clipboard" in sig.parameters:
             copy = bound.arguments.get(
-                'copy_to_clipboard', sig.parameters['copy_to_clipboard'].default
+                "copy_to_clipboard", sig.parameters["copy_to_clipboard"].default
             )
         else:
             copy = True
@@ -216,7 +217,7 @@ def source_first_arg_from_clipboard_if_none(func):
 def remove_improperly_double_newlines(
     string: str | None,
     *,
-    copy_to_clipboard=True  # Note: Yes, it's used, but obfuscated by the decorator
+    copy_to_clipboard=True,  # Note: Yes, it's used, but obfuscated by the decorator
 ) -> str:
     r"""Remove improperly double newlines from a string.
 

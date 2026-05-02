@@ -68,14 +68,14 @@ def aggregate_store(
     wrapped_store = store_wrap(store)
 
     if isinstance(egress, str):
-        if '{}' in egress:
+        if "{}" in egress:
             output_template = egress
             egress = output_template.format
         # else: it's the name of the save file itself
     else:
-        assert egress is None or callable(
-            egress
-        ), "egress must be None, str, or callable"
+        assert egress is None or callable(egress), (
+            "egress must be None, str, or callable"
+        )
 
     if isinstance(chk_size, int):
         from lkj.chunking import chunk_iterable

@@ -10,4 +10,4 @@ to markdown format. It includes:
 
 # Note: Moved to independent package module specialized for markdown conversion
 
-from dn.src import * 
+from dn.src import *

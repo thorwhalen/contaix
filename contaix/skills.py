@@ -27,9 +27,9 @@ from pathlib import Path
 
 # Packages in the contaix ecosystem that may ship skills.
 # Add new packages here as the ecosystem grows.
-ECOSYSTEM_PACKAGES = ('contaix', 'dn', 'pdfdol')
+ECOSYSTEM_PACKAGES = ("contaix", "dn", "pdfdol")
 
-GLOBAL_SKILLS_DIR = Path.home() / '.claude' / 'skills'
+GLOBAL_SKILLS_DIR = Path.home() / ".claude" / "skills"
 
 
 def discover_skills(packages=ECOSYSTEM_PACKAGES) -> dict[str, Path]:
@@ -55,11 +55,11 @@ def discover_skills(packages=ECOSYSTEM_PACKAGES) -> dict[str, Path]:
         except ImportError:
             continue
         pkg_dir = Path(pkg.__file__).parent
-        skills_dir = pkg_dir / 'data' / 'skills'
+        skills_dir = pkg_dir / "data" / "skills"
         if not skills_dir.is_dir():
             continue
         for skill_dir in sorted(skills_dir.iterdir()):
-            if skill_dir.is_dir() and (skill_dir / 'SKILL.md').exists():
+            if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
                 found[skill_dir.name] = skill_dir
     return found
 
@@ -86,31 +86,31 @@ def install_skills(
 
     if not skills:
         if verbose:
-            print('No skills found in installed packages.')
+            print("No skills found in installed packages.")
         return
 
     if verbose:
-        print(f'Found {len(skills)} skill(s) in {len(packages)} package(s):')
+        print(f"Found {len(skills)} skill(s) in {len(packages)} package(s):")
 
     for name, source_dir in skills.items():
         target = GLOBAL_SKILLS_DIR / name
         if target.is_symlink():
             if not force:
                 if verbose:
-                    print(f'  skip {name} (symlink exists)')
+                    print(f"  skip {name} (symlink exists)")
                 continue
             target.unlink()
         elif target.exists():
             if verbose:
                 print(
-                    f'  skip {name} (directory exists — '
-                    f'remove manually if you want to replace it)'
+                    f"  skip {name} (directory exists — "
+                    f"remove manually if you want to replace it)"
                 )
             continue
 
         os.symlink(source_dir, target)
         if verbose:
-            print(f'  link {name} -> {source_dir}')
+            print(f"  link {name} -> {source_dir}")
 
 
 def uninstall_skills(
@@ -135,24 +135,24 @@ def uninstall_skills(
         if target.is_symlink():
             target.unlink()
             if verbose:
-                print(f'  removed {name}')
+                print(f"  removed {name}")
         elif verbose and target.exists():
-            print(f'  skip {name} (not a symlink)')
+            print(f"  skip {name} (not a symlink)")
 
 
 def main():
     """CLI entry point: discover and install skills."""
     import sys
 
-    if '--uninstall' in sys.argv:
-        print('Removing contaix ecosystem skills...')
+    if "--uninstall" in sys.argv:
+        print("Removing contaix ecosystem skills...")
         uninstall_skills()
     else:
-        print('Installing contaix ecosystem skills...')
-        install_skills(force='--force' in sys.argv)
+        print("Installing contaix ecosystem skills...")
+        install_skills(force="--force" in sys.argv)
         print()
-        print(f'Skills directory: {GLOBAL_SKILLS_DIR}')
+        print(f"Skills directory: {GLOBAL_SKILLS_DIR}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

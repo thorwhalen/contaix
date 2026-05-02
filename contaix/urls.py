@@ -32,7 +32,7 @@ def _strip_trailing_url_punctuation(url: str) -> str:
     'https://example.com/path?a=1&b=2'
     """
 
-    return url.rstrip(")].,;:!?*\"'\"")
+    return url.rstrip(')].,;:!?*"\'"')
 
 
 # Default URL matching:
@@ -310,6 +310,7 @@ def verify_urls(src: str | list | None = None) -> dict[str, int | str]:
     {'https://example.com': 200}
     """
     import json
+
     src = src or get_from_clipboard()
 
     if isinstance(src, list):

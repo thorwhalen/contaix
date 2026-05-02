@@ -40,22 +40,26 @@ from contaix.code import (
 # ``__getattr__`` lets ``import contaix`` succeed without a token; the
 # error surfaces only if a caller actually uses one of these names.
 _LAZY_FROM_UTIL = (
-    'markdown_of_site',
-    'download_site',
-    'scrape_multiple_sites',
-    'acquire_content',
+    "markdown_of_site",
+    "download_site",
+    "scrape_multiple_sites",
+    "acquire_content",
 )
-_LAZY_FROM_CODE = ('get_github',)
+_LAZY_FROM_CODE = ("get_github",)
 
 
 def __getattr__(name):
     if name in _LAZY_FROM_UTIL:
         from contaix import util
+
         return getattr(util, name)
     if name in _LAZY_FROM_CODE:
         from contaix import code
+
         return getattr(code, name)
-    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 from contaix.urls import (
     get_from_clipboard,
     extract_urls,
