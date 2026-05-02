@@ -300,25 +300,28 @@ def verify_urls(src: str | list | None = None) -> dict[str, int | str]:
 
     Args:
         src (str | list): The markdown string or list containing URLs.
+            If a string starting with ``[``, parsed as a JSON list of URLs.
+            Otherwise, URLs are extracted from the markdown text.
 
     Returns:
         dict: A dictionary with URLs as keys and their status codes as values.
+
+    >>> verify_urls(['https://example.com'])  # doctest: +SKIP
+    {'https://example.com': 200}
     """
+    import json
     src = src or get_from_clipboard()
 
     if isinstance(src, list):
         urls = src
+    elif src.lstrip().startswith("["):
+        # Parse a JSON list of URLs (safer than eval).
+        urls = json.loads(src)
     else:
-        if src.startswith("["):
-            # assume it's a list of urls, and resolve to list
-            urls = eval(src)
-        else:  # it's an actual md_string, so need to etract the urls
-            # Regex to extract URLs from the markdown string
-            pattern = r"\[(.*?)\]\((.*?)\)"
-            matches = re.findall(pattern, src)
-            urls = list(matches.values())
-    url_status_codes = {}
+        # Extract URLs from markdown / prose using the standard extractor.
+        urls = [url for _, url in extract_urls(src)]
 
+    url_status_codes = {}
     for url in urls:
         try:
             response = _get_head_with_headers(url)

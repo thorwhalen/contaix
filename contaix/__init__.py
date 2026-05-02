@@ -9,7 +9,7 @@ Download all articles from a markdown string and save them as PDF files:
 
 Verify URLs in a markdown string by checking their status codes
 (useful when trying to verify if AI hallucinated the urls)
-x`
+
 >>> verify_urls(md_string)  # doctest: +SKIP
 
 Make an md file with all the code in a directory:
@@ -62,6 +62,8 @@ from contaix.web import (
     fetch_page,
     fetch_pages,
     fetch_nextjs_rsc,
+    fetch_llms_full,
+    find_llms_full_url,
     is_nextjs_site,
     html_to_clean_markdown,
     extract_rsc_page_content,

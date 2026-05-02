@@ -58,10 +58,6 @@ def aggregate_store(
     if max_num_characters is not None:
         wrappers.append(wrap_kvs(value_decoder=lambda v: v[:max_num_characters]))
 
-    if max_num_characters is not None:
-        capped_num_characters = wrap_kvs(value_decoder=lambda v: v[:max_num_characters])
-        wrappers.append(capped_num_characters)
-
     if len(wrappers) > 0:
         store_wrap = Pipe(
             *wrappers,

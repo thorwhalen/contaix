@@ -420,10 +420,22 @@ def html_to_clean_markdown(
 # ---------------------------------------------------------------------------
 
 
+_RSC_RECORD_HEAD = re.compile(r'(?:^|\n)([0-9a-f]{1,4}):', re.MULTILINE)
+
+
 def parse_rsc_flight(rsc_text: str) -> dict:
     """Parse RSC flight data into a dict mapping keys to parsed JSON data.
 
-    Handles both JSON payloads and T-chunks (raw text, often code blocks).
+    Each RSC record starts with ``<hex_key>:<payload>``. Records come in three
+    flavors:
+
+    - ``I[...]``: module import descriptors (skipped here).
+    - ``T<hex_size>,<bytes>``: a raw text chunk whose payload occupies exactly
+      ``hex_size`` bytes (often markdown, code, or compiled MDX). The payload
+      may contain newlines, so we read by byte count rather than splitting on
+      ``\\n``.
+    - Anything else: a JSON value terminated by the next record header
+      (``\\n<hex>:``) or end-of-text.
 
     Parameters
     ----------
@@ -436,28 +448,39 @@ def parse_rsc_flight(rsc_text: str) -> dict:
         Mapping of hex keys to their parsed payloads.
     """
     registry = {}
-    for line in rsc_text.split('\n'):
-        if not line or ':' not in line:
-            continue
-        colon_idx = line.index(':')
-        key = line[:colon_idx].strip()
-        # Only accept hex-like keys (1-4 hex chars)
-        if not re.match(r'^[0-9a-f]{1,4}$', key):
-            continue
-        payload = line[colon_idx + 1:]
+    # Find every record header (key:) position; we'll slice payloads between them.
+    headers = list(_RSC_RECORD_HEAD.finditer(rsc_text))
+    for i, m in enumerate(headers):
+        key = m.group(1)
+        payload_start = m.end()
+        next_start = headers[i + 1].start() if i + 1 < len(headers) else len(rsc_text)
+        payload = rsc_text[payload_start:next_start]
+
+        # Skip module imports
         if payload.startswith('I['):
-            continue  # Skip module imports
-        # Handle T-chunks: "Thex_length,raw_content"
-        t_match = re.match(r'T([0-9a-f]+),(.+)', payload, re.DOTALL)
-        if t_match:
-            raw = t_match.group(2)
-            # Convert HTML code blocks to markdown
-            if '<pre' in raw and '<code' in raw:
-                code_text = _html_code_block_to_text(raw)
-                if code_text:
-                    registry[key] = code_text
-            elif raw.strip():
-                registry[key] = raw.strip()
+            continue
+
+        # T-chunks: payload begins with "T<hex>,<bytes...>" where <hex> is the
+        # byte-length of the chunk. Read exactly that many bytes; the rest of
+        # ``payload`` may be trailing whitespace before the next header.
+        if payload.startswith('T'):
+            t_match = re.match(r'T([0-9a-f]+),', payload)
+            if t_match:
+                size = int(t_match.group(1), 16)
+                start = t_match.end()
+                raw = payload[start:start + size]
+                if '<pre' in raw and '<code' in raw:
+                    code_text = _html_code_block_to_text(raw)
+                    if code_text:
+                        registry[key] = code_text
+                elif raw.strip():
+                    registry[key] = raw
+                continue
+
+        # JSON payload: it may span multiple lines, but stops at the next
+        # record header. Strip any trailing whitespace that came along.
+        payload = payload.rstrip()
+        if not payload:
             continue
         try:
             registry[key] = json.loads(payload)
@@ -821,6 +844,17 @@ def extract_rsc_page_content(rsc_text: str) -> str | None:
         # Return the longest content part (likely the page body)
         result = max(content_parts, key=len)
         return _clean_rsc_markdown(result)
+
+    # Fallback: no list-tree content found. Some sites (e.g. Mintlify) keep the
+    # prose content in T-chunk strings rather than RSC component trees. Pick the
+    # T-chunk that looks most like markdown prose (skipping CSS/JS/JSX).
+    prose_chunks = [
+        v for v in registry.values()
+        if isinstance(v, str) and _looks_like_markdown_prose(v)
+    ]
+    if prose_chunks:
+        result = max(prose_chunks, key=len)
+        return _clean_rsc_markdown(result)
     return None
 
 
@@ -867,6 +901,129 @@ def _looks_like_page_content(data) -> bool:
     return any(ind in text for ind in content_indicators)
 
 
+# T-chunks that are obviously CSS/JS/MDX-compiled JSX rather than prose.
+_CODE_CHUNK_INDICATORS = (
+    'use strict', '_provideComponents', 'arguments[0]',
+    '@font-face', 'function ', '() => {', 'window.', 'document.',
+    'addEventListener', 'querySelector',
+)
+# Markdown-prose markers (cheap signal vs the heavy code markers above).
+_PROSE_CHUNK_INDICATORS = ('# ', '## ', '**', '- ', '`', 'http')
+
+
+def _looks_like_markdown_prose(text: str) -> bool:
+    """Heuristic: is this T-chunk markdown prose rather than CSS/JS/JSX?
+
+    Used as a fallback for sites that ship page content as raw markdown in
+    T-chunks instead of as RSC component trees.
+    """
+    if len(text) < 100:
+        return False
+    head = text[:600]
+    if any(marker in head for marker in _CODE_CHUNK_INDICATORS):
+        return False
+    return any(marker in text for marker in _PROSE_CHUNK_INDICATORS)
+
+
+# ---------------------------------------------------------------------------
+# llms.txt / llms-full.txt fast path
+# ---------------------------------------------------------------------------
+
+# Common locations where doc-site generators (Mintlify, Docusaurus, etc.)
+# publish a single-document version of their docs for LLM consumption.
+LLMS_FULL_CANDIDATES = ('/llms-full.txt', '/llms.txt')
+
+
+def find_llms_full_url(
+    url: str, *, timeout: int = DFLT_REQUEST_TIMEOUT
+) -> str | None:
+    """Probe for a publisher-provided single-doc bundle.
+
+    Many documentation generators (Mintlify, Docusaurus, Fern, etc.) expose
+    the entire docs as a single markdown file at ``/llms-full.txt`` (or
+    ``/llms.txt`` for an index). When present, this is far better than
+    scraping page-by-page.
+
+    Tries, in order:
+
+    1. Same path as the input URL with the doc-root replaced (e.g.
+       ``https://site.com/docs/foo`` -> ``https://site.com/docs/llms-full.txt``).
+    2. Site root (e.g. ``https://site.com/llms-full.txt``).
+
+    Parameters
+    ----------
+    url : str
+        Any URL on the documentation site.
+    timeout : int
+        HEAD request timeout.
+
+    Returns
+    -------
+    str or None
+        The first URL that returns HTTP 200 with non-trivial content, or
+        ``None`` if none of the candidates exist.
+    """
+    parsed = urlparse(url)
+    base = f'{parsed.scheme}://{parsed.netloc}'
+    # Build candidate prefix list: longest path prefix first, then root.
+    prefixes = []
+    path = parsed.path.rstrip('/')
+    while path:
+        prefixes.append(path)
+        if '/' not in path.lstrip('/'):
+            break
+        path = path.rsplit('/', 1)[0]
+    prefixes.append('')  # site root
+
+    headers = {'User-Agent': DFLT_USER_AGENT}
+    seen = set()
+    for prefix in prefixes:
+        for candidate in LLMS_FULL_CANDIDATES:
+            probe = base + prefix + candidate
+            if probe in seen:
+                continue
+            seen.add(probe)
+            try:
+                r = requests.head(
+                    probe, headers=headers, allow_redirects=True, timeout=timeout
+                )
+            except requests.RequestException:
+                continue
+            if r.status_code != 200:
+                continue
+            ctype = r.headers.get('content-type', '')
+            # Reject HTML 200 responses (some sites return their 404 page as 200).
+            if 'html' in ctype.lower():
+                continue
+            try:
+                size = int(r.headers.get('content-length', '0'))
+            except ValueError:
+                size = 0
+            # Anything under 500 bytes is almost certainly not a real bundle.
+            if size and size < 500:
+                continue
+            return r.url  # follow redirects to canonical URL
+    return None
+
+
+def fetch_llms_full(
+    url: str, *, timeout: int = DFLT_REQUEST_TIMEOUT
+) -> str | None:
+    """Fetch a publisher-provided single-doc bundle if available.
+
+    See :func:`find_llms_full_url` for how the URL is discovered.
+
+    Returns the markdown text, or ``None`` if no bundle was found.
+    """
+    bundle_url = find_llms_full_url(url, timeout=timeout)
+    if not bundle_url:
+        return None
+    headers = {'User-Agent': DFLT_USER_AGENT}
+    r = requests.get(bundle_url, headers=headers, timeout=timeout)
+    r.raise_for_status()
+    return r.text
+
+
 # ---------------------------------------------------------------------------
 # High-level pipeline
 # ---------------------------------------------------------------------------
@@ -882,6 +1039,7 @@ def site_to_markdown(
     content_extractor: Callable = None,
     section_separator: str = '\n\n---\n\n',
     collapse_blank_lines: bool = True,
+    use_llms_full: bool = True,
     verbose: bool = False,
 ) -> str:
     """Download a documentation site and produce a single aggregated markdown.
@@ -903,6 +1061,13 @@ def site_to_markdown(
         Custom ``(html) -> markdown`` function. Defaults to auto-detection.
     section_separator : str
         Separator between page sections in the output.
+    use_llms_full : bool
+        If True (default), first try to find a publisher-provided
+        ``/llms-full.txt`` bundle (Mintlify, Docusaurus, etc. ship these).
+        When found, returns it directly instead of scraping page-by-page.
+        Disable to force the scraping pipeline. Skipped automatically when
+        ``page_fetcher`` or ``tab_filter`` is set, since those imply the
+        caller wants the scraping path.
     verbose : bool
         Print progress information.
 
@@ -914,6 +1079,34 @@ def site_to_markdown(
     """
     if cache_dir is None:
         cache_dir = DFLT_CACHE_DIR
+
+    # Fast path: many doc generators expose the whole site as a single markdown
+    # bundle at /llms-full.txt. When available, prefer it over scraping.
+    if use_llms_full and page_fetcher is None and tab_filter is None:
+        if verbose:
+            print(f'Probing {url} for llms-full.txt bundle...')
+        try:
+            bundle = fetch_llms_full(url)
+        except requests.RequestException as e:
+            if verbose:
+                print(f'  llms-full probe failed ({e}); falling back to scrape')
+            bundle = None
+        if bundle:
+            if verbose:
+                print(
+                    f'  Found publisher bundle ({len(bundle):,} chars) — '
+                    'skipping per-page scrape'
+                )
+            if output_file:
+                output_file = os.path.expanduser(output_file)
+                os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+                Path(output_file).write_text(bundle, encoding='utf-8')
+                if verbose:
+                    print(f'Saved to {output_file} ({len(bundle)} chars)')
+                return output_file
+            return bundle
+        elif verbose:
+            print('  No bundle found, falling back to page-by-page scrape')
 
     if verbose:
         print(f'Extracting navigation from {url}...')

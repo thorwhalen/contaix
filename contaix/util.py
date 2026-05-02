@@ -90,7 +90,7 @@ def url_to_contents(
 
     Args:
         url (str): The URL to fetch.
-        kind (str): The kind of content to fetch ('text' or 'binary' or 'response'). Defaults to 'text'.
+        kind (str): The kind of content to fetch ('text', 'binary', or 'response'). Defaults to 'binary'.
         timeout (int): Timeout for the request in seconds. Default is 10 seconds.
 
     Returns:
@@ -105,7 +105,6 @@ def url_to_contents(
     elif kind == 'response':
         return response
     else:
-        raise ValueError("Invalid kind. Use 'text', 'binary', or 'response'.")
         raise ValueError("Invalid kind. Use 'text', 'binary', or 'response'.")
 
 
