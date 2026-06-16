@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>contaix.code &mdash; contaix 0.0.15 documentation</title>
+  <title>contaix.code &mdash; contaix 0.0.16 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f0357c94"></script>
+      <script src="../../_static/documentation_options.js?v=c7cdf6fe"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../contaix.html">contaix</a></li>
 <li class="toctree-l1"><a class="reference internal" href="aggregation.html">contaix.aggregation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">contaix.code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.code.DFLT_AGGREGATE_EXCLUDE_PATTERNS"><code class="docutils literal notranslate"><span class="pre">DFLT_AGGREGATE_EXCLUDE_PATTERNS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.code.PackageCodeContexts"><code class="docutils literal notranslate"><span class="pre">PackageCodeContexts</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#contaix.code.PackageCodeContexts.multiple_pkgs_code"><code class="docutils literal notranslate"><span class="pre">PackageCodeContexts.multiple_pkgs_code()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#contaix.code.PackageCodeContexts.save_multiple_pkgs_code"><code class="docutils literal notranslate"><span class="pre">PackageCodeContexts.save_multiple_pkgs_code()</span></code></a></li>
@@ -60,6 +61,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.code.code_aggregate"><code class="docutils literal notranslate"><span class="pre">code_aggregate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.code.is_local_pkg_name"><code class="docutils literal notranslate"><span class="pre">is_local_pkg_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.code.iter_pruned_aggregate_lines"><code class="docutils literal notranslate"><span class="pre">iter_pruned_aggregate_lines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contaix.code.prune_code_aggregate"><code class="docutils literal notranslate"><span class="pre">prune_code_aggregate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.code.resolve_code_source"><code class="docutils literal notranslate"><span class="pre">resolve_code_source()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contaix.code.resolve_code_source_dir_path"><code class="docutils literal notranslate"><span class="pre">resolve_code_source_dir_path()</span></code></a></li>
 </ul>
@@ -98,6 +101,14 @@
   <section id="module-contaix.code">
 <span id="contaix-code"></span><h1>contaix.code<a class="headerlink" href="#module-contaix.code" title="Link to this heading"></a></h1>
 <p>Tools to make AI contexts from code bases</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="contaix.code.DFLT_AGGREGATE_EXCLUDE_PATTERNS">
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">DFLT_AGGREGATE_EXCLUDE_PATTERNS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('(^|/)node_modules/',</span> <span class="pre">'(^|/)\\.git/',</span> <span class="pre">'(^|/)bower_components/',</span> <span class="pre">'(^|/)(dist|build|out|target|\\.next|\\.nuxt|\\.turbo|\\.cache|\\.parcel-cache|coverage|__pycache__|\\.pytest_cache|\\.mypy_cache|\\.tox|\\.venv|venv|site-packages|vendor)/',</span> <span class="pre">'(^|/)(package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|npm-shrinkwrap\\.json|poetry\\.lock|Pipfile\\.lock|Cargo\\.lock|composer\\.lock|Gemfile\\.lock|go\\.sum)$',</span> <span class="pre">'\\.min\\.(js|mjs|cjs|css)$',</span> <span class="pre">'\\.(js|mjs|cjs|css)\\.map$',</span> <span class="pre">'\\.map$')</span></span><a class="headerlink" href="#contaix.code.DFLT_AGGREGATE_EXCLUDE_PATTERNS" title="Link to this definition"></a></dt>
+<dd><p>Default regex patterns matching section paths that are (almost) never useful as AI
+context: vendored deps, VCS internals, build/cache outputs, lockfiles, and minified
+bundles/sourcemaps. Patterns are matched (<code class="docutils literal notranslate"><span class="pre">re.search</span></code>) against each section’s path.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="contaix.code.PackageCodeContexts">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">PackageCodeContexts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/contaix/code.html#PackageCodeContexts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.PackageCodeContexts" title="Link to this definition"></a></dt>
@@ -135,7 +146,7 @@ Saves the result to a file if a name is provided.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="contaix.code.code_aggregate">
-<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">code_aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">identity&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kv_to_item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\\.py$'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_readme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">_readme_from_parent_dir&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**store_aggregate_kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#code_aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.code_aggregate" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">code_aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">identity&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kv_to_item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\\.py$'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_readme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">_readme_from_parent_dir&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**store_aggregate_kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#code_aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.code_aggregate" title="Link to this definition"></a></dt>
 <dd><p>Aggregates all code segments from the given code source (folder, github url, store).</p>
 <p>This is useful when you want to use AI to search and respond to questions about a
 specific code base.</p>
@@ -150,6 +161,10 @@ If a string, the aggregate will be saved to the file.</p></li>
 items that should be aggregated.</p></li>
 <li><p><strong>keys_filt</strong> (<em>Union</em><em>[</em><em>Callable</em><em>, </em><em>str</em><em>]</em>) – A function or regex string to filter the keys of the code store.
 If a string, it will be compiled to a regex pattern.</p></li>
+<li><p><strong>keys_exclude</strong> – Optional regex string, iterable of regex strings, or <code class="docutils literal notranslate"><span class="pre">path-&gt;bool</span></code>
+predicate identifying keys to <em>exclude</em> from the aggregate (applied
+after <code class="docutils literal notranslate"><span class="pre">keys_filt</span></code>). Use <code class="docutils literal notranslate"><span class="pre">DFLT_AGGREGATE_EXCLUDE_PATTERNS</span></code> to
+skip vendored deps, build outputs, lockfiles and minified bundles.</p></li>
 <li><p><strong>include_readme</strong> (<em>Callable</em>) – A function that takes the code_store as input and returns
 the content of a README file to include in the aggregate.
 If None, no README will be included.</p></li>
@@ -219,8 +234,95 @@ repository.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="contaix.code.iter_pruned_aggregate_lines">
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">iter_pruned_aggregate_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('(^|/)node_modules/',</span> <span class="pre">'(^|/)\\.git/',</span> <span class="pre">'(^|/)bower_components/',</span> <span class="pre">'(^|/)(dist|build|out|target|\\.next|\\.nuxt|\\.turbo|\\.cache|\\.parcel-cache|coverage|__pycache__|\\.pytest_cache|\\.mypy_cache|\\.tox|\\.venv|venv|site-packages|vendor)/',</span> <span class="pre">'(^|/)(package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|npm-shrinkwrap\\.json|poetry\\.lock|Pipfile\\.lock|Cargo\\.lock|composer\\.lock|Gemfile\\.lock|go\\.sum)$',</span> <span class="pre">'\\.min\\.(js|mjs|cjs|css)$',</span> <span class="pre">'\\.(js|mjs|cjs|css)\\.map$',</span> <span class="pre">'\\.map$')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'##</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'```'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_drop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#iter_pruned_aggregate_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.iter_pruned_aggregate_lines" title="Link to this definition"></a></dt>
+<dd><p>Stream <code class="docutils literal notranslate"><span class="pre">lines</span></code> of an aggregated-code markdown, yielding only the lines that
+belong to sections whose header path does <em>not</em> match <code class="docutils literal notranslate"><span class="pre">exclude</span></code>.</p>
+<p>A section header is detected <em>structurally</em>: a <code class="docutils literal notranslate"><span class="pre">header_prefix</span></code> line whose remainder
+looks like a file path <strong>and</strong> whose next non-blank line opens a code fence. This is
+deliberately not a simple “toggle on every fence” scheme – file <em>content</em> in these
+aggregates routinely contains stray <code class="docutils literal notranslate"><span class="pre">`</span> <span class="pre">lines</span> <span class="pre">(vendored</span> <span class="pre">``.md</span></code>/<code class="docutils literal notranslate"><span class="pre">.ts</span></code>/<code class="docutils literal notranslate"><span class="pre">.json</span></code>),
+which corrupts fence-toggle state and lets bloat slip through. Requiring the
+header-then-fence signature makes section boundaries robust to that.</p>
+<p>Because it consumes and produces a line iterable, it works equally on a small
+in-memory string (via <code class="docutils literal notranslate"><span class="pre">str.splitlines(keepends=True)</span></code>) and on a multi-gigabyte
+file (by iterating the open file object), never holding more than a handful of lines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lines</strong> – Iterable of lines. Whatever line endings are present are preserved.</p></li>
+<li><p><strong>exclude</strong> – Regex string, iterable of regex strings, or <code class="docutils literal notranslate"><span class="pre">path-&gt;bool</span></code> predicate
+selecting sections to drop. Defaults to <code class="docutils literal notranslate"><span class="pre">DFLT_AGGREGATE_EXCLUDE_PATTERNS</span></code>.</p></li>
+<li><p><strong>header_prefix</strong> – Prefix marking a section header; the remainder is the path.</p></li>
+<li><p><strong>fence</strong> – Code-fence marker that opens a section’s content block.</p></li>
+<li><p><strong>on_drop</strong> – Optional callback invoked with each dropped section’s path (useful for
+logging/counting what was removed).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p>The lines to keep, in original order.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">md</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;## a.py</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">```python</span>
+<span class="gp">... </span><span class="s1">x = 1  # a heading-looking line: ## not a header</span>
+<span class="gp">... </span><span class="s1">```</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">## node_modules/dep/index.js</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">```python</span>
+<span class="gp">... </span><span class="s1">huge minified bundle</span>
+<span class="gp">... </span><span class="s1">```</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kept</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">iter_pruned_aggregate_lines</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;## a.py&#39;</span> <span class="ow">in</span> <span class="n">kept</span> <span class="ow">and</span> <span class="s1">&#39;x = 1&#39;</span> <span class="ow">in</span> <span class="n">kept</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;node_modules&#39;</span> <span class="ow">in</span> <span class="n">kept</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.code.prune_code_aggregate">
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">prune_code_aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">src:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~typing.Iterable[str],</span> <span class="pre">*,</span> <span class="pre">exclude=('(^|/)node_modules/',</span> <span class="pre">'(^|/)\\.git/',</span> <span class="pre">'(^|/)bower_components/',</span> <span class="pre">'(^|/)(dist|build|out|target|\\.next|\\.nuxt|\\.turbo|\\.cache|\\.parcel-cache|coverage|__pycache__|\\.pytest_cache|\\.mypy_cache|\\.tox|\\.venv|venv|site-packages|vendor)/',</span> <span class="pre">'(^|/)(package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|npm-shrinkwrap\\.json|poetry\\.lock|Pipfile\\.lock|Cargo\\.lock|composer\\.lock|Gemfile\\.lock|go\\.sum)$',</span> <span class="pre">'\\.min\\.(js|mjs|cjs|css)$',</span> <span class="pre">'\\.(js|mjs|cjs|css)\\.map$',</span> <span class="pre">'\\.map$'),</span> <span class="pre">egress:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">identity&gt;,</span> <span class="pre">header_prefix:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'##</span> <span class="pre">',</span> <span class="pre">fence:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'```',</span> <span class="pre">on_drop:</span> <span class="pre">~typing.Callable[[str],</span> <span class="pre">~typing.Any]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#prune_code_aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.prune_code_aggregate" title="Link to this definition"></a></dt>
+<dd><p>Remove bloated sections (vendored deps, build output, lockfiles, minified
+bundles, …) from an aggregated-code markdown.</p>
+<p>This is the post-hoc complement to <code class="docutils literal notranslate"><span class="pre">code_aggregate</span></code>’s <code class="docutils literal notranslate"><span class="pre">keys_exclude</span></code>: use it to
+slim down an aggregate that was already generated (e.g. one that accidentally
+included a <code class="docutils literal notranslate"><span class="pre">node_modules/</span></code> tree). It streams, so it handles arbitrarily large
+files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src</strong> – The aggregate as a markdown string, a path to a markdown file, or any
+iterable of lines.</p></li>
+<li><p><strong>exclude</strong> – Sections to drop (see <code class="docutils literal notranslate"><span class="pre">iter_pruned_aggregate_lines</span></code>).</p></li>
+<li><p><strong>egress</strong> – What to do with the result. The default (<code class="docutils literal notranslate"><span class="pre">identity</span></code>) returns the
+pruned markdown as a string. Pass a filepath string to stream the result to
+that file (memory-safe for huge inputs) and return the filepath.</p></li>
+<li><p><strong>header_prefix</strong> – Aggregate format markers (see <code class="docutils literal notranslate"><span class="pre">iter_pruned_aggregate_lines</span></code>).</p></li>
+<li><p><strong>fence</strong> – Aggregate format markers (see <code class="docutils literal notranslate"><span class="pre">iter_pruned_aggregate_lines</span></code>).</p></li>
+<li><p><strong>on_drop</strong> – Optional callback invoked with each dropped section’s path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The pruned markdown string, or the output filepath when <code class="docutils literal notranslate"><span class="pre">egress</span></code> is a path.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">md</span> <span class="o">=</span> <span class="s2">&quot;## keep.py</span><span class="se">\n\n</span><span class="s2">```python</span><span class="se">\n</span><span class="s2">ok</span><span class="se">\n</span><span class="s2">```</span><span class="se">\n</span><span class="s2">## dist/bundle.js</span><span class="se">\n\n</span><span class="s2">```python</span><span class="se">\n</span><span class="s2">x</span><span class="se">\n</span><span class="s2">```</span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">&quot;dist/bundle.js&quot;</span> <span class="ow">in</span> <span class="n">prune_code_aggregate</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="contaix.code.resolve_code_source">
-<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">resolve_code_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mapping</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#resolve_code_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.resolve_code_source" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">contaix.code.</span></span><span class="sig-name descname"><span class="pre">resolve_code_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_filt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mapping</span></span></span><a class="reference internal" href="../../_modules/contaix/code.html#resolve_code_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.code.resolve_code_source" title="Link to this definition"></a></dt>
 <dd><p>Will resolve code_src to a Mapping whose values are the code strings</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -232,6 +334,10 @@ or an imported package (must contain a __path__ atribute)</p></li>
 <li><p><strong>keys_filt</strong> (<em>Callable</em>) – A function or regex string to filter the keys of the code store.
 If a string, it will be compiled to a regex pattern.</p></li>
 <li><p><strong>keys_filt</strong> – A function to filter the keys. Defaults to lambda x: x.endswith(‘.py’).</p></li>
+<li><p><strong>keys_exclude</strong> – Optional regex string, iterable of regex strings, or <code class="docutils literal notranslate"><span class="pre">path-&gt;bool</span></code>
+predicate identifying keys to <em>exclude</em> (e.g. vendored deps, build outputs).
+Applied on top of (after) <code class="docutils literal notranslate"><span class="pre">keys_filt</span></code>. Pass
+<code class="docutils literal notranslate"><span class="pre">DFLT_AGGREGATE_EXCLUDE_PATTERNS</span></code> to skip the usual bloat.</p></li>
 </ul>
 </dd>
 </dl>
@@ -274,7 +380,7 @@ or an imported package (must contain a __path__ atribute)</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright NO COPYRIGHT.</p>
+    <p></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

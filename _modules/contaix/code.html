@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>contaix.code &mdash; contaix 0.0.15 documentation</title>
+  <title>contaix.code &mdash; contaix 0.0.16 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f0357c94"></script>
+      <script src="../../_static/documentation_options.js?v=c7cdf6fe"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -166,7 +166,10 @@
 <div class="viewcode-block" id="resolve_code_source">
 <a class="viewcode-back" href="../../module_docs/contaix/code.html#contaix.code.resolve_code_source">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_code_source</span><span class="p">(</span>
-    <span class="n">code_src</span><span class="p">:</span> <span class="n">CodeSource</span><span class="p">,</span> <span class="n">keys_filt</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">)</span>
+    <span class="n">code_src</span><span class="p">:</span> <span class="n">CodeSource</span><span class="p">,</span>
+    <span class="n">keys_filt</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">),</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">keys_exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Will resolve code_src to a Mapping whose values are the code strings</span>
@@ -179,6 +182,10 @@
 <span class="sd">        keys_filt (Union[Callable, str]): A function or regex string to filter the keys of the code store.</span>
 <span class="sd">                                        If a string, it will be compiled to a regex pattern.</span>
 <span class="sd">        keys_filt (Callable): A function to filter the keys. Defaults to lambda x: x.endswith(&#39;.py&#39;).</span>
+<span class="sd">        keys_exclude: Optional regex string, iterable of regex strings, or ``path-&gt;bool``</span>
+<span class="sd">            predicate identifying keys to *exclude* (e.g. vendored deps, build outputs).</span>
+<span class="sd">            Applied on top of (after) ``keys_filt``. Pass</span>
+<span class="sd">            ``DFLT_AGGREGATE_EXCLUDE_PATTERNS`` to skip the usual bloat.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">keys_filt</span><span class="p">:</span>
@@ -191,6 +198,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;keys_filt should be callable or string. Was </span><span class="si">{</span><span class="n">keys_filt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">keys_filt</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">keys_exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">should_drop</span> <span class="o">=</span> <span class="n">_exclude_predicate</span><span class="p">(</span><span class="n">keys_exclude</span><span class="p">)</span>
+        <span class="n">_include</span> <span class="o">=</span> <span class="n">keys_filt</span>
+        <span class="n">keys_filt</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">_include</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">should_drop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
     <span class="c1"># handle a ModuleType that is a single .py file</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code_src</span><span class="p">,</span> <span class="n">ModuleType</span><span class="p">):</span>
@@ -224,6 +236,248 @@
 
 
 <span class="n">Filepath</span> <span class="o">=</span> <span class="nb">str</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------------------</span>
+<span class="c1"># Pruning bloat from code aggregates</span>
+<span class="c1">#</span>
+<span class="c1"># Aggregates produced by ``code_aggregate`` (or any tool that walks a repo and dumps</span>
+<span class="c1"># every file into one markdown) often sweep in content that is worthless as AI context</span>
+<span class="c1"># and enormous in size: vendored dependencies (``node_modules/``), build/cache outputs</span>
+<span class="c1"># (``dist/``, ``.next/``, ``__pycache__/``), lockfiles, and minified bundles/sourcemaps.</span>
+<span class="c1"># A single ``node_modules`` tree can turn a few MB of real source into a multi-GB file.</span>
+<span class="c1">#</span>
+<span class="c1"># ``prune_code_aggregate`` strips those sections back out *after the fact*, operating as</span>
+<span class="c1"># a line stream so it handles multi-gigabyte aggregates without loading them in memory.</span>
+<span class="c1"># ``code_aggregate``/``resolve_code_source`` also accept a ``keys_exclude`` argument now,</span>
+<span class="c1"># so freshly generated aggregates can avoid the bloat in the first place.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="c1">#: Default regex patterns matching section paths that are (almost) never useful as AI</span>
+<span class="c1">#: context: vendored deps, VCS internals, build/cache outputs, lockfiles, and minified</span>
+<span class="c1">#: bundles/sourcemaps. Patterns are matched (``re.search``) against each section&#39;s path.</span>
+<span class="n">DFLT_AGGREGATE_EXCLUDE_PATTERNS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="sa">r</span><span class="s2">&quot;(^|/)node_modules/&quot;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">&quot;(^|/)\.git/&quot;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">&quot;(^|/)bower_components/&quot;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">&quot;(^|/)(dist|build|out|target|\.next|\.nuxt|\.turbo|\.cache|\.parcel-cache|&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;coverage|__pycache__|\.pytest_cache|\.mypy_cache|\.tox|\.venv|venv|&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;site-packages|vendor)/&quot;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">&quot;(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|npm-shrinkwrap\.json|&quot;</span>
+    <span class="sa">r</span><span class="s2">&quot;poetry\.lock|Pipfile\.lock|Cargo\.lock|composer\.lock|Gemfile\.lock|go\.sum)$&quot;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">&quot;\.min\.(js|mjs|cjs|css)$&quot;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">&quot;\.(js|mjs|cjs|css)\.map$&quot;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s2">&quot;\.map$&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: Extension-less filenames that should still be recognized as real section headers</span>
+<span class="c1">#: (so they are not mistaken for in-content markdown headings).</span>
+<span class="n">_KNOWN_EXTENSIONLESS_FILES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;Makefile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Dockerfile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;LICENSE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;README&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;CHANGELOG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Procfile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Gemfile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Rakefile&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_exclude_predicate</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compile ``exclude`` into a ``path -&gt; bool`` predicate (True == drop the section).</span>
+
+<span class="sd">    ``exclude`` may be an iterable of regex strings, a single regex string, a callable</span>
+<span class="sd">    predicate, or None (drop nothing).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">exclude</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">exclude</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="n">exclude</span><span class="p">,)</span>
+    <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
+    <span class="k">return</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_looks_like_section_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Heuristic: does ``path`` look like a file path (a real section header) rather</span>
+<span class="sd">    than an in-content markdown heading like ``## Overview``?&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;/&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">last</span> <span class="ow">in</span> <span class="n">_KNOWN_EXTENSIONLESS_FILES</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="c1"># a short, space-free extension on the last segment, e.g. ``foo.py`` / ``a.min.js``</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[^\s]+\.[A-Za-z0-9_]{1,12}$&quot;</span><span class="p">,</span> <span class="n">last</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="iter_pruned_aggregate_lines">
+<a class="viewcode-back" href="../../module_docs/contaix/code.html#contaix.code.iter_pruned_aggregate_lines">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">iter_pruned_aggregate_lines</span><span class="p">(</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="o">=</span><span class="n">DFLT_AGGREGATE_EXCLUDE_PATTERNS</span><span class="p">,</span>
+    <span class="n">header_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;## &quot;</span><span class="p">,</span>
+    <span class="n">fence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;```&quot;</span><span class="p">,</span>
+    <span class="n">on_drop</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stream ``lines`` of an aggregated-code markdown, yielding only the lines that</span>
+<span class="sd">    belong to sections whose header path does *not* match ``exclude``.</span>
+
+<span class="sd">    A section header is detected *structurally*: a ``header_prefix`` line whose remainder</span>
+<span class="sd">    looks like a file path **and** whose next non-blank line opens a code fence. This is</span>
+<span class="sd">    deliberately not a simple &quot;toggle on every fence&quot; scheme -- file *content* in these</span>
+<span class="sd">    aggregates routinely contains stray ``` lines (vendored ``.md``/``.ts``/``.json``),</span>
+<span class="sd">    which corrupts fence-toggle state and lets bloat slip through. Requiring the</span>
+<span class="sd">    header-then-fence signature makes section boundaries robust to that.</span>
+
+<span class="sd">    Because it consumes and produces a line iterable, it works equally on a small</span>
+<span class="sd">    in-memory string (via ``str.splitlines(keepends=True)``) and on a multi-gigabyte</span>
+<span class="sd">    file (by iterating the open file object), never holding more than a handful of lines.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lines: Iterable of lines. Whatever line endings are present are preserved.</span>
+<span class="sd">        exclude: Regex string, iterable of regex strings, or ``path-&gt;bool`` predicate</span>
+<span class="sd">            selecting sections to drop. Defaults to ``DFLT_AGGREGATE_EXCLUDE_PATTERNS``.</span>
+<span class="sd">        header_prefix: Prefix marking a section header; the remainder is the path.</span>
+<span class="sd">        fence: Code-fence marker that opens a section&#39;s content block.</span>
+<span class="sd">        on_drop: Optional callback invoked with each dropped section&#39;s path (useful for</span>
+<span class="sd">            logging/counting what was removed).</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        The lines to keep, in original order.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; md = &#39;&#39;&#39;## a.py</span>
+<span class="sd">    ...</span>
+<span class="sd">    ... ```python</span>
+<span class="sd">    ... x = 1  # a heading-looking line: ## not a header</span>
+<span class="sd">    ... ```</span>
+<span class="sd">    ...</span>
+<span class="sd">    ... ## node_modules/dep/index.js</span>
+<span class="sd">    ...</span>
+<span class="sd">    ... ```python</span>
+<span class="sd">    ... huge minified bundle</span>
+<span class="sd">    ... ```</span>
+<span class="sd">    ... &#39;&#39;&#39;</span>
+<span class="sd">    &gt;&gt;&gt; kept = &#39;&#39;.join(iter_pruned_aggregate_lines(md.splitlines(keepends=True)))</span>
+<span class="sd">    &gt;&gt;&gt; &#39;## a.py&#39; in kept and &#39;x = 1&#39; in kept</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; &#39;node_modules&#39; in kept</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">should_drop</span> <span class="o">=</span> <span class="n">_exclude_predicate</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="n">dropping</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+        <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">header_prefix</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_looks_like_section_path</span><span class="p">(</span>
+            <span class="n">stripped</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">header_prefix</span><span class="p">)</span> <span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="p">):</span>
+            <span class="c1"># Candidate header: confirm by peeking for a fence opener past blank lines.</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">stripped</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">header_prefix</span><span class="p">)</span> <span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">buffered</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">confirmed</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">nxt</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+                <span class="n">buffered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nxt</span><span class="p">)</span>
+                <span class="n">ns</span> <span class="o">=</span> <span class="n">nxt</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ns</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">confirmed</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">fence</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">confirmed</span><span class="p">:</span>
+                <span class="n">dropping</span> <span class="o">=</span> <span class="n">should_drop</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dropping</span> <span class="ow">and</span> <span class="n">on_drop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">on_drop</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="c1"># Whether or not confirmed, `line` + `buffered` belong to the current</span>
+            <span class="c1"># section (a new one if confirmed, the ongoing one otherwise).</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dropping</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">line</span>
+                <span class="k">yield from</span> <span class="n">buffered</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dropping</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">line</span></div>
+
+
+
+<div class="viewcode-block" id="prune_code_aggregate">
+<a class="viewcode-back" href="../../module_docs/contaix/code.html#contaix.code.prune_code_aggregate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prune_code_aggregate</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="o">=</span><span class="n">DFLT_AGGREGATE_EXCLUDE_PATTERNS</span><span class="p">,</span>
+    <span class="n">egress</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Filepath</span><span class="p">]</span> <span class="o">=</span> <span class="n">identity</span><span class="p">,</span>
+    <span class="n">header_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;## &quot;</span><span class="p">,</span>
+    <span class="n">fence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;```&quot;</span><span class="p">,</span>
+    <span class="n">on_drop</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove bloated sections (vendored deps, build output, lockfiles, minified</span>
+<span class="sd">    bundles, ...) from an aggregated-code markdown.</span>
+
+<span class="sd">    This is the post-hoc complement to ``code_aggregate``&#39;s ``keys_exclude``: use it to</span>
+<span class="sd">    slim down an aggregate that was already generated (e.g. one that accidentally</span>
+<span class="sd">    included a ``node_modules/`` tree). It streams, so it handles arbitrarily large</span>
+<span class="sd">    files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: The aggregate as a markdown string, a path to a markdown file, or any</span>
+<span class="sd">            iterable of lines.</span>
+<span class="sd">        exclude: Sections to drop (see ``iter_pruned_aggregate_lines``).</span>
+<span class="sd">        egress: What to do with the result. The default (``identity``) returns the</span>
+<span class="sd">            pruned markdown as a string. Pass a filepath string to stream the result to</span>
+<span class="sd">            that file (memory-safe for huge inputs) and return the filepath.</span>
+<span class="sd">        header_prefix, fence: Aggregate format markers (see ``iter_pruned_aggregate_lines``).</span>
+<span class="sd">        on_drop: Optional callback invoked with each dropped section&#39;s path.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The pruned markdown string, or the output filepath when ``egress`` is a path.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; md = &quot;## keep.py\\n\\n```python\\nok\\n```\\n## dist/bundle.js\\n\\n```python\\nx\\n```\\n&quot;</span>
+<span class="sd">    &gt;&gt;&gt; &quot;dist/bundle.js&quot; in prune_code_aggregate(md)</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">_resolve_lines</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+    <span class="n">pruned</span> <span class="o">=</span> <span class="n">iter_pruned_aggregate_lines</span><span class="p">(</span>
+        <span class="n">lines</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>
+        <span class="n">header_prefix</span><span class="o">=</span><span class="n">header_prefix</span><span class="p">,</span>
+        <span class="n">fence</span><span class="o">=</span><span class="n">fence</span><span class="p">,</span>
+        <span class="n">on_drop</span><span class="o">=</span><span class="n">on_drop</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">egress</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">out_path</span> <span class="o">=</span> <span class="n">fullpath</span><span class="p">(</span><span class="n">egress</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">pruned</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_path</span>
+    <span class="k">return</span> <span class="n">egress</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pruned</span><span class="p">))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_lines</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve ``src`` to an iterable of lines (with line endings preserved).</span>
+
+<span class="sd">    A string that names an existing file is opened and iterated lazily; any other</span>
+<span class="sd">    string is treated as the markdown content itself; anything else is assumed to</span>
+<span class="sd">    already be an iterable of lines.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">src</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fullpath</span><span class="p">(</span><span class="n">src</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">_iter_file_lines</span><span class="p">(</span><span class="n">fullpath</span><span class="p">(</span><span class="n">src</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">src</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">src</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_iter_file_lines</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lazily yield the lines of a file, closing it when exhausted.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">yield from</span> <span class="n">f</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_readme_from_parent_dir</span><span class="p">(</span><span class="n">code_store</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -267,6 +521,7 @@
     <span class="n">egress</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Filepath</span><span class="p">]</span> <span class="o">=</span> <span class="n">identity</span><span class="p">,</span>
     <span class="n">kv_to_item</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;## </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">```python</span><span class="se">\n</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">```&quot;</span><span class="p">,</span>
     <span class="n">keys_filt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\.py$&quot;</span><span class="p">,</span>
+    <span class="n">keys_exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">include_readme</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">_readme_from_parent_dir</span><span class="p">,</span>
     <span class="o">**</span><span class="n">store_aggregate_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -285,6 +540,10 @@
 <span class="sd">                               items that should be aggregated.</span>
 <span class="sd">        keys_filt (Union[Callable, str]): A function or regex string to filter the keys of the code store.</span>
 <span class="sd">                                        If a string, it will be compiled to a regex pattern.</span>
+<span class="sd">        keys_exclude: Optional regex string, iterable of regex strings, or ``path-&gt;bool``</span>
+<span class="sd">                      predicate identifying keys to *exclude* from the aggregate (applied</span>
+<span class="sd">                      after ``keys_filt``). Use ``DFLT_AGGREGATE_EXCLUDE_PATTERNS`` to</span>
+<span class="sd">                      skip vendored deps, build outputs, lockfiles and minified bundles.</span>
 <span class="sd">        include_readme (Callable): A function that takes the code_store as input and returns</span>
 <span class="sd">                                   the content of a README file to include in the aggregate.</span>
 <span class="sd">                                   If None, no README will be included.</span>
@@ -345,7 +604,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">dol.trans</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_and_ignore_if_error</span>
 
-    <span class="n">code_store</span> <span class="o">=</span> <span class="n">resolve_code_source</span><span class="p">(</span><span class="n">code_src</span><span class="p">,</span> <span class="n">keys_filt</span><span class="o">=</span><span class="n">keys_filt</span><span class="p">)</span>
+    <span class="n">code_store</span> <span class="o">=</span> <span class="n">resolve_code_source</span><span class="p">(</span>
+        <span class="n">code_src</span><span class="p">,</span> <span class="n">keys_filt</span><span class="o">=</span><span class="n">keys_filt</span><span class="p">,</span> <span class="n">keys_exclude</span><span class="o">=</span><span class="n">keys_exclude</span>
+    <span class="p">)</span>
     <span class="n">code_store</span> <span class="o">=</span> <span class="n">warn_and_ignore_if_error</span><span class="p">(</span><span class="n">code_store</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">include_readme</span><span class="p">:</span>
@@ -466,7 +727,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright NO COPYRIGHT.</p>
+    <p></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
