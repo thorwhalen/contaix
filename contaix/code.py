@@ -75,7 +75,10 @@ def resolve_code_source_dir_path(code_src: CodeSource) -> DirectoryPathString:
 
 
 def resolve_code_source(
-    code_src: CodeSource, keys_filt: Callable = lambda x: x.endswith(".py")
+    code_src: CodeSource,
+    keys_filt: Callable = lambda x: x.endswith(".py"),
+    *,
+    keys_exclude=None,
 ) -> Mapping:
     """
     Will resolve code_src to a Mapping whose values are the code strings
@@ -88,6 +91,10 @@ def resolve_code_source(
         keys_filt (Union[Callable, str]): A function or regex string to filter the keys of the code store.
                                         If a string, it will be compiled to a regex pattern.
         keys_filt (Callable): A function to filter the keys. Defaults to lambda x: x.endswith('.py').
+        keys_exclude: Optional regex string, iterable of regex strings, or ``path->bool``
+            predicate identifying keys to *exclude* (e.g. vendored deps, build outputs).
+            Applied on top of (after) ``keys_filt``. Pass
+            ``DFLT_AGGREGATE_EXCLUDE_PATTERNS`` to skip the usual bloat.
 
     """
     if keys_filt:
@@ -100,6 +107,11 @@ def resolve_code_source(
             raise ValueError(f"keys_filt should be callable or string. Was {keys_filt}")
     else:
         keys_filt = lambda x: True
+
+    if keys_exclude is not None:
+        should_drop = _exclude_predicate(keys_exclude)
+        _include = keys_filt
+        keys_filt = lambda x: _include(x) and not should_drop(x)
 
     # handle a ModuleType that is a single .py file
     if isinstance(code_src, ModuleType):
@@ -132,6 +144,242 @@ def resolve_code_source(
 
 
 Filepath = str
+
+
+# --------------------------------------------------------------------------------------
+# Pruning bloat from code aggregates
+#
+# Aggregates produced by ``code_aggregate`` (or any tool that walks a repo and dumps
+# every file into one markdown) often sweep in content that is worthless as AI context
+# and enormous in size: vendored dependencies (``node_modules/``), build/cache outputs
+# (``dist/``, ``.next/``, ``__pycache__/``), lockfiles, and minified bundles/sourcemaps.
+# A single ``node_modules`` tree can turn a few MB of real source into a multi-GB file.
+#
+# ``prune_code_aggregate`` strips those sections back out *after the fact*, operating as
+# a line stream so it handles multi-gigabyte aggregates without loading them in memory.
+# ``code_aggregate``/``resolve_code_source`` also accept a ``keys_exclude`` argument now,
+# so freshly generated aggregates can avoid the bloat in the first place.
+
+import re
+
+#: Default regex patterns matching section paths that are (almost) never useful as AI
+#: context: vendored deps, VCS internals, build/cache outputs, lockfiles, and minified
+#: bundles/sourcemaps. Patterns are matched (``re.search``) against each section's path.
+DFLT_AGGREGATE_EXCLUDE_PATTERNS = (
+    r"(^|/)node_modules/",
+    r"(^|/)\.git/",
+    r"(^|/)bower_components/",
+    r"(^|/)(dist|build|out|target|\.next|\.nuxt|\.turbo|\.cache|\.parcel-cache|"
+    r"coverage|__pycache__|\.pytest_cache|\.mypy_cache|\.tox|\.venv|venv|"
+    r"site-packages|vendor)/",
+    r"(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|npm-shrinkwrap\.json|"
+    r"poetry\.lock|Pipfile\.lock|Cargo\.lock|composer\.lock|Gemfile\.lock|go\.sum)$",
+    r"\.min\.(js|mjs|cjs|css)$",
+    r"\.(js|mjs|cjs|css)\.map$",
+    r"\.map$",
+)
+
+#: Extension-less filenames that should still be recognized as real section headers
+#: (so they are not mistaken for in-content markdown headings).
+_KNOWN_EXTENSIONLESS_FILES = frozenset(
+    {
+        "Makefile",
+        "Dockerfile",
+        "LICENSE",
+        "README",
+        "CHANGELOG",
+        "Procfile",
+        "Gemfile",
+        "Rakefile",
+    }
+)
+
+
+def _exclude_predicate(exclude) -> Callable[[str], bool]:
+    """Compile ``exclude`` into a ``path -> bool`` predicate (True == drop the section).
+
+    ``exclude`` may be an iterable of regex strings, a single regex string, a callable
+    predicate, or None (drop nothing).
+    """
+    if exclude is None:
+        return lambda path: False
+    if callable(exclude):
+        return exclude
+    if isinstance(exclude, str):
+        exclude = (exclude,)
+    patterns = [re.compile(p) for p in exclude]
+    return lambda path: any(p.search(path) for p in patterns)
+
+
+def _looks_like_section_path(path: str) -> bool:
+    """Heuristic: does ``path`` look like a file path (a real section header) rather
+    than an in-content markdown heading like ``## Overview``?"""
+    if "/" in path:
+        return True
+    last = path.rsplit("/", 1)[-1]
+    if last in _KNOWN_EXTENSIONLESS_FILES:
+        return True
+    # a short, space-free extension on the last segment, e.g. ``foo.py`` / ``a.min.js``
+    return bool(re.search(r"^[^\s]+\.[A-Za-z0-9_]{1,12}$", last))
+
+
+def iter_pruned_aggregate_lines(
+    lines: Iterable[str],
+    *,
+    exclude=DFLT_AGGREGATE_EXCLUDE_PATTERNS,
+    header_prefix: str = "## ",
+    fence: str = "```",
+    on_drop: Optional[Callable[[str], Any]] = None,
+) -> Iterable[str]:
+    """Stream ``lines`` of an aggregated-code markdown, yielding only the lines that
+    belong to sections whose header path does *not* match ``exclude``.
+
+    A section header is detected *structurally*: a ``header_prefix`` line whose remainder
+    looks like a file path **and** whose next non-blank line opens a code fence. This is
+    deliberately not a simple "toggle on every fence" scheme -- file *content* in these
+    aggregates routinely contains stray ``` lines (vendored ``.md``/``.ts``/``.json``),
+    which corrupts fence-toggle state and lets bloat slip through. Requiring the
+    header-then-fence signature makes section boundaries robust to that.
+
+    Because it consumes and produces a line iterable, it works equally on a small
+    in-memory string (via ``str.splitlines(keepends=True)``) and on a multi-gigabyte
+    file (by iterating the open file object), never holding more than a handful of lines.
+
+    Args:
+        lines: Iterable of lines. Whatever line endings are present are preserved.
+        exclude: Regex string, iterable of regex strings, or ``path->bool`` predicate
+            selecting sections to drop. Defaults to ``DFLT_AGGREGATE_EXCLUDE_PATTERNS``.
+        header_prefix: Prefix marking a section header; the remainder is the path.
+        fence: Code-fence marker that opens a section's content block.
+        on_drop: Optional callback invoked with each dropped section's path (useful for
+            logging/counting what was removed).
+
+    Yields:
+        The lines to keep, in original order.
+
+    Example:
+
+    >>> md = '''## a.py
+    ...
+    ... ```python
+    ... x = 1  # a heading-looking line: ## not a header
+    ... ```
+    ...
+    ... ## node_modules/dep/index.js
+    ...
+    ... ```python
+    ... huge minified bundle
+    ... ```
+    ... '''
+    >>> kept = ''.join(iter_pruned_aggregate_lines(md.splitlines(keepends=True)))
+    >>> '## a.py' in kept and 'x = 1' in kept
+    True
+    >>> 'node_modules' in kept
+    False
+    """
+    should_drop = _exclude_predicate(exclude)
+    it = iter(lines)
+    dropping = False
+    for line in it:
+        stripped = line.rstrip("\n")
+        if stripped.startswith(header_prefix) and _looks_like_section_path(
+            stripped[len(header_prefix) :].strip()
+        ):
+            # Candidate header: confirm by peeking for a fence opener past blank lines.
+            path = stripped[len(header_prefix) :].strip()
+            buffered = []
+            confirmed = False
+            for nxt in it:
+                buffered.append(nxt)
+                ns = nxt.rstrip("\n")
+                if ns == "":
+                    continue
+                confirmed = ns.lstrip().startswith(fence)
+                break
+            if confirmed:
+                dropping = should_drop(path)
+                if dropping and on_drop is not None:
+                    on_drop(path)
+            # Whether or not confirmed, `line` + `buffered` belong to the current
+            # section (a new one if confirmed, the ongoing one otherwise).
+            if not dropping:
+                yield line
+                yield from buffered
+            continue
+        if not dropping:
+            yield line
+
+
+def prune_code_aggregate(
+    src: Union[str, Iterable[str]],
+    *,
+    exclude=DFLT_AGGREGATE_EXCLUDE_PATTERNS,
+    egress: Union[Callable, Filepath] = identity,
+    header_prefix: str = "## ",
+    fence: str = "```",
+    on_drop: Optional[Callable[[str], Any]] = None,
+) -> Any:
+    """Remove bloated sections (vendored deps, build output, lockfiles, minified
+    bundles, ...) from an aggregated-code markdown.
+
+    This is the post-hoc complement to ``code_aggregate``'s ``keys_exclude``: use it to
+    slim down an aggregate that was already generated (e.g. one that accidentally
+    included a ``node_modules/`` tree). It streams, so it handles arbitrarily large
+    files.
+
+    Args:
+        src: The aggregate as a markdown string, a path to a markdown file, or any
+            iterable of lines.
+        exclude: Sections to drop (see ``iter_pruned_aggregate_lines``).
+        egress: What to do with the result. The default (``identity``) returns the
+            pruned markdown as a string. Pass a filepath string to stream the result to
+            that file (memory-safe for huge inputs) and return the filepath.
+        header_prefix, fence: Aggregate format markers (see ``iter_pruned_aggregate_lines``).
+        on_drop: Optional callback invoked with each dropped section's path.
+
+    Returns:
+        The pruned markdown string, or the output filepath when ``egress`` is a path.
+
+    Example:
+
+    >>> md = "## keep.py\\n\\n```python\\nok\\n```\\n## dist/bundle.js\\n\\n```python\\nx\\n```\\n"
+    >>> "dist/bundle.js" in prune_code_aggregate(md)
+    False
+    """
+    lines = _resolve_lines(src)
+    pruned = iter_pruned_aggregate_lines(
+        lines,
+        exclude=exclude,
+        header_prefix=header_prefix,
+        fence=fence,
+        on_drop=on_drop,
+    )
+    if isinstance(egress, str):
+        out_path = fullpath(egress)
+        with open(out_path, "w") as f:
+            f.writelines(pruned)
+        return out_path
+    return egress("".join(pruned))
+
+
+def _resolve_lines(src: Union[str, Iterable[str]]) -> Iterable[str]:
+    """Resolve ``src`` to an iterable of lines (with line endings preserved).
+
+    A string that names an existing file is opened and iterated lazily; any other
+    string is treated as the markdown content itself; anything else is assumed to
+    already be an iterable of lines.
+    """
+    if isinstance(src, str):
+        if "\n" not in src and os.path.isfile(fullpath(src)):
+            return _iter_file_lines(fullpath(src))
+        return src.splitlines(keepends=True)
+    return src
+
+
+def _iter_file_lines(path: str) -> Iterable[str]:
+    """Lazily yield the lines of a file, closing it when exhausted."""
+    with open(path, "r") as f:
+        yield from f
 
 
 def _readme_from_parent_dir(code_store: Mapping) -> Optional[str]:
@@ -173,6 +421,7 @@ def code_aggregate(
     egress: Union[Callable, Filepath] = identity,
     kv_to_item=lambda k, v: f"## {k}\n\n```python\n{v.strip()}\n```",
     keys_filt: Union[Callable, str] = r"\.py$",
+    keys_exclude=None,
     include_readme: Callable = _readme_from_parent_dir,
     **store_aggregate_kwargs,
 ) -> Any:
@@ -191,6 +440,10 @@ def code_aggregate(
                                items that should be aggregated.
         keys_filt (Union[Callable, str]): A function or regex string to filter the keys of the code store.
                                         If a string, it will be compiled to a regex pattern.
+        keys_exclude: Optional regex string, iterable of regex strings, or ``path->bool``
+                      predicate identifying keys to *exclude* from the aggregate (applied
+                      after ``keys_filt``). Use ``DFLT_AGGREGATE_EXCLUDE_PATTERNS`` to
+                      skip vendored deps, build outputs, lockfiles and minified bundles.
         include_readme (Callable): A function that takes the code_store as input and returns
                                    the content of a README file to include in the aggregate.
                                    If None, no README will be included.
@@ -251,7 +504,9 @@ def code_aggregate(
     """
     from dol.trans import warn_and_ignore_if_error
 
-    code_store = resolve_code_source(code_src, keys_filt=keys_filt)
+    code_store = resolve_code_source(
+        code_src, keys_filt=keys_filt, keys_exclude=keys_exclude
+    )
     code_store = warn_and_ignore_if_error(code_store)
 
     if include_readme:

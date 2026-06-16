@@ -32,6 +32,9 @@ from contaix.aggregation import aggregate_store
 from contaix.code import (
     code_aggregate,  # get markdown aggregate of code from a directory, package, or GitHub URL
     PackageCodeContexts,
+    prune_code_aggregate,  # strip bloat (node_modules, build output, ...) from an aggregate
+    iter_pruned_aggregate_lines,  # streaming line-level pruner (memory-safe for huge files)
+    DFLT_AGGREGATE_EXCLUDE_PATTERNS,  # default bloat patterns for aggregates
 )
 
 
