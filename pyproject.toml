@@ -10,7 +10,31 @@ version = "0.0.17"
 description = "Tools to make contexts for AI"
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = []
+license = "MIT"
+keywords = [
+    "ai",
+    "llm",
+    "context",
+    "rag",
+    "documentation",
+    "markdown",
+    "scraping",
+    "github",
+    "pdf",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Markup",
+]
 authors = [
     { name = "Thor Whalen" },
 ]
@@ -23,11 +47,11 @@ dependencies = [
     "hubcap",
 ]
 
-[project.license]
-text = "MIT"
-
 [project.urls]
-Homepage = "https://github.com/thorwhalen/contaix"
+Homepage = "https://thorwhalen.github.io/contaix/"
+Repository = "https://github.com/thorwhalen/contaix"
+Issues = "https://github.com/thorwhalen/contaix/issues"
+Changelog = "https://github.com/thorwhalen/contaix/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 pdf = [
