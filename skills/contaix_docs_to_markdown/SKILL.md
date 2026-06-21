@@ -28,8 +28,26 @@ result = site_to_markdown(
 )
 ```
 
-This auto-detects the site type, discovers navigation, fetches all pages with
-caching, and aggregates into one markdown file.
+`site_to_markdown` now does this in two phases:
+
+1. **Fast path** — probes the site for a publisher-provided single-doc bundle
+   at `/llms-full.txt` (Mintlify, Docusaurus, Fern, and many other generators
+   ship one). When found, returns it directly. **This is the best case** —
+   one HTTP request, clean markdown, no scraping needed.
+2. **Scrape path** — if no bundle exists, it falls back to discovering the
+   site's navigation, fetching every page (with caching), and aggregating.
+
+You can also call the fast-path helpers directly:
+
+```python
+from contaix.web import find_llms_full_url, fetch_llms_full
+
+bundle_url = find_llms_full_url('<URL>')   # str or None
+md = fetch_llms_full('<URL>')              # str or None
+```
+
+To force the scrape path (e.g. you want only one tab), pass `use_llms_full=False`
+or use a `tab_filter`.
 
 **If this works and the user is happy → done.**
 
@@ -136,7 +154,9 @@ Or switch to the `contaix_web_aggregate` skill for full manual control.
 
 | Function | Purpose |
 |----------|---------|
-| `site_to_markdown(url, **kw)` | Full pipeline: nav → fetch → convert → aggregate |
+| `site_to_markdown(url, **kw)` | Full pipeline: llms-full fast path → nav → fetch → convert → aggregate |
+| `find_llms_full_url(url)` | Probe for a publisher's `/llms-full.txt` bundle (returns URL or None) |
+| `fetch_llms_full(url)` | Fetch the bundle directly (returns markdown or None) |
 | `repair_markdown(md)` | Fix broken links, empty links, and other markdown artifacts |
 | `extract_site_nav(url)` | Get `{base_url, tabs, pages}` navigation structure |
 | `list_site_pages(url)` | Flat list of `{path, title, url, group, tab}` dicts |
@@ -152,8 +172,9 @@ Or switch to the `contaix_web_aggregate` skill for full manual control.
 |-----------|---------|-------------|
 | `cache_dir` | `~/.cache/contaix/web` | Cache directory for fetched pages |
 | `output_file` | `None` | Save path (returns string if None) |
-| `tab_filter` | `None` | Filter by tab label (str or callable) |
-| `page_fetcher` | auto | Custom `(url) -> content` function |
+| `tab_filter` | `None` | Filter by tab label (str or callable). Skips the llms-full fast path. |
+| `page_fetcher` | auto | Custom `(url) -> content` function. Skips the llms-full fast path. |
 | `content_extractor` | auto | Custom `(content) -> markdown` function |
 | `collapse_blank_lines` | `True` | Collapse triple+ newlines to double |
+| `use_llms_full` | `True` | Probe for a `/llms-full.txt` publisher bundle first |
 | `verbose` | `False` | Print progress |

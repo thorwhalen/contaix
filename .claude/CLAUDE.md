@@ -14,9 +14,13 @@ contaix/
   aggregation.py   # Store aggregation with deduplication
   markdown.py      # File format conversion (delegates to dn.src)
   util.py          # Utilities (markdown cleanup delegates to dn.repair)
-  skills.py        # Skill discovery across ecosystem packages
-  data/skills/     # Skill source-of-truth (symlinked into .claude/skills/)
+  skills.py        # Skill discovery across OTHER ecosystem packages
 ```
+
+contaix's own skills now live at the repo root `skills/` (gh-distributed via
+`gh skill install`), symlinked into `.claude/skills/`. (`contaix/data/skills/`
+was retired in favor of gh distribution; `skills.py` still discovers other
+packages' `data/skills/` — a follow-up may retire/repoint it.)
 
 ## Dependencies
 
@@ -49,4 +53,4 @@ Available skills:
 - `dol` store abstractions for file/data access
 - Smart defaults with keyword-only configurability
 - Pure transforms in domain packages (dn, pdfdol); UX wrappers (clipboard) in contaix
-- Skills in `<package>/data/skills/`, symlinked to `.claude/skills/` and `~/.claude/skills/`
+- Own skills in repo-root `skills/` (gh-distributed via `gh skill install`), symlinked into `.claude/skills/`

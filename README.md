@@ -131,9 +131,11 @@ contaix/
   urls.py          # extract_urls, verify_urls, download_articles
   aggregation.py   # aggregate_store with deduplication and chunking
   util.py          # markdown_of_site, scrape utilities, clipboard helpers
-  skills.py        # discover and install ecosystem skills
-  data/skills/     # ships SKILL.md files for AI agents
+  skills.py        # discover/install OTHER ecosystem packages' skills
 ```
+
+contaix's own agent skills live at the repo root in `skills/` (gh-distributed —
+see the Skills section above), symlinked into `.claude/skills/`.
 
 ## Architecture
 
