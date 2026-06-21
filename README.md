@@ -9,29 +9,23 @@ collections — into clean markdown contexts for AI agents to consume.
 pip install contaix
 ```
 
-## Claude Code Skills
+## Skills
 
-contaix ships with [Claude Code](https://claude.com/claude-code) skills so an
-AI agent can use it directly. After installing, run:
+This package ships agent skills you can install into any agent host with
+[`gh skill`](https://cli.github.com/manual/gh_skill) (don't have it?
+[install gh](https://cli.github.com/)):
 
 ```bash
-python -m contaix.skills
+gh skill install thorwhalen/contaix contaix-acquire-docs --agent claude-code
+gh skill install thorwhalen/contaix contaix_docs_to_markdown
+gh skill install thorwhalen/contaix contaix_web_aggregate
 ```
 
-This symlinks each skill into `~/.claude/skills/`, where Claude Code discovers
-them automatically.
-
-| Skill | When the agent uses it |
-|-------|------------------------|
-| `contaix_docs_to_markdown` | "Get me the docs", "download documentation", "make a markdown of this docs site" |
-| `contaix_web_aggregate` | "Aggregate these pages into markdown" — falls back to manual curation when sites need it |
-| `dn-repair` (from [dn](https://github.com/thorwhalen/dn)) | "Clean up this markdown", "fix broken links" |
-| `pdfdol-read` (from [pdfdol](https://github.com/thorwhalen/pdfdol)) | "Extract text from these PDFs" |
-| `pdfdol-convert` (from [pdfdol](https://github.com/thorwhalen/pdfdol)) | "Convert this to PDF" |
-
-`python -m contaix.skills` also picks up skills shipped by the related
-packages (`dn`, `pdfdol`) when those are installed — one command wires up
-the whole ecosystem.
+| Skill | Use it when… |
+|-------|--------------|
+| `contaix-acquire-docs` | acquiring a tool's docs (plus OpenAPI/MCP/GraphQL specs) as one agent-ready markdown bundle, cheapest source first |
+| `contaix_docs_to_markdown` | converting a documentation website into a single clean markdown file |
+| `contaix_web_aggregate` | aggregating arbitrary (non-docs) web pages into structured markdown, with manual control |
 
 ## Quick Start
 
