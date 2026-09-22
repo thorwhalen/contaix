@@ -251,19 +251,23 @@ Run these against the final markdown:
 
 ```python
 import re
-md = open('<file>.md').read()
+
+md = open("<file>.md").read()
 print(f"  size: {len(md):,} chars")
 print(f"  ##  sections: {len(re.findall(r'^## ', md, re.M))}")
 print(f"  ### pages:    {len(re.findall(r'^### ', md, re.M))}")
-print(f"  code blocks:  {md.count(chr(96)*3) // 2}")
+print(f"  code blocks:  {md.count(chr(96) * 3) // 2}")
 print(f"  external links: {len(re.findall(r'\\]\\(https?://', md))}")
 # Junk that means HTML-clean went sideways
-for pat, name in [(r'\\$L[0-9a-f]+', '$L refs'),
-                  ('Loading\\.\\.\\.', 'Loading…'),
-                  (r'^\\s*\\*?\\s*Copyright \\d{4}', 'footer leakage'),
-                  ('cookie', 'cookie-banner leak')]:
+for pat, name in [
+    (r"\\$L[0-9a-f]+", "$L refs"),
+    ("Loading\\.\\.\\.", "Loading…"),
+    (r"^\\s*\\*?\\s*Copyright \\d{4}", "footer leakage"),
+    ("cookie", "cookie-banner leak"),
+]:
     n = len(re.findall(pat, md, re.I | re.M))
-    if n: print(f"  WARN {n}× {name}")
+    if n:
+        print(f"  WARN {n}× {name}")
 ```
 
 If the junk counters are nonzero, the markdown came from rung 5; run

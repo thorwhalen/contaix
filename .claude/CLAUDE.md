@@ -35,8 +35,9 @@ PDF download functions live in **pdfdol.download** (contaix wraps with clipboard
 Skills from contaix and its dependencies are discoverable via:
 ```python
 from contaix.skills import discover_skills, install_skills
-discover_skills()   # Find skills in contaix, dn, pdfdol
-install_skills()    # Symlink them into ~/.claude/skills/
+
+discover_skills()  # Find skills in contaix, dn, pdfdol
+install_skills()  # Symlink them into ~/.claude/skills/
 # Or: python -m contaix.skills
 ```
 

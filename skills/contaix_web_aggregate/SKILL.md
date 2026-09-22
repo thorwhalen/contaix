@@ -24,7 +24,7 @@ Fetch the landing page and study it:
 ```python
 from contaix.web import fetch_page, html_to_clean_markdown
 
-html = fetch_page('<URL>', cache_dir='/tmp/contaix_cache')
+html = fetch_page("<URL>", cache_dir="/tmp/contaix_cache")
 ```
 
 Then use WebFetch to understand the page visually:
@@ -43,9 +43,10 @@ If no → continue with manual aggregation below.
 Check by looking at the fetched HTML:
 ```python
 from contaix.web import is_nextjs_site
+
 if is_nextjs_site(html):
     print("Next.js site — use RSC endpoint or site_to_markdown")
-elif 'Loading' in html and len(html) > 100000:
+elif "Loading" in html and len(html) > 100000:
     print("Likely JS-rendered — use WebFetch for each page")
 else:
     print("Server-rendered — html_to_clean_markdown works")
@@ -56,17 +57,18 @@ else:
 ### Option A: Extract from navigation
 ```python
 from contaix.web import extract_site_nav
-nav = extract_site_nav('<URL>')
-pages = nav['pages']  # [{path, title, url, group, tab}, ...]
+
+nav = extract_site_nav("<URL>")
+pages = nav["pages"]  # [{path, title, url, group, tab}, ...]
 ```
 
 ### Option B: Manual curation
 Study the site and build the list:
 ```python
 pages = [
-    {'title': 'Overview', 'url': 'https://example.com'},
-    {'title': 'Features', 'url': 'https://example.com/features'},
-    {'title': 'Pricing', 'url': 'https://example.com/pricing'},
+    {"title": "Overview", "url": "https://example.com"},
+    {"title": "Features", "url": "https://example.com/features"},
+    {"title": "Pricing", "url": "https://example.com/pricing"},
 ]
 ```
 
@@ -75,11 +77,11 @@ pages = [
 import requests
 from xml.etree import ElementTree
 
-r = requests.get('https://example.com/sitemap.xml', timeout=15)
+r = requests.get("https://example.com/sitemap.xml", timeout=15)
 if r.status_code == 200:
     root = ElementTree.fromstring(r.content)
-    ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
-    urls = [loc.text for loc in root.findall('.//ns:loc', ns)]
+    ns = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    urls = [loc.text for loc in root.findall(".//ns:loc", ns)]
 ```
 
 ## Step 3: Fetch and convert each page
@@ -90,7 +92,7 @@ from contaix.web import fetch_page, html_to_clean_markdown
 
 sections = []
 for page in pages:
-    html = fetch_page(page['url'], cache_dir='/tmp/contaix_cache')
+    html = fetch_page(page["url"], cache_dir="/tmp/contaix_cache")
     md = html_to_clean_markdown(html)
     sections.append(f"# {page['title']}\n\n{md}")
 ```
@@ -111,7 +113,7 @@ from contaix.web import fetch_nextjs_rsc, extract_rsc_page_content
 
 sections = []
 for page in pages:
-    rsc = fetch_nextjs_rsc(page['url'], cache_dir='/tmp/contaix_cache')
+    rsc = fetch_nextjs_rsc(page["url"], cache_dir="/tmp/contaix_cache")
     md = extract_rsc_page_content(rsc)
     if md:
         sections.append(f"# {page['title']}\n\n{md}")
@@ -120,19 +122,22 @@ for page in pages:
 ## Step 4: Clean, repair, and aggregate
 
 ```python
-result = '\n\n---\n\n'.join(sections)
+result = "\n\n---\n\n".join(sections)
 
 # Repair markdown artifacts (broken links, empty links, etc.)
 from contaix.web import repair_markdown
+
 result = repair_markdown(result)
 
 # Optional: remove duplicate blocks (nav/footer that leaked through)
 from scraped.util import deduplicate_lines
+
 result, removed = deduplicate_lines(result, min_block_size=5)
 
 # Save
 from pathlib import Path
-output = Path('~/Downloads/<site_name>.md').expanduser()
+
+output = Path("~/Downloads/<site_name>.md").expanduser()
 output.write_text(result)
 print(f"Saved to {output} ({len(result):,} chars)")
 ```
@@ -148,8 +153,9 @@ Review the output. Look for:
 Quick diagnostic:
 ```python
 import re
+
 content = output.read_text()
-broken_links = re.findall(r'\[[^\]]*\n[^\]]*\]\([^)]+\)', content)
+broken_links = re.findall(r"\[[^\]]*\n[^\]]*\]\([^)]+\)", content)
 if broken_links:
     print(f"{len(broken_links)} multi-line links — run repair_markdown()")
 ```
@@ -161,7 +167,8 @@ Fix issues by adjusting the extraction approach per-page if needed.
 ### Add code from a GitHub repo
 ```python
 from contaix import code_aggregate
-code_md = code_aggregate('https://github.com/org/repo')
+
+code_md = code_aggregate("https://github.com/org/repo")
 full = f"{website_md}\n\n---\n\n# Source Code\n\n{code_md}"
 ```
 

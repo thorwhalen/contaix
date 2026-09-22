@@ -21,9 +21,9 @@ that's fine — the tool will discover the full navigation from any page.
 from contaix.web import site_to_markdown
 
 result = site_to_markdown(
-    '<URL>',
-    cache_dir='/tmp/contaix_cache/<site_name>',
-    output_file='~/Downloads/<site_name>_docs.md',
+    "<URL>",
+    cache_dir="/tmp/contaix_cache/<site_name>",
+    output_file="~/Downloads/<site_name>_docs.md",
     verbose=True,
 )
 ```
@@ -42,8 +42,8 @@ You can also call the fast-path helpers directly:
 ```python
 from contaix.web import find_llms_full_url, fetch_llms_full
 
-bundle_url = find_llms_full_url('<URL>')   # str or None
-md = fetch_llms_full('<URL>')              # str or None
+bundle_url = find_llms_full_url("<URL>")  # str or None
+md = fetch_llms_full("<URL>")  # str or None
 ```
 
 To force the scrape path (e.g. you want only one tab), pass `use_llms_full=False`
@@ -63,13 +63,13 @@ import re
 print(f"Size: {len(content):,} chars")
 print(f"Sections: {len(re.findall(r'^# .+', content, re.MULTILINE))}")
 print(f"Links: {len(re.findall(r'\\[.+?\\]\\(.+?\\)', content))}")
-print(f"Code blocks: {content.count(chr(96)*3) // 2}")
+print(f"Code blocks: {content.count(chr(96) * 3) // 2}")
 
 # Artifact check
 for pattern, name in [
-    (r'\$L[0-9a-f]+', 'unresolved $L refs'),
-    ('Loading...', 'Loading placeholders'),
-    ('False', 'False artifacts'),
+    (r"\$L[0-9a-f]+", "unresolved $L refs"),
+    ("Loading...", "Loading placeholders"),
+    ("False", "False artifacts"),
 ]:
     count = len(re.findall(pattern, content))
     if count > 0:
@@ -88,7 +88,7 @@ content = open(result).read()
 fixed = repair_markdown(content)
 # Compare
 if fixed != content:
-    open(result, 'w').write(fixed)
+    open(result, "w").write(fixed)
     print("Repaired markdown artifacts")
 ```
 
@@ -106,10 +106,11 @@ WebFetch instead.
 **Missing pages** → Check if the site has tabs/sections. Use `tab_filter`:
 ```python
 from contaix.web import list_site_pages
-pages = list_site_pages('<URL>')
+
+pages = list_site_pages("<URL>")
 # See what tabs/groups exist
-tabs = set(p['tab'] for p in pages)
-groups = set(p['group'] for p in pages)
+tabs = set(p["tab"] for p in pages)
+groups = set(p["group"] for p in pages)
 print(f"Tabs: {tabs}")
 print(f"Groups: {groups}")
 ```
@@ -140,9 +141,9 @@ If `site_to_markdown` doesn't work, use these building blocks:
 
 ```python
 from contaix.web import (
-    extract_site_nav,     # Get navigation structure
-    fetch_page,           # Fetch with caching
-    fetch_nextjs_rsc,     # Fetch from Next.js RSC endpoint
+    extract_site_nav,  # Get navigation structure
+    fetch_page,  # Fetch with caching
+    fetch_nextjs_rsc,  # Fetch from Next.js RSC endpoint
     html_to_clean_markdown,  # Convert HTML to markdown
     extract_rsc_page_content,  # Extract from RSC flight data
 )

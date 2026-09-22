@@ -35,8 +35,8 @@ gh skill install thorwhalen/contaix contaix_web_aggregate
 from contaix.web import site_to_markdown
 
 site_to_markdown(
-    'https://fal.ai/docs/documentation',
-    output_file='~/Downloads/fal_ai_docs.md',
+    "https://fal.ai/docs/documentation",
+    output_file="~/Downloads/fal_ai_docs.md",
     verbose=True,
 )
 ```
@@ -52,8 +52,8 @@ To bypass the fast path or grab the bundle yourself:
 ```python
 from contaix.web import find_llms_full_url, fetch_llms_full
 
-bundle_url = find_llms_full_url('https://fal.ai/docs')   # str or None
-markdown   = fetch_llms_full('https://fal.ai/docs')      # str or None
+bundle_url = find_llms_full_url("https://fal.ai/docs")  # str or None
+markdown = fetch_llms_full("https://fal.ai/docs")  # str or None
 ```
 
 ### Code base → single markdown file
@@ -62,16 +62,16 @@ markdown   = fetch_llms_full('https://fal.ai/docs')      # str or None
 from contaix import code_aggregate
 
 # A local package
-md = code_aggregate('contaix')
+md = code_aggregate("contaix")
 
 # A directory
-md = code_aggregate('/path/to/project')
+md = code_aggregate("/path/to/project")
 
 # A GitHub repo (downloaded via hubcap)
-md = code_aggregate('https://github.com/thorwhalen/contaix')
+md = code_aggregate("https://github.com/thorwhalen/contaix")
 
 # Save instead of return
-code_aggregate('contaix', egress='/tmp/contaix_code.md')
+code_aggregate("contaix", egress="/tmp/contaix_code.md")
 ```
 
 ### Files → markdown
@@ -81,10 +81,10 @@ from contaix import bytes_to_markdown, bytes_store_to_markdown_store
 from dol import Files
 
 # Single file (auto-detects format)
-md = bytes_to_markdown(open('report.pdf', 'rb').read(), input_format='pdf')
+md = bytes_to_markdown(open("report.pdf", "rb").read(), input_format="pdf")
 
 # A whole folder
-src = Files('/path/to/documents')
+src = Files("/path/to/documents")
 target = {}
 bytes_store_to_markdown_store(src, target)
 ```
@@ -114,11 +114,11 @@ list(extract_urls("[OpenAI](https://openai.com) and https://anthropic.com"))
 # -> [('OpenAI', 'https://openai.com'), ('https://anthropic.com', 'https://anthropic.com')]
 
 # Verify they resolve
-verify_urls(['https://openai.com', 'https://anthropic.com'])
+verify_urls(["https://openai.com", "https://anthropic.com"])
 # -> {'https://openai.com': 200, 'https://anthropic.com': 200}
 
 # Download as PDFs (delegates to pdfdol)
-download_articles(some_md_string, save_dir='~/Downloads/articles')
+download_articles(some_md_string, save_dir="~/Downloads/articles")
 ```
 
 ## Package Map
