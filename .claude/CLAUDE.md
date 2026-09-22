@@ -41,6 +41,7 @@ install_skills()    # Symlink them into ~/.claude/skills/
 ```
 
 Available skills:
+- `contaix-acquire-docs` - Acquire a tool's docs (plus OpenAPI/MCP/GraphQL specs) as one agent-ready markdown bundle, cheapest source first
 - `contaix_docs_to_markdown` - Convert a documentation website to markdown
 - `contaix_web_aggregate` - General web content aggregation
 - `dn-repair` - Markdown repair and cleanup
