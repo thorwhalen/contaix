@@ -1,0 +1,21 @@
+contaix.urls
+============
+
+.. automodule:: contaix.urls
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      download_articles
+      download_articles_by_section
+      extract_html_links
+      extract_markdown_links
+      extract_urls
+      extract_urls_only
+      extract_with_surrounding_context
+      get_from_clipboard
+      remove_hyperlink_crap
+      verify_urls
+   

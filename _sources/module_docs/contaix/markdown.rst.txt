@@ -1,4 +1,0 @@
-contaix.markdown
-================
-.. automodule:: contaix.markdown
-   :members:

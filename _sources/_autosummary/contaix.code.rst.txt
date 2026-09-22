@@ -1,0 +1,29 @@
+contaix.code
+============
+
+.. automodule:: contaix.code
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DFLT_AGGREGATE_EXCLUDE_PATTERNS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      code_aggregate
+      is_local_pkg_name
+      iter_pruned_aggregate_lines
+      prune_code_aggregate
+      resolve_code_source
+      resolve_code_source_dir_path
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      PackageCodeContexts
+   

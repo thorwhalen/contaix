@@ -1,0 +1,19 @@
+﻿contaix
+=======
+
+.. automodule:: contaix
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   aggregation
+   code
+   markdown
+   skills
+   urls
+   util
+   web

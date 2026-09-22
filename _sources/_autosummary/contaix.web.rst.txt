@@ -1,0 +1,25 @@
+contaix.web
+===========
+
+.. automodule:: contaix.web
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      extract_rsc_page_content
+      extract_site_nav
+      fetch_llms_full
+      fetch_nextjs_rsc
+      fetch_page
+      fetch_pages
+      find_llms_full_url
+      html_to_clean_markdown
+      is_nextjs_site
+      list_site_pages
+      parse_rsc_flight
+      rsc_tree_to_markdown
+      site_to_markdown
+      url_to_cache_key
+   

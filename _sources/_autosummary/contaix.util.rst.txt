@@ -1,0 +1,18 @@
+contaix.util
+============
+
+.. automodule:: contaix.util
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      fullpath
+      identity
+      is_url
+      remove_improperly_double_newlines
+      save_to_file_and_return_file
+      source_first_arg_from_clipboard_if_none
+      url_to_contents
+   

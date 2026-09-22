@@ -1,0 +1,707 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<link rel="alternate" type="text/markdown" href="contaix.web.html.md">
+<link rel="describedby" href="../llms.txt" type="text/markdown">
+<link rel="alternate" type="text/markdown" href="contaix.web.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="For AI agents" href="../ai-agents.html"><link rel="prev" title="contaix.util" href="contaix.util.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>contaix.web - contaix</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f0f0f0;
+  --color-code-foreground: black;
+  --color-brand-primary: #8c325d;
+  --color-brand-content: #8c325d;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #f893bd;
+  --color-brand-content: #f893bd;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #f893bd;
+  --color-brand-content: #f893bd;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">contaix</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">contaix</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../api.html">API reference</a><input aria-label="Toggle navigation of API reference" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="contaix.html">contaix</a><input aria-label="Toggle navigation of contaix" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="contaix.aggregation.html">contaix.aggregation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contaix.code.html">contaix.code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contaix.markdown.html">contaix.markdown</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contaix.skills.html">contaix.skills</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contaix.urls.html">contaix.urls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contaix.util.html">contaix.util</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">contaix.web</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ai-agents.html">For AI agents</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/_autosummary/contaix.web.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-contaix.web">
+<span id="contaix-web"></span><h1>contaix.web<a class="headerlink" href="#module-contaix.web" title="Link to this heading">¶</a></h1>
+<p>Web content extraction and aggregation tools.</p>
+<p>Functions for extracting structured content from websites and converting to markdown,
+with support for navigation discovery, caching, and content aggregation.</p>
+<p>Main entry points:</p>
+<blockquote>
+<div><p>site_to_markdown(url)  # Full pipeline: discover nav, fetch pages, aggregate
+extract_site_nav(url)  # Get ordered navigation structure from a doc site
+fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">md</span> <span class="o">=</span> <span class="n">site_to_markdown</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s1">'https://platform.claude.com/docs/en/home'</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">cache_dir</span><span class="o">=</span><span class="s1">'/tmp/claude_docs_cache'</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">output_file</span><span class="o">=</span><span class="s1">'~/Downloads/claude_docs.md'</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Functions</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.extract_rsc_page_content" title="contaix.web.extract_rsc_page_content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_rsc_page_content</span></code></a>(rsc_text)</p></td>
+<td><p>Extract page content from RSC flight data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.extract_site_nav" title="contaix.web.extract_site_nav"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_site_nav</span></code></a>(url, *[, html])</p></td>
+<td><p>Extract navigation structure from a documentation site.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.fetch_llms_full" title="contaix.web.fetch_llms_full"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetch_llms_full</span></code></a>(url, *[, timeout])</p></td>
+<td><p>Fetch a publisher-provided single-doc bundle if available.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.fetch_nextjs_rsc" title="contaix.web.fetch_nextjs_rsc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetch_nextjs_rsc</span></code></a>(url, *[, cache_dir, force, ...])</p></td>
+<td><p>Fetch page content via Next.js RSC flight endpoint.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.fetch_page" title="contaix.web.fetch_page"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetch_page</span></code></a>(url, *[, cache_dir, force, timeout])</p></td>
+<td><p>Fetch a page's HTML content, with optional disk caching.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.fetch_pages" title="contaix.web.fetch_pages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetch_pages</span></code></a>(urls, *[, cache_dir, force, verbose])</p></td>
+<td><p>Fetch multiple pages with caching.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.find_llms_full_url" title="contaix.web.find_llms_full_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_llms_full_url</span></code></a>(url, *[, timeout])</p></td>
+<td><p>Probe for a publisher-provided single-doc bundle.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.html_to_clean_markdown" title="contaix.web.html_to_clean_markdown"><code class="xref py py-obj docutils literal notranslate"><span class="pre">html_to_clean_markdown</span></code></a>(html, *[, ...])</p></td>
+<td><p>Convert HTML to clean markdown using html2text.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.is_nextjs_site" title="contaix.web.is_nextjs_site"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_nextjs_site</span></code></a>(html)</p></td>
+<td><p>Detect if a page is served by Next.js (App Router).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.list_site_pages" title="contaix.web.list_site_pages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_site_pages</span></code></a>(url)</p></td>
+<td><p>List all pages found in a documentation site's navigation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.parse_rsc_flight" title="contaix.web.parse_rsc_flight"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_rsc_flight</span></code></a>(rsc_text)</p></td>
+<td><p>Parse RSC flight data into a dict mapping keys to parsed JSON data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.rsc_tree_to_markdown" title="contaix.web.rsc_tree_to_markdown"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsc_tree_to_markdown</span></code></a>(node, *[, _registry, ...])</p></td>
+<td><p>Recursively extract markdown from a React Server Component tree node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.site_to_markdown" title="contaix.web.site_to_markdown"><code class="xref py py-obj docutils literal notranslate"><span class="pre">site_to_markdown</span></code></a>(url, *[, cache_dir, ...])</p></td>
+<td><p>Download a documentation site and produce a single aggregated markdown.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.url_to_cache_key" title="contaix.web.url_to_cache_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">url_to_cache_key</span></code></a>(url)</p></td>
+<td><p>Convert a URL to a filesystem-safe cache key.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.extract_rsc_page_content">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">extract_rsc_page_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rsc_text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#extract_rsc_page_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.extract_rsc_page_content" title="Link to this definition">¶</a></dt>
+<dd><p>Extract page content from RSC flight data.</p>
+<p>Works on both:</p>
+<ul class="simple">
+<li><p>RSC flight endpoint responses (<code class="docutils literal notranslate"><span class="pre">text/x-component</span></code>)</p></li>
+<li><p>Inline RSC payloads extracted from HTML</p></li>
+</ul>
+<p>Returns markdown text if content was found, None otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.extract_site_nav">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">extract_site_nav</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#extract_site_nav"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.extract_site_nav" title="Link to this definition">¶</a></dt>
+<dd><p>Extract navigation structure from a documentation site.</p>
+<p>Returns a dict with keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">base_url</span></code>: The base URL of the site</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tabs</span></code>: List of tab dicts, each with <code class="docutils literal notranslate"><span class="pre">label</span></code> and <code class="docutils literal notranslate"><span class="pre">groups</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pages</span></code>: Flat ordered list of <code class="docutils literal notranslate"><span class="pre">{path,</span> <span class="pre">title}</span></code> dicts (all tabs)</p></li>
+</ul>
+</div></blockquote>
+<p>Tries, in order:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Next.js RSC payload (embedded in SSR HTML)</p></li>
+<li><p>HTML <code class="docutils literal notranslate"><span class="pre">&lt;a&gt;</span></code> link extraction with path-based grouping</p></li>
+</ol>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The documentation site URL (e.g. a homepage or any page on the site).</p></li>
+<li><p><strong>html</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Pre-fetched HTML. If None, fetches from <code class="docutils literal notranslate"><span class="pre">url</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fetch_llms_full">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fetch_llms_full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#fetch_llms_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.fetch_llms_full" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch a publisher-provided single-doc bundle if available.</p>
+<p>See <a class="reference internal" href="#contaix.web.find_llms_full_url" title="contaix.web.find_llms_full_url"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_llms_full_url()</span></code></a> for how the URL is discovered.</p>
+<p>Returns the markdown text, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no bundle was found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fetch_nextjs_rsc">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fetch_nextjs_rsc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#fetch_nextjs_rsc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.fetch_nextjs_rsc" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch page content via Next.js RSC flight endpoint.</p>
+<p>Next.js App Router sites serve React Server Component payloads when the
+<code class="docutils literal notranslate"><span class="pre">RSC:</span> <span class="pre">1</span></code> header is present. These contain the full page content that
+would otherwise require JavaScript rendering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The page URL.</p></li>
+<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory to cache RSC responses.</p></li>
+<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Re-fetch even if cached.</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Request timeout.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The RSC flight data as text.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fetch_page">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fetch_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#fetch_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.fetch_page" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch a page’s HTML content, with optional disk caching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The URL to fetch.</p></li>
+<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory to cache HTML files. If None, no caching.</p></li>
+<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If True, re-fetch even if cached.</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Request timeout in seconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The page’s HTML content.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.fetch_pages">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">fetch_pages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">urls</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#fetch_pages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.fetch_pages" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch multiple pages with caching.</p>
+<p>Returns a dict mapping URL -&gt; HTML content.
+Pages that fail to fetch are skipped with a warning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.find_llms_full_url">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">find_llms_full_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#find_llms_full_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.find_llms_full_url" title="Link to this definition">¶</a></dt>
+<dd><p>Probe for a publisher-provided single-doc bundle.</p>
+<p>Many documentation generators (Mintlify, Docusaurus, Fern, etc.) expose
+the entire docs as a single markdown file at <code class="docutils literal notranslate"><span class="pre">/llms-full.txt</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">/llms.txt</span></code> for an index). When present, this is far better than
+scraping page-by-page.</p>
+<p>Tries, in order:</p>
+<ol class="arabic simple">
+<li><p>Same path as the input URL with the doc-root replaced (e.g.
+<code class="docutils literal notranslate"><span class="pre">https://site.com/docs/foo</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">https://site.com/docs/llms-full.txt</span></code>).</p></li>
+<li><p>Site root (e.g. <code class="docutils literal notranslate"><span class="pre">https://site.com/llms-full.txt</span></code>).</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Any URL on the documentation site.</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – HEAD request timeout.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The first URL that returns HTTP 200 with non-trivial content, or
+<code class="docutils literal notranslate"><span class="pre">None</span></code> if none of the candidates exist.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.html_to_clean_markdown">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">html_to_clean_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_links</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">html2text_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#html_to_clean_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.html_to_clean_markdown" title="Link to this definition">¶</a></dt>
+<dd><p>Convert HTML to clean markdown using html2text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>html</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Raw HTML content.</p></li>
+<li><p><strong>body_width</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Line width for wrapping. 0 = no wrapping.</p></li>
+<li><p><strong>ignore_images</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to skip image tags.</p></li>
+<li><p><strong>include_links</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to include hyperlinks in output.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.is_nextjs_site">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">is_nextjs_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#is_nextjs_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.is_nextjs_site" title="Link to this definition">¶</a></dt>
+<dd><p>Detect if a page is served by Next.js (App Router).</p>
+<p>Looks for <code class="docutils literal notranslate"><span class="pre">self.__next_f.push</span></code> in the HTML, which is the RSC
+streaming payload signature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.list_site_pages">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">list_site_pages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#list_site_pages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.list_site_pages" title="Link to this definition">¶</a></dt>
+<dd><p>List all pages found in a documentation site’s navigation.</p>
+<p>Returns a list of dicts with keys: path, title, url, group, tab.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pages</span> <span class="o">=</span> <span class="n">list_site_pages</span><span class="p">(</span><span class="s1">'https://platform.claude.com/docs/en/home'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">pages</span><span class="p">)</span>
+<span class="go">89</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.parse_rsc_flight">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">parse_rsc_flight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rsc_text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#parse_rsc_flight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.parse_rsc_flight" title="Link to this definition">¶</a></dt>
+<dd><p>Parse RSC flight data into a dict mapping keys to parsed JSON data.</p>
+<p>Each RSC record starts with <code class="docutils literal notranslate"><span class="pre">&lt;hex_key&gt;:&lt;payload&gt;</span></code>. Records come in three
+flavors:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">I[...]</span></code>: module import descriptors (skipped here).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T&lt;hex_size&gt;,&lt;bytes&gt;</span></code>: a raw text chunk whose payload occupies exactly
+<code class="docutils literal notranslate"><span class="pre">hex_size</span></code> bytes (often markdown, code, or compiled MDX). The payload
+may contain newlines, so we read by byte count rather than splitting on
+<code class="docutils literal notranslate"><span class="pre">\n</span></code>.</p></li>
+<li><p>Anything else: a JSON value terminated by the next record header
+(<code class="docutils literal notranslate"><span class="pre">\n&lt;hex&gt;:</span></code>) or end-of-text.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rsc_text</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Raw RSC flight response text (<code class="docutils literal notranslate"><span class="pre">text/x-component</span></code>).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping of hex keys to their parsed payloads.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.rsc_tree_to_markdown">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">rsc_tree_to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">_registry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#rsc_tree_to_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.rsc_tree_to_markdown" title="Link to this definition">¶</a></dt>
+<dd><p>Recursively extract markdown from a React Server Component tree node.</p>
+<p>The RSC tree uses the format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s2">"$"</span><span class="p">,</span> <span class="s2">"tagName"</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="p">{</span><span class="s2">"children"</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span> <span class="s2">"className"</span><span class="p">:</span> <span class="o">...</span><span class="p">}]</span>
+</pre></div>
+</div>
+<p>or plain strings for text nodes. Component references like <code class="docutils literal notranslate"><span class="pre">&quot;$L2a&quot;</span></code>
+are resolved via <code class="docutils literal notranslate"><span class="pre">_registry</span></code> (from <a class="reference internal" href="#contaix.web.parse_rsc_flight" title="contaix.web.parse_rsc_flight"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_rsc_flight()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.site_to_markdown">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">site_to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tab_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_fetcher</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_extractor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\\n\\n---\\n\\n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collapse_blank_lines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_llms_full</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#site_to_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.site_to_markdown" title="Link to this definition">¶</a></dt>
+<dd><p>Download a documentation site and produce a single aggregated markdown.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The documentation site’s root URL.</p></li>
+<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory for caching fetched HTML. Defaults to <code class="docutils literal notranslate"><span class="pre">~/.cache/contaix/web</span></code>.</p></li>
+<li><p><strong>output_file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Path to save the markdown file. If None, returns the string.</p></li>
+<li><p><strong>tab_filter</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – If a string, only include pages from tabs whose label contains this
+string (case-insensitive). If a callable, <code class="docutils literal notranslate"><span class="pre">tab_filter(tab_label)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code>.</p></li>
+<li><p><strong>page_fetcher</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – Custom <code class="docutils literal notranslate"><span class="pre">(url)</span> <span class="pre">-&gt;</span> <span class="pre">html</span></code> function. Defaults to <code class="docutils literal notranslate"><span class="pre">fetch_page</span></code>.</p></li>
+<li><p><strong>content_extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – Custom <code class="docutils literal notranslate"><span class="pre">(html)</span> <span class="pre">-&gt;</span> <span class="pre">markdown</span></code> function. Defaults to auto-detection.</p></li>
+<li><p><strong>section_separator</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Separator between page sections in the output.</p></li>
+<li><p><strong>use_llms_full</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If True (default), first try to find a publisher-provided
+<code class="docutils literal notranslate"><span class="pre">/llms-full.txt</span></code> bundle (Mintlify, Docusaurus, etc. ship these).
+When found, returns it directly instead of scraping page-by-page.
+Disable to force the scraping pipeline. Skipped automatically when
+<code class="docutils literal notranslate"><span class="pre">page_fetcher</span></code> or <code class="docutils literal notranslate"><span class="pre">tab_filter</span></code> is set, since those imply the
+caller wants the scraping path.</p></li>
+<li><p><strong>verbose</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Print progress information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">output_file</span></code> is None, returns the markdown string.
+Otherwise, returns the output file path.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="contaix.web.url_to_cache_key">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">url_to_cache_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#url_to_cache_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.url_to_cache_key" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a URL to a filesystem-safe cache key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url_to_cache_key</span><span class="p">(</span><span class="s1">'https://example.com/docs/en/foo'</span><span class="p">)</span>
+<span class="go">'example.com__docs__en__foo.html'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../ai-agents.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">For AI agents</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="contaix.util.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">contaix.util</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">contaix.web</a><ul>
+<li><a class="reference internal" href="#contaix.web.extract_rsc_page_content"><code class="docutils literal notranslate"><span class="pre">extract_rsc_page_content()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.extract_site_nav"><code class="docutils literal notranslate"><span class="pre">extract_site_nav()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.fetch_llms_full"><code class="docutils literal notranslate"><span class="pre">fetch_llms_full()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.fetch_nextjs_rsc"><code class="docutils literal notranslate"><span class="pre">fetch_nextjs_rsc()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.fetch_page"><code class="docutils literal notranslate"><span class="pre">fetch_page()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.fetch_pages"><code class="docutils literal notranslate"><span class="pre">fetch_pages()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.find_llms_full_url"><code class="docutils literal notranslate"><span class="pre">find_llms_full_url()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.html_to_clean_markdown"><code class="docutils literal notranslate"><span class="pre">html_to_clean_markdown()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.is_nextjs_site"><code class="docutils literal notranslate"><span class="pre">is_nextjs_site()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.list_site_pages"><code class="docutils literal notranslate"><span class="pre">list_site_pages()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.parse_rsc_flight"><code class="docutils literal notranslate"><span class="pre">parse_rsc_flight()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.rsc_tree_to_markdown"><code class="docutils literal notranslate"><span class="pre">rsc_tree_to_markdown()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.site_to_markdown"><code class="docutils literal notranslate"><span class="pre">site_to_markdown()</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.url_to_cache_key"><code class="docutils literal notranslate"><span class="pre">url_to_cache_key()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=a8acf705"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=fd10adb8"></script>
+    </body>
+</html>

@@ -1,0 +1,27 @@
+# contaix
+
+> Tools to make contexts for AI
+
+
+## Pages
+
+- [contaix](index.html.md): Tools to make contexts (knowledge bases) for AI.
+- [API reference](api.html.md): | &#96;contaix&#96;   | Tools to make contexts (knowledge bases for AI agents)   |
+- [contaix](_autosummary/contaix.html.md): Tools to make contexts (knowledge bases for AI agents)
+- [contaix.aggregation](_autosummary/contaix.aggregation.html.md): Tools for aggregating contexts
+- [contaix.code](_autosummary/contaix.code.html.md): Tools to make AI contexts from code bases
+- [contaix.markdown](_autosummary/contaix.markdown.html.md): Converting things to markdown
+- [contaix.skills](_autosummary/contaix.skills.html.md): Skill discovery and installation for the contaix ecosystem.
+- [contaix.urls](_autosummary/contaix.urls.html.md): Work with urls
+- [contaix.util](_autosummary/contaix.util.html.md): General utilities for contaix
+- [contaix.web](_autosummary/contaix.web.html.md): Web content extraction and aggregation tools.
+- [For AI agents](ai-agents.html.md): &#96;contaix&#96; ships artifacts for coding agents alongside its code. This page lists
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-09-22 13:47 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+
+## Optional
+
+- [contaix.md](contaix.md): Complete documentation in a single file.
+
+## Build
+
+- [build_info.json](build_info.json): build provenance (commit, version, tool versions, whether the docs match the package)

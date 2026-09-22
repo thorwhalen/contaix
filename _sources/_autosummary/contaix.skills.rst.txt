@@ -1,0 +1,15 @@
+contaix.skills
+==============
+
+.. automodule:: contaix.skills
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      discover_skills
+      install_skills
+      main
+      uninstall_skills
+   

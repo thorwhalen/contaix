@@ -1,4 +1,0 @@
-contaix.web
-===========
-.. automodule:: contaix.web
-   :members:

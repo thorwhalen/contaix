@@ -1,4 +1,0 @@
-contaix.aggregation
-===================
-.. automodule:: contaix.aggregation
-   :members:

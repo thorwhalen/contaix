@@ -1,4 +1,0 @@
-contaix.util
-============
-.. automodule:: contaix.util
-   :members:

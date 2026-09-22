@@ -1,0 +1,19 @@
+# contaix
+
+> Tools to make contexts for AI
+
+
+## Pages in this subsection
+
+- [contaix](contaix.html.md): Tools to make contexts (knowledge bases for AI agents)
+- [contaix.aggregation](contaix.aggregation.html.md): Tools for aggregating contexts
+- [contaix.code](contaix.code.html.md): Tools to make AI contexts from code bases
+- [contaix.markdown](contaix.markdown.html.md): Converting things to markdown
+- [contaix.skills](contaix.skills.html.md): Skill discovery and installation for the contaix ecosystem.
+- [contaix.urls](contaix.urls.html.md): Work with urls
+- [contaix.util](contaix.util.html.md): General utilities for contaix
+- [contaix.web](contaix.web.html.md): Web content extraction and aggregation tools.
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.

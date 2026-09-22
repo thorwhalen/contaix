@@ -1,0 +1,12 @@
+contaix.aggregation
+===================
+
+.. automodule:: contaix.aggregation
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      aggregate_store
+   
