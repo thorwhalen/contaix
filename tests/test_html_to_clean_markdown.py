@@ -105,3 +105,83 @@ def test_extract_main_content_prefers_article():
     html = f"<nav>menu</nav><article><h1>Hi</h1><p>{filler}</p></article><footer>f</footer>"
     md = _extract_main_content_html(html)
     assert md.startswith("# Hi") and "menu" not in md and "footer" not in md
+
+
+# --- regressions found by the adversarial review (omitted end tags, glued words, ...) ---
+
+
+@pytest.mark.parametrize(
+    "html, expected",
+    [
+        ("<ul><li>a<li>b<li>c</ul>", "* a\n* b\n* c"),
+        ("<ol><li>one<li>two</ol>", "1. one\n2. two"),
+        (
+            "<table><tr><th>h1<th>h2<tr><td>a<td>b</table>",
+            "| h1 | h2 |\n| --- | --- |\n| a | b |",
+        ),
+    ],
+)
+def test_omitted_end_tags_parse_like_a_browser(html, expected):
+    assert html_to_clean_markdown(html) == expected
+
+
+@pytest.mark.parametrize(
+    "html",
+    [
+        "<ul>" + "<li>x" * 2000 + "</ul>",
+        "<div>" * 600 + "x" + "</div>" * 600,
+        "<b>x " * 700,
+    ],
+)
+def test_deeply_nested_html_does_not_raise_recursion_error(html):
+    assert "x" in html_to_clean_markdown(html)
+
+
+def test_text_after_nested_list_is_not_glued_to_its_last_item():
+    md = html_to_clean_markdown(
+        "<ul><li>x<ul><li>next batch</li></ul>Ten sheets</li></ul>"
+    )
+    assert "next batchTen" not in md and "next batch" in md and "Ten sheets" in md
+
+
+def test_heading_inside_link_stays_a_heading():
+    assert html_to_clean_markdown('<a href="/x"><h2>Head</h2></a>') == "## [Head](/x)"
+    card = html_to_clean_markdown('<a href="/c"><div><h3>T</h3><p>B</p></div></a>')
+    assert card.startswith("### [T](/c)") and "B" in card
+
+
+def test_code_containing_a_fence_gets_a_longer_fence():
+    md = html_to_clean_markdown("<pre>```\ninner\n```</pre>")
+    assert md == "````\n```\ninner\n```\n````"
+
+
+def test_blank_lines_kept_in_code_nested_in_lists():
+    md = html_to_clean_markdown(
+        "<ul><li>x<ul><li>i<pre>a\n\n\n\nb</pre></li></ul></li></ul>"
+    )
+    assert "a\n\n\n\n    b" in md
+
+
+def test_convert_and_string_strip_options():
+    html = "<p><b>b</b><i>i</i><img src=x></p>"
+    assert html_to_clean_markdown(html, convert=["b", "i", "img"]) == "**b***i*"
+    assert html_to_clean_markdown("<p>a <code>c</code></p>", strip="code") == "a c"
+
+
+def test_source_newlines_do_not_create_block_syntax():
+    assert (
+        html_to_clean_markdown("<p>Total\n# of items\n- b</p>")
+        == "Total # of items - b"
+    )
+
+
+def test_permalink_anchors_are_dropped():
+    html = '<h2>Install<a class="headerlink" href="#install">¶</a></h2>'
+    assert html_to_clean_markdown(html) == "## Install"
+
+
+def test_inline_content_after_a_non_nested_list_is_not_glued():
+    md = html_to_clean_markdown(
+        "<div><ul><li>next batch</li></ul><span>Ten sheets</span></div>"
+    )
+    assert "batchTen" not in md and "Ten sheets" in md
