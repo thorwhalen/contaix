@@ -1,39 +1,39 @@
 {
   "schema_version": 1,
-  "built_at": "2026-09-22T13:47:28Z",
+  "built_at": "2026-10-12T23:13:28Z",
   "package": {
     "name": "contaix",
-    "version": "0.0.19",
+    "version": "0.0.20",
     "display_name": "contaix",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "8e7afad3f150efc4765bd12934b61891243261b5",
-    "short_commit": "8e7afad",
+    "commit": "94df689b5ca308f965abccd487c7c75d9b0c4702",
+    "short_commit": "94df689",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/contaix",
-    "commit_url": "https://github.com/thorwhalen/contaix/commit/8e7afad3f150efc4765bd12934b61891243261b5",
+    "commit_url": "https://github.com/thorwhalen/contaix/commit/94df689b5ca308f965abccd487c7c75d9b0c4702",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/contaix",
-    "sha": "8e7afad3f150efc4765bd12934b61891243261b5",
+    "sha": "94df689b5ca308f965abccd487c7c75d9b0c4702",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "35735523995",
-    "run_url": "https://github.com/thorwhalen/contaix/actions/runs/35735523995",
+    "run_id": "38320812825",
+    "run_url": "https://github.com/thorwhalen/contaix/actions/runs/38320812825",
     "server_url": "https://github.com"
   },
   "tools": {
     "epythet": "0.2.12",
     "sphinx": "9.1.0",
     "docutils": "0.22.4",
-    "python": "3.12.14"
+    "python": "3.12.15"
   },
   "config": {
     "theme": "auto",
@@ -56,20 +56,20 @@
   },
   "site": {
     "modules_documented": 8,
-    "objects_documented": 46
+    "objects_documented": 49
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.20",
+    "latest": "0.0.21",
     "relation": "behind",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/contaix && cd contaix\ngit checkout 8e7afad3f150efc4765bd12934b61891243261b5\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/contaix && cd contaix\ngit checkout 94df689b5ca308f965abccd487c7c75d9b0c4702\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": false,
     "notes": [
-      "The documented version (0.0.19) is behind the latest release on PyPI (0.0.20): `pip install contaix` gives newer code than these docs describe."
+      "The documented version (0.0.20) is behind the latest release on PyPI (0.0.21): `pip install contaix` gives newer code than these docs describe."
     ]
   }
 }

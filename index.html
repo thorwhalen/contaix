@@ -301,8 +301,8 @@ gh<span class="w"> </span>skill<span class="w"> </span>install<span class="w"> <
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contaix.web</span><span class="w"> </span><span class="kn">import</span> <span class="n">site_to_markdown</span>
 
 <span class="n">site_to_markdown</span><span class="p">(</span>
-    <span class="s1">'https://fal.ai/docs/documentation'</span><span class="p">,</span>
-    <span class="n">output_file</span><span class="o">=</span><span class="s1">'~/Downloads/fal_ai_docs.md'</span><span class="p">,</span>
+    <span class="s2">"https://fal.ai/docs/documentation"</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="s2">"~/Downloads/fal_ai_docs.md"</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -315,8 +315,8 @@ page (with caching), and aggregating.</p>
 <p>To bypass the fast path or grab the bundle yourself:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contaix.web</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_llms_full_url</span><span class="p">,</span> <span class="n">fetch_llms_full</span>
 
-<span class="n">bundle_url</span> <span class="o">=</span> <span class="n">find_llms_full_url</span><span class="p">(</span><span class="s1">'https://fal.ai/docs'</span><span class="p">)</span>   <span class="c1"># str or None</span>
-<span class="n">markdown</span>   <span class="o">=</span> <span class="n">fetch_llms_full</span><span class="p">(</span><span class="s1">'https://fal.ai/docs'</span><span class="p">)</span>      <span class="c1"># str or None</span>
+<span class="n">bundle_url</span> <span class="o">=</span> <span class="n">find_llms_full_url</span><span class="p">(</span><span class="s2">"https://fal.ai/docs"</span><span class="p">)</span>  <span class="c1"># str or None</span>
+<span class="n">markdown</span> <span class="o">=</span> <span class="n">fetch_llms_full</span><span class="p">(</span><span class="s2">"https://fal.ai/docs"</span><span class="p">)</span>  <span class="c1"># str or None</span>
 </pre></div>
 </div>
 </section>
@@ -325,16 +325,16 @@ page (with caching), and aggregating.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">contaix</span><span class="w"> </span><span class="kn">import</span> <span class="n">code_aggregate</span>
 
 <span class="c1"># A local package</span>
-<span class="n">md</span> <span class="o">=</span> <span class="n">code_aggregate</span><span class="p">(</span><span class="s1">'contaix'</span><span class="p">)</span>
+<span class="n">md</span> <span class="o">=</span> <span class="n">code_aggregate</span><span class="p">(</span><span class="s2">"contaix"</span><span class="p">)</span>
 
 <span class="c1"># A directory</span>
-<span class="n">md</span> <span class="o">=</span> <span class="n">code_aggregate</span><span class="p">(</span><span class="s1">'/path/to/project'</span><span class="p">)</span>
+<span class="n">md</span> <span class="o">=</span> <span class="n">code_aggregate</span><span class="p">(</span><span class="s2">"/path/to/project"</span><span class="p">)</span>
 
 <span class="c1"># A GitHub repo (downloaded via hubcap)</span>
-<span class="n">md</span> <span class="o">=</span> <span class="n">code_aggregate</span><span class="p">(</span><span class="s1">'https://github.com/thorwhalen/contaix'</span><span class="p">)</span>
+<span class="n">md</span> <span class="o">=</span> <span class="n">code_aggregate</span><span class="p">(</span><span class="s2">"https://github.com/thorwhalen/contaix"</span><span class="p">)</span>
 
 <span class="c1"># Save instead of return</span>
-<span class="n">code_aggregate</span><span class="p">(</span><span class="s1">'contaix'</span><span class="p">,</span> <span class="n">egress</span><span class="o">=</span><span class="s1">'/tmp/contaix_code.md'</span><span class="p">)</span>
+<span class="n">code_aggregate</span><span class="p">(</span><span class="s2">"contaix"</span><span class="p">,</span> <span class="n">egress</span><span class="o">=</span><span class="s2">"/tmp/contaix_code.md"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -344,10 +344,10 @@ page (with caching), and aggregating.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Files</span>
 
 <span class="c1"># Single file (auto-detects format)</span>
-<span class="n">md</span> <span class="o">=</span> <span class="n">bytes_to_markdown</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s1">'report.pdf'</span><span class="p">,</span> <span class="s1">'rb'</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">input_format</span><span class="o">=</span><span class="s1">'pdf'</span><span class="p">)</span>
+<span class="n">md</span> <span class="o">=</span> <span class="n">bytes_to_markdown</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">"report.pdf"</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">"pdf"</span><span class="p">)</span>
 
 <span class="c1"># A whole folder</span>
-<span class="n">src</span> <span class="o">=</span> <span class="n">Files</span><span class="p">(</span><span class="s1">'/path/to/documents'</span><span class="p">)</span>
+<span class="n">src</span> <span class="o">=</span> <span class="n">Files</span><span class="p">(</span><span class="s2">"/path/to/documents"</span><span class="p">)</span>
 <span class="n">target</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">bytes_store_to_markdown_store</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 </pre></div>
@@ -375,11 +375,11 @@ the contaix wrappers add clipboard integration.</p>
 <span class="c1"># -&gt; [('OpenAI', 'https://openai.com'), ('https://anthropic.com', 'https://anthropic.com')]</span>
 
 <span class="c1"># Verify they resolve</span>
-<span class="n">verify_urls</span><span class="p">([</span><span class="s1">'https://openai.com'</span><span class="p">,</span> <span class="s1">'https://anthropic.com'</span><span class="p">])</span>
+<span class="n">verify_urls</span><span class="p">([</span><span class="s2">"https://openai.com"</span><span class="p">,</span> <span class="s2">"https://anthropic.com"</span><span class="p">])</span>
 <span class="c1"># -&gt; {'https://openai.com': 200, 'https://anthropic.com': 200}</span>
 
 <span class="c1"># Download as PDFs (delegates to pdfdol)</span>
-<span class="n">download_articles</span><span class="p">(</span><span class="n">some_md_string</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="s1">'~/Downloads/articles'</span><span class="p">)</span>
+<span class="n">download_articles</span><span class="p">(</span><span class="n">some_md_string</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="s2">"~/Downloads/articles"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -436,7 +436,7 @@ format conversion</p></li>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-22 13:47 UTC from <a href="https://github.com/thorwhalen/contaix/commit/8e7afad3f150efc4765bd12934b61891243261b5">8e7afad</a> (main) · contaix 0.0.19 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-12 23:13 UTC from <a href="https://github.com/thorwhalen/contaix/commit/94df689b5ca308f965abccd487c7c75d9b0c4702">94df689</a> (main) · contaix 0.0.20 · <a href="about-this-build.html">about this build</a></p>
         </article>
       </div>
       <footer>
@@ -503,7 +503,7 @@ format conversion</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=a8acf705"></script>
+</div><script src="_static/documentation_options.js?v=7c40b9fe"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

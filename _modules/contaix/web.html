@@ -269,6 +269,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -278,7 +279,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">html2text</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -648,6 +648,167 @@
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 
+<span class="c1">#: Tags whose *content* is never part of the document text. ``markdownify`` drops</span>
+<span class="c1">#: ``script``/``style`` but would keep ``&lt;title&gt;``, so the whole head goes first.</span>
+<span class="n">NON_CONTENT_TAGS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"head"</span><span class="p">,</span> <span class="s2">"script"</span><span class="p">,</span> <span class="s2">"style"</span><span class="p">,</span> <span class="s2">"noscript"</span><span class="p">)</span>
+
+<span class="c1">#: Defaults for the HTML-&gt;Markdown conversion (the same ones ``scraped`` uses).</span>
+<span class="c1">#: Any of them can be overridden by keyword in :func:`html_to_clean_markdown`.</span>
+<span class="n">HTML_TO_MARKDOWN_DEFAULTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"heading_style"</span><span class="p">:</span> <span class="s2">"ATX"</span><span class="p">,</span>  <span class="c1"># "# Title", not the underlined setext form</span>
+    <span class="s2">"bullets"</span><span class="p">:</span> <span class="s2">"*"</span><span class="p">,</span>
+    <span class="s2">"escape_underscores"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># keeps identifiers like ``foo_bar`` readable</span>
+    <span class="s2">"escape_asterisks"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1">#: Recursion limit used (temporarily) to retry a page nested too deeply for the</span>
+<span class="c1">#: default one: ``markdownify`` recurses once per nesting level. Python &lt; 3.11</span>
+<span class="c1">#: spends C stack on every Python call, so a high limit would segfault there.</span>
+<span class="n">DEEP_HTML_RECURSION_LIMIT</span> <span class="o">=</span> <span class="mi">100_000</span> <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span> <span class="k">else</span> <span class="mi">3_000</span>
+
+<span class="c1">#: Permalink-anchor texts (Sphinx ``headerlink``, MkDocs ``toclink``, ...) that</span>
+<span class="c1">#: carry no content and would otherwise become ``[¶](#section)`` on every heading.</span>
+<span class="n">_PERMALINK_TEXTS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"¶"</span><span class="p">,</span> <span class="s2">"#"</span><span class="p">,</span> <span class="s2">"§"</span><span class="p">,</span> <span class="s2">"🔗"</span><span class="p">})</span>
+<span class="n">_PERMALINK_CLASSES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="p">{</span><span class="s2">"headerlink"</span><span class="p">,</span> <span class="s2">"toclink"</span><span class="p">,</span> <span class="s2">"anchor"</span><span class="p">,</span> <span class="s2">"permalink"</span><span class="p">,</span> <span class="s2">"header-anchor"</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">_BLOCK_TAGS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"div"</span><span class="p">,</span> <span class="s2">"p"</span><span class="p">,</span> <span class="s2">"ul"</span><span class="p">,</span> <span class="s2">"ol"</span><span class="p">,</span> <span class="s2">"dl"</span><span class="p">,</span> <span class="s2">"table"</span><span class="p">,</span> <span class="s2">"pre"</span><span class="p">,</span> <span class="s2">"blockquote"</span><span class="p">,</span> <span class="s2">"section"</span><span class="p">)</span>
+<span class="n">_INLINE_TAGS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="s2">"a b i u em strong span code small font label abbr cite mark sub sup"</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">_HEADING_TAGS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"h1"</span><span class="p">,</span> <span class="s2">"h2"</span><span class="p">,</span> <span class="s2">"h3"</span><span class="p">,</span> <span class="s2">"h4"</span><span class="p">,</span> <span class="s2">"h5"</span><span class="p">,</span> <span class="s2">"h6"</span><span class="p">)</span>
+
+<span class="c1">#: An opening/closing code fence (any indentation: fences nest in list items).</span>
+<span class="n">_CODE_FENCE_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^\s*(`{3,}|~{3,})"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_collapse_blank_runs</span><span class="p">(</span><span class="n">markdown</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Collapse runs of blank lines to one, *outside fenced code blocks*.</span>
+
+<span class="sd">    Whitespace inside code is content (two blank lines between top-level ``def``s</span>
+<span class="sd">    is PEP 8), so fenced regions pass through untouched; an unterminated fence</span>
+<span class="sd">    protects everything after it. A closing fence must use the opening fence's</span>
+<span class="sd">    character and be at least as long (CommonMark).</span>
+
+<span class="sd">    &gt;&gt;&gt; _collapse_blank_runs("a\\n\\n\\n\\nb\\n")</span>
+<span class="sd">    'a\\n\\nb\\n'</span>
+<span class="sd">    &gt;&gt;&gt; _collapse_blank_runs("```\\na\\n\\n\\n\\nb\\n```\\n")</span>
+<span class="sd">    '```\\na\\n\\n\\n\\nb\\n```\\n'</span>
+<span class="sd">    &gt;&gt;&gt; _collapse_blank_runs("````\\n```\\n\\n\\n\\n```\\n````\\n")</span>
+<span class="sd">    '````\\n```\\n\\n\\n\\n```\\n````\\n'</span>
+<span class="sd">    """</span>
+    <span class="n">out</span><span class="p">,</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">fence</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="s2">""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">flush</span><span class="p">(</span><span class="n">is_code</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span> <span class="k">if</span> <span class="n">is_code</span> <span class="k">else</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\n{3,}"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
+        <span class="n">chunk</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">markdown</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">_CODE_FENCE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fence</span> <span class="ow">and</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">flush</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">fence</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fence</span><span class="p">:</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">closes</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="k">match</span>
+                <span class="ow">and</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">fence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fence</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">fence</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">closes</span><span class="p">:</span>
+                <span class="n">flush</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">fence</span> <span class="o">=</span> <span class="s2">""</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">chunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">flush</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">fence</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_converter</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A ``MarkdownConverter`` whose ``&lt;pre&gt;`` fences outgrow any backticks in the code."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">markdownify</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarkdownConverter</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_Converter</span><span class="p">(</span><span class="n">MarkdownConverter</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">convert_pre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">el</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">convert_pre</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">longest</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">run</span><span class="p">)</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">"`+"</span><span class="p">,</span> <span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">out</span> <span class="ow">and</span> <span class="n">longest</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">fence</span> <span class="o">=</span> <span class="s2">"`"</span> <span class="o">*</span> <span class="p">(</span><span class="n">longest</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">head</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"```"</span><span class="p">)</span>
+                <span class="n">body</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">tail</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">```"</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">head</span><span class="si">}{</span><span class="n">fence</span><span class="si">}{</span><span class="n">body</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">fence</span><span class="si">}{</span><span class="n">rest</span><span class="si">}</span><span class="s2">"</span>
+            <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">return</span> <span class="n">_Converter</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_html</span><span class="p">(</span><span class="n">html</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Parse leniently like a browser (``lxml``: omitted ``&lt;/li&gt;``/``&lt;/td&gt;`` ... work)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">bs4</span><span class="w"> </span><span class="kn">import</span> <span class="n">BeautifulSoup</span><span class="p">,</span> <span class="n">FeatureNotFound</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s2">"lxml"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">FeatureNotFound</span><span class="p">:</span>  <span class="c1"># pragma: no cover - lxml is a declared dependency</span>
+        <span class="k">return</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s2">"html.parser"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_prepare_soup</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fix the shapes ``markdownify`` renders badly (in place)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">bs4</span><span class="w"> </span><span class="kn">import</span> <span class="n">NavigableString</span>
+
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">NON_CONTENT_TAGS</span><span class="p">):</span>
+        <span class="n">tag</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
+    <span class="c1"># Permalink anchors on headings are noise, not content ("see § 3" is content).</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_PERMALINK_TEXTS</span>
+            <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="s2">"href"</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">_PERMALINK_CLASSES</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"class"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">())</span>
+                <span class="ow">or</span> <span class="n">a</span><span class="o">.</span><span class="n">find_parent</span><span class="p">(</span><span class="n">_HEADING_TAGS</span> <span class="o">+</span> <span class="p">(</span><span class="s2">"dt"</span><span class="p">,))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
+    <span class="c1"># Bare markdown link destinations break on spaces and parentheses.</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">[</span><span class="s2">"href"</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">"[ ()]"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"%</span><span class="si">{</span><span class="nb">ord</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">())</span><span class="si">:</span><span class="s2">02X</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="s2">"href"</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="p">)</span>
+    <span class="c1"># Source newlines/indentation are not significant outside &lt;pre&gt;; left in, a</span>
+    <span class="c1"># line starting with "# " or "- " would turn a paragraph into a heading/list.</span>
+    <span class="n">verbatim</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nb">id</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">((</span><span class="s2">"pre"</span><span class="p">,</span> <span class="s2">"textarea"</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">el</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">is</span> <span class="n">NavigableString</span> <span class="ow">and</span> <span class="nb">id</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">verbatim</span><span class="p">:</span>
+            <span class="n">text</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[ \t\n\r\f]+"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
+    <span class="c1"># Inline content right after a list would be glued onto its last item.</span>
+    <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">((</span><span class="s2">"ul"</span><span class="p">,</span> <span class="s2">"ol"</span><span class="p">,</span> <span class="s2">"dl"</span><span class="p">)):</span>
+        <span class="n">sibling</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">next_sibling</span>
+        <span class="k">if</span> <span class="n">sibling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sibling</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sibling</span><span class="p">,</span> <span class="n">NavigableString</span><span class="p">)</span> <span class="ow">or</span> <span class="n">sibling</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">_INLINE_TAGS</span><span class="p">:</span>
+                <span class="n">sub</span><span class="o">.</span><span class="n">insert_after</span><span class="p">(</span><span class="n">soup</span><span class="o">.</span><span class="n">new_tag</span><span class="p">(</span><span class="s2">"br"</span><span class="p">))</span>
+    <span class="c1"># `&lt;a&gt;&lt;h2&gt;T&lt;/h2&gt;&lt;/a&gt;` would render as `[## T](url)`: put the link inside.</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">_BLOCK_TAGS</span> <span class="o">+</span> <span class="n">_HEADING_TAGS</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">_HEADING_TAGS</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">heading</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"a"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">link</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">new_tag</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="s2">"href"</span><span class="p">])</span>
+                <span class="n">link</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">heading</span><span class="o">.</span><span class="n">contents</span><span class="p">))</span>
+                <span class="n">heading</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">_HEADING_TAGS</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">unwrap</span><span class="p">()</span>
+
+
 <div class="viewcode-block" id="html_to_clean_markdown">
 <a class="viewcode-back" href="../../_autosummary/contaix.web.html#contaix.web.html_to_clean_markdown">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">html_to_clean_markdown</span><span class="p">(</span>
@@ -656,30 +817,75 @@
     <span class="n">body_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">ignore_images</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">include_links</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">html2text_options</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">markdownify_options</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Convert HTML to clean markdown using html2text.</span>
+<span class="w">    </span><span class="sd">"""Convert HTML to clean markdown (via ``markdownify``, MIT-licensed).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    html : str</span>
 <span class="sd">        Raw HTML content.</span>
 <span class="sd">    body_width : int</span>
-<span class="sd">        Line width for wrapping. 0 = no wrapping.</span>
+<span class="sd">        Kept for backward compatibility. Only ``0`` (no wrapping, the default)</span>
+<span class="sd">        is supported; any other value raises ``ValueError``.</span>
 <span class="sd">    ignore_images : bool</span>
 <span class="sd">        Whether to skip image tags.</span>
 <span class="sd">    include_links : bool</span>
-<span class="sd">        Whether to include hyperlinks in output.</span>
+<span class="sd">        Whether to include hyperlinks in output (``False`` keeps the link text only).</span>
+<span class="sd">    **markdownify_options</span>
+<span class="sd">        Options for ``markdownify.MarkdownConverter``, overriding</span>
+<span class="sd">        :data:`HTML_TO_MARKDOWN_DEFAULTS`. Unknown names raise ``TypeError``</span>
+<span class="sd">        (``MarkdownConverter`` would silently ignore them), in particular the</span>
+<span class="sd">        ``html2text`` options this function accepted before (``ignore_links``,</span>
+<span class="sd">        ``unicode_snob``, ...).</span>
+
+<span class="sd">    &gt;&gt;&gt; html_to_clean_markdown("&lt;h1&gt;Hi&lt;/h1&gt;&lt;p&gt;a &lt;b&gt;b&lt;/b&gt; &lt;a href='u'&gt;c&lt;/a&gt;&lt;/p&gt;")</span>
+<span class="sd">    '# Hi\\n\\na **b** [c](u)'</span>
+<span class="sd">    &gt;&gt;&gt; html_to_clean_markdown("&lt;p&gt;a &lt;a href='u'&gt;c&lt;/a&gt;&lt;/p&gt;", include_links=False)</span>
+<span class="sd">    'a c'</span>
 <span class="sd">    """</span>
-    <span class="n">converter</span> <span class="o">=</span> <span class="n">html2text</span><span class="o">.</span><span class="n">HTML2Text</span><span class="p">()</span>
-    <span class="n">converter</span><span class="o">.</span><span class="n">body_width</span> <span class="o">=</span> <span class="n">body_width</span>
-    <span class="n">converter</span><span class="o">.</span><span class="n">ignore_images</span> <span class="o">=</span> <span class="n">ignore_images</span>
-    <span class="n">converter</span><span class="o">.</span><span class="n">ignore_links</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">include_links</span>
-    <span class="n">converter</span><span class="o">.</span><span class="n">protect_links</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">converter</span><span class="o">.</span><span class="n">wrap_links</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">html2text_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="n">converter</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">converter</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">html</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">markdownify</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarkdownConverter</span>
+
+    <span class="k">if</span> <span class="n">body_width</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"body_width is not supported: markdownify never wraps lines. "</span>
+            <span class="s2">"Pass body_width=0 (the default)."</span>
+        <span class="p">)</span>
+    <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">MarkdownConverter</span><span class="o">.</span><span class="n">DefaultOptions</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="n">unknown</span> <span class="o">:=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">markdownify_options</span><span class="p">)</span> <span class="o">-</span> <span class="n">known</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Unknown markdownify option(s): </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s2">. "</span>
+            <span class="sa">f</span><span class="s2">"Valid options are: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">known</span><span class="p">))</span><span class="si">}</span><span class="s2">."</span>
+        <span class="p">)</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">HTML_TO_MARKDOWN_DEFAULTS</span><span class="p">,</span> <span class="o">**</span><span class="n">markdownify_options</span><span class="p">}</span>
+    <span class="n">excluded</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">t</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">skip</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"img"</span><span class="p">,</span> <span class="n">ignore_images</span><span class="p">),</span> <span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="ow">not</span> <span class="n">include_links</span><span class="p">))</span> <span class="k">if</span> <span class="n">skip</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">excluded</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">"convert"</span>
+        <span class="p">):</span>  <span class="c1"># markdownify forbids `strip` together with `convert`</span>
+            <span class="n">options</span><span class="p">[</span><span class="s2">"convert"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="s2">"convert"</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">strip</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"strip"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="n">options</span><span class="p">[</span><span class="s2">"strip"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="o">*</span><span class="p">([</span><span class="n">strip</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">strip</span><span class="p">),</span>
+                <span class="o">*</span><span class="n">excluded</span><span class="p">,</span>
+            <span class="p">]</span>
+
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">_parse_html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+    <span class="n">_prepare_soup</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+    <span class="n">converter</span> <span class="o">=</span> <span class="n">_make_converter</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">markdown</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert_soup</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">RecursionError</span><span class="p">:</span>  <span class="c1"># very deeply nested page: retry with a higher limit</span>
+        <span class="n">previous</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getrecursionlimit</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">previous</span><span class="p">,</span> <span class="n">DEEP_HTML_RECURSION_LIMIT</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">markdown</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert_soup</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="n">previous</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_collapse_blank_runs</span><span class="p">(</span><span class="n">markdown</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
 
 
@@ -1478,13 +1684,13 @@
 <span class="w">    </span><span class="sd">"""Automatically choose the best content extraction method.</span>
 
 <span class="sd">    1. Try RSC payload extraction (for Next.js sites)</span>
-<span class="sd">    2. Fall back to html2text on the full HTML</span>
+<span class="sd">    2. Fall back to the HTML-&gt;markdown converter on the full HTML</span>
 <span class="sd">    """</span>
     <span class="n">rsc_content</span> <span class="o">=</span> <span class="n">extract_rsc_page_content</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">rsc_content</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">rsc_content</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">rsc_content</span>
 
-    <span class="c1"># Fallback: html2text on full HTML, trying to extract main content</span>
+    <span class="c1"># Fallback: convert the full HTML, trying to extract main content</span>
     <span class="k">return</span> <span class="n">_extract_main_content_html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
 
 
@@ -1585,7 +1791,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=a8acf705"></script>
+</div><script src="../../_static/documentation_options.js?v=7c40b9fe"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

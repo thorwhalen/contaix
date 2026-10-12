@@ -273,6 +273,22 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 <span class="gp">... </span><span class="p">)</span>
 </pre></div>
 </div>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.NON_CONTENT_TAGS" title="contaix.web.NON_CONTENT_TAGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NON_CONTENT_TAGS</span></code></a></p></td>
+<td><p>Tags whose <em>content</em> is never part of the document text.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.HTML_TO_MARKDOWN_DEFAULTS" title="contaix.web.HTML_TO_MARKDOWN_DEFAULTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></code></a></p></td>
+<td><p>Defaults for the HTML-&gt;Markdown conversion (the same ones <code class="docutils literal notranslate"><span class="pre">scraped</span></code> uses).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.DEEP_HTML_RECURSION_LIMIT" title="contaix.web.DEEP_HTML_RECURSION_LIMIT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEEP_HTML_RECURSION_LIMIT</span></code></a></p></td>
+<td><p>Recursion limit used (temporarily) to retry a page nested too deeply for the default one: <code class="docutils literal notranslate"><span class="pre">markdownify</span></code> recurses once per nesting level.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -299,7 +315,7 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 <td><p>Probe for a publisher-provided single-doc bundle.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.html_to_clean_markdown" title="contaix.web.html_to_clean_markdown"><code class="xref py py-obj docutils literal notranslate"><span class="pre">html_to_clean_markdown</span></code></a>(html, *[, ...])</p></td>
-<td><p>Convert HTML to clean markdown using html2text.</p></td>
+<td><p>Convert HTML to clean markdown (via <code class="docutils literal notranslate"><span class="pre">markdownify</span></code>, MIT-licensed).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.is_nextjs_site" title="contaix.web.is_nextjs_site"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_nextjs_site</span></code></a>(html)</p></td>
 <td><p>Detect if a page is served by Next.js (App Router).</p></td>
@@ -322,6 +338,28 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 </tbody>
 </table>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="contaix.web.DEEP_HTML_RECURSION_LIMIT">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">DEEP_HTML_RECURSION_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100000</span></span><a class="headerlink" href="#contaix.web.DEEP_HTML_RECURSION_LIMIT" title="Link to this definition">¶</a></dt>
+<dd><p>Recursion limit used (temporarily) to retry a page nested too deeply for the
+default one: <code class="docutils literal notranslate"><span class="pre">markdownify</span></code> recurses once per nesting level. Python &lt; 3.11
+spends C stack on every Python call, so a high limit would segfault there.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="contaix.web.HTML_TO_MARKDOWN_DEFAULTS">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'bullets':</span> <span class="pre">'*',</span> <span class="pre">'escape_asterisks':</span> <span class="pre">False,</span> <span class="pre">'escape_underscores':</span> <span class="pre">False,</span> <span class="pre">'heading_style':</span> <span class="pre">'ATX'}</span></span><a class="headerlink" href="#contaix.web.HTML_TO_MARKDOWN_DEFAULTS" title="Link to this definition">¶</a></dt>
+<dd><p>Defaults for the HTML-&gt;Markdown conversion (the same ones <code class="docutils literal notranslate"><span class="pre">scraped</span></code> uses).
+Any of them can be overridden by keyword in <a class="reference internal" href="#contaix.web.html_to_clean_markdown" title="contaix.web.html_to_clean_markdown"><code class="xref py py-func docutils literal notranslate"><span class="pre">html_to_clean_markdown()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="contaix.web.NON_CONTENT_TAGS">
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">NON_CONTENT_TAGS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('head',</span> <span class="pre">'script',</span> <span class="pre">'style',</span> <span class="pre">'noscript')</span></span><a class="headerlink" href="#contaix.web.NON_CONTENT_TAGS" title="Link to this definition">¶</a></dt>
+<dd><p>Tags whose <em>content</em> is never part of the document text. <code class="docutils literal notranslate"><span class="pre">markdownify</span></code> drops
+<code class="docutils literal notranslate"><span class="pre">script</span></code>/<code class="docutils literal notranslate"><span class="pre">style</span></code> but would keep <code class="docutils literal notranslate"><span class="pre">&lt;title&gt;</span></code>, so the whole head goes first.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="contaix.web.extract_rsc_page_content">
 <span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">extract_rsc_page_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rsc_text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#extract_rsc_page_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.extract_rsc_page_content" title="Link to this definition">¶</a></dt>
@@ -334,7 +372,7 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 <p>Returns markdown text if content was found, None otherwise.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -361,12 +399,12 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The documentation site URL (e.g. a homepage or any page on the site).</p></li>
-<li><p><strong>html</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Pre-fetched HTML. If None, fetches from <code class="docutils literal notranslate"><span class="pre">url</span></code>.</p></li>
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The documentation site URL (e.g. a homepage or any page on the site).</p></li>
+<li><p><strong>html</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Pre-fetched HTML. If None, fetches from <code class="docutils literal notranslate"><span class="pre">url</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -379,7 +417,7 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 <p>Returns the markdown text, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no bundle was found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -394,17 +432,17 @@ would otherwise require JavaScript rendering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The page URL.</p></li>
-<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory to cache RSC responses.</p></li>
-<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Re-fetch even if cached.</p></li>
-<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Request timeout.</p></li>
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The page URL.</p></li>
+<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory to cache RSC responses.</p></li>
+<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Re-fetch even if cached.</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Request timeout.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The RSC flight data as text.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -416,17 +454,17 @@ would otherwise require JavaScript rendering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The URL to fetch.</p></li>
-<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory to cache HTML files. If None, no caching.</p></li>
-<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If True, re-fetch even if cached.</p></li>
-<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Request timeout in seconds.</p></li>
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The URL to fetch.</p></li>
+<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory to cache HTML files. If None, no caching.</p></li>
+<li><p><strong>force</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If True, re-fetch even if cached.</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Request timeout in seconds.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The page’s HTML content.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -439,7 +477,7 @@ would otherwise require JavaScript rendering.</p>
 Pages that fail to fetch are skipped with a warning.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -461,8 +499,8 @@ scraping page-by-page.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Any URL on the documentation site.</p></li>
-<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – HEAD request timeout.</p></li>
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Any URL on the documentation site.</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – HEAD request timeout.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -470,26 +508,37 @@ scraping page-by-page.</p>
 <code class="docutils literal notranslate"><span class="pre">None</span></code> if none of the candidates exist.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="contaix.web.html_to_clean_markdown">
-<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">html_to_clean_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_links</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">html2text_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#html_to_clean_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.html_to_clean_markdown" title="Link to this definition">¶</a></dt>
-<dd><p>Convert HTML to clean markdown using html2text.</p>
+<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">html_to_clean_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_links</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">markdownify_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contaix/web.html#html_to_clean_markdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#contaix.web.html_to_clean_markdown" title="Link to this definition">¶</a></dt>
+<dd><p>Convert HTML to clean markdown (via <code class="docutils literal notranslate"><span class="pre">markdownify</span></code>, MIT-licensed).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>html</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Raw HTML content.</p></li>
-<li><p><strong>body_width</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Line width for wrapping. 0 = no wrapping.</p></li>
-<li><p><strong>ignore_images</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to skip image tags.</p></li>
-<li><p><strong>include_links</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to include hyperlinks in output.</p></li>
+<li><p><strong>html</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Raw HTML content.</p></li>
+<li><p><strong>body_width</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Kept for backward compatibility. Only <code class="docutils literal notranslate"><span class="pre">0</span></code> (no wrapping, the default)
+is supported; any other value raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+<li><p><strong>ignore_images</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to skip image tags.</p></li>
+<li><p><strong>include_links</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to include hyperlinks in output (<code class="docutils literal notranslate"><span class="pre">False</span></code> keeps the link text only).</p></li>
+<li><p><strong>**markdownify_options</strong> – Options for <code class="docutils literal notranslate"><span class="pre">markdownify.MarkdownConverter</span></code>, overriding
+<a class="reference internal" href="#contaix.web.HTML_TO_MARKDOWN_DEFAULTS" title="contaix.web.HTML_TO_MARKDOWN_DEFAULTS"><code class="xref py py-data docutils literal notranslate"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></code></a>. Unknown names raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>
+(<code class="docutils literal notranslate"><span class="pre">MarkdownConverter</span></code> would silently ignore them), in particular the
+<code class="docutils literal notranslate"><span class="pre">html2text</span></code> options this function accepted before (<code class="docutils literal notranslate"><span class="pre">ignore_links</span></code>,
+<code class="docutils literal notranslate"><span class="pre">unicode_snob</span></code>, …).</p></li>
+<li><p><strong>href='u'&gt;c&lt;/a&gt;&lt;/p&gt;&quot;</strong><strong>)</strong> (<em>&gt;&gt;&gt; html_to_clean_markdown</em><em>(</em><em>&quot;&lt;h1&gt;Hi&lt;/h1&gt;&lt;p&gt;a &lt;b&gt;b&lt;/b&gt; &lt;a</em>)</p></li>
+<li><p><strong>[</strong><strong>c</strong><strong>]</strong><strong>(</strong><strong>u</strong><strong>)</strong><strong>'</strong> (<em>'# Hinna b</em>)</p></li>
+<li><p><strong>href='u'&gt;c&lt;/a&gt;&lt;/p&gt;&quot;</strong> (<em>&gt;&gt;&gt; html_to_clean_markdown</em><em>(</em><em>&quot;&lt;p&gt;a &lt;a</em>)</p></li>
+<li><p><strong>include_links=False</strong><strong>)</strong></p></li>
+<li><p><strong>c'</strong> (<em>'a</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -502,7 +551,7 @@ scraping page-by-page.</p>
 streaming payload signature.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -514,7 +563,7 @@ streaming payload signature.</p>
 <p>Returns a list of dicts with keys: path, title, url, group, tab.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span></p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pages</span> <span class="o">=</span> <span class="n">list_site_pages</span><span class="p">(</span><span class="s1">'https://platform.claude.com/docs/en/home'</span><span class="p">)</span>
@@ -541,13 +590,13 @@ may contain newlines, so we read by byte count rather than splitting on
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rsc_text</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Raw RSC flight response text (<code class="docutils literal notranslate"><span class="pre">text/x-component</span></code>).</p>
+<dd class="field-odd"><p><strong>rsc_text</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Raw RSC flight response text (<code class="docutils literal notranslate"><span class="pre">text/x-component</span></code>).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Mapping of hex keys to their parsed payloads.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -564,7 +613,7 @@ may contain newlines, so we read by byte count rather than splitting on
 are resolved via <code class="docutils literal notranslate"><span class="pre">_registry</span></code> (from <a class="reference internal" href="#contaix.web.parse_rsc_flight" title="contaix.web.parse_rsc_flight"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_rsc_flight()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -576,21 +625,21 @@ are resolved via <code class="docutils literal notranslate"><span class="pre">_r
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The documentation site’s root URL.</p></li>
-<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory for caching fetched HTML. Defaults to <code class="docutils literal notranslate"><span class="pre">~/.cache/contaix/web</span></code>.</p></li>
-<li><p><strong>output_file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Path to save the markdown file. If None, returns the string.</p></li>
-<li><p><strong>tab_filter</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – If a string, only include pages from tabs whose label contains this
+<li><p><strong>url</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The documentation site’s root URL.</p></li>
+<li><p><strong>cache_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Directory for caching fetched HTML. Defaults to <code class="docutils literal notranslate"><span class="pre">~/.cache/contaix/web</span></code>.</p></li>
+<li><p><strong>output_file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Path to save the markdown file. If None, returns the string.</p></li>
+<li><p><strong>tab_filter</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – If a string, only include pages from tabs whose label contains this
 string (case-insensitive). If a callable, <code class="docutils literal notranslate"><span class="pre">tab_filter(tab_label)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code>.</p></li>
-<li><p><strong>page_fetcher</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – Custom <code class="docutils literal notranslate"><span class="pre">(url)</span> <span class="pre">-&gt;</span> <span class="pre">html</span></code> function. Defaults to <code class="docutils literal notranslate"><span class="pre">fetch_page</span></code>.</p></li>
-<li><p><strong>content_extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – Custom <code class="docutils literal notranslate"><span class="pre">(html)</span> <span class="pre">-&gt;</span> <span class="pre">markdown</span></code> function. Defaults to auto-detection.</p></li>
-<li><p><strong>section_separator</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Separator between page sections in the output.</p></li>
-<li><p><strong>use_llms_full</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If True (default), first try to find a publisher-provided
+<li><p><strong>page_fetcher</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – Custom <code class="docutils literal notranslate"><span class="pre">(url)</span> <span class="pre">-&gt;</span> <span class="pre">html</span></code> function. Defaults to <code class="docutils literal notranslate"><span class="pre">fetch_page</span></code>.</p></li>
+<li><p><strong>content_extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – Custom <code class="docutils literal notranslate"><span class="pre">(html)</span> <span class="pre">-&gt;</span> <span class="pre">markdown</span></code> function. Defaults to auto-detection.</p></li>
+<li><p><strong>section_separator</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Separator between page sections in the output.</p></li>
+<li><p><strong>use_llms_full</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If True (default), first try to find a publisher-provided
 <code class="docutils literal notranslate"><span class="pre">/llms-full.txt</span></code> bundle (Mintlify, Docusaurus, etc. ship these).
 When found, returns it directly instead of scraping page-by-page.
 Disable to force the scraping pipeline. Skipped automatically when
 <code class="docutils literal notranslate"><span class="pre">page_fetcher</span></code> or <code class="docutils literal notranslate"><span class="pre">tab_filter</span></code> is set, since those imply the
 caller wants the scraping path.</p></li>
-<li><p><strong>verbose</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Print progress information.</p></li>
+<li><p><strong>verbose</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Print progress information.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -598,7 +647,7 @@ caller wants the scraping path.</p></li>
 Otherwise, returns the output file path.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -609,7 +658,7 @@ Otherwise, returns the output file path.</p>
 <dd><p>Convert a URL to a filesystem-safe cache key.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">url_to_cache_key</span><span class="p">(</span><span class="s1">'https://example.com/docs/en/foo'</span><span class="p">)</span>
@@ -672,6 +721,9 @@ Otherwise, returns the output file path.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">contaix.web</a><ul>
+<li><a class="reference internal" href="#contaix.web.DEEP_HTML_RECURSION_LIMIT"><code class="docutils literal notranslate"><span class="pre">DEEP_HTML_RECURSION_LIMIT</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.HTML_TO_MARKDOWN_DEFAULTS"><code class="docutils literal notranslate"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></code></a></li>
+<li><a class="reference internal" href="#contaix.web.NON_CONTENT_TAGS"><code class="docutils literal notranslate"><span class="pre">NON_CONTENT_TAGS</span></code></a></li>
 <li><a class="reference internal" href="#contaix.web.extract_rsc_page_content"><code class="docutils literal notranslate"><span class="pre">extract_rsc_page_content()</span></code></a></li>
 <li><a class="reference internal" href="#contaix.web.extract_site_nav"><code class="docutils literal notranslate"><span class="pre">extract_site_nav()</span></code></a></li>
 <li><a class="reference internal" href="#contaix.web.fetch_llms_full"><code class="docutils literal notranslate"><span class="pre">fetch_llms_full()</span></code></a></li>
@@ -697,7 +749,7 @@ Otherwise, returns the output file path.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=a8acf705"></script>
+</div><script src="../_static/documentation_options.js?v=7c40b9fe"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

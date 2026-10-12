@@ -5,19 +5,19 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-09-22 13:47 UTC** from commit <a href="https://github.com/thorwhalen/contaix/commit/8e7afad3f150efc4765bd12934b61891243261b5"><code>8e7afad</code></a> on branch <code>main</code>, for **contaix 0.0.19** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-12 23:13 UTC** from commit <a href="https://github.com/thorwhalen/contaix/commit/94df689b5ca308f965abccd487c7c75d9b0c4702"><code>94df689</code></a> on branch <code>main</code>, for **contaix 0.0.20** (from <code>pyproject.toml</code>).
 
 :::{warning}
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.19) is behind the latest release on PyPI (0.0.20): `pip install contaix` gives newer code than these docs describe.
+- The documented version (0.0.20) is behind the latest release on PyPI (0.0.21): `pip install contaix` gives newer code than these docs describe.
 :::
 
 ## Source
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/thorwhalen/contaix/commit/8e7afad3f150efc4765bd12934b61891243261b5"><code>8e7afad3f150efc4765bd12934b61891243261b5</code></a> |
+| Commit | <a href="https://github.com/thorwhalen/contaix/commit/94df689b5ca308f965abccd487c7c75d9b0c4702"><code>94df689b5ca308f965abccd487c7c75d9b0c4702</code></a> |
 | Branch | <code>main</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -28,9 +28,9 @@ The documentation and the package may be misaligned:
 | | |
 |---|---|
 | Repository | <code>thorwhalen/contaix</code> |
-| Run | <a href="https://github.com/thorwhalen/contaix/actions/runs/35735523995">35735523995</a> |
+| Run | <a href="https://github.com/thorwhalen/contaix/actions/runs/38320812825">38320812825</a> |
 | Ref | <code>refs/heads/main</code> |
-| Event commit | <code>8e7afad3f150efc4765bd12934b61891243261b5</code> (in the history of the built commit) |
+| Event commit | <code>94df689b5ca308f965abccd487c7c75d9b0c4702</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -39,7 +39,7 @@ The documentation and the package may be misaligned:
 | epythet | 0.2.12 |
 | Sphinx | 9.1.0 |
 | docutils | 0.22.4 |
-| Python | 3.12.14 |
+| Python | 3.12.15 |
 
 ## Configuration as resolved
 
@@ -55,13 +55,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/contaix/0.0.20/">0.0.20</a>, newer than the documented version (0.0.19).
+Latest release: <a href="https://pypi.org/project/contaix/0.0.21/">0.0.21</a>, newer than the documented version (0.0.20).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/contaix && cd contaix
-git checkout 8e7afad3f150efc4765bd12934b61891243261b5
+git checkout 94df689b5ca308f965abccd487c7c75d9b0c4702
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

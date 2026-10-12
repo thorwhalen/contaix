@@ -1,4 +1,4 @@
-> built 2026-09-22 13:47 UTC from 8e7afad (main) · contaix 0.0.19. Details: build_info.json
+> built 2026-10-12 23:13 UTC from 94df689 (main) · contaix 0.0.20. Details: build_info.json
 
 # index.html.md
 
@@ -41,8 +41,8 @@ gh skill install thorwhalen/contaix contaix_web_aggregate
 from contaix.web import site_to_markdown
 
 site_to_markdown(
-    'https://fal.ai/docs/documentation',
-    output_file='~/Downloads/fal_ai_docs.md',
+    "https://fal.ai/docs/documentation",
+    output_file="~/Downloads/fal_ai_docs.md",
     verbose=True,
 )
 ```
@@ -58,8 +58,8 @@ To bypass the fast path or grab the bundle yourself:
 ```python
 from contaix.web import find_llms_full_url, fetch_llms_full
 
-bundle_url = find_llms_full_url('https://fal.ai/docs')   # str or None
-markdown   = fetch_llms_full('https://fal.ai/docs')      # str or None
+bundle_url = find_llms_full_url("https://fal.ai/docs")  # str or None
+markdown = fetch_llms_full("https://fal.ai/docs")  # str or None
 ```
 
 ### Code base → single markdown file
@@ -68,16 +68,16 @@ markdown   = fetch_llms_full('https://fal.ai/docs')      # str or None
 from contaix import code_aggregate
 
 # A local package
-md = code_aggregate('contaix')
+md = code_aggregate("contaix")
 
 # A directory
-md = code_aggregate('/path/to/project')
+md = code_aggregate("/path/to/project")
 
 # A GitHub repo (downloaded via hubcap)
-md = code_aggregate('https://github.com/thorwhalen/contaix')
+md = code_aggregate("https://github.com/thorwhalen/contaix")
 
 # Save instead of return
-code_aggregate('contaix', egress='/tmp/contaix_code.md')
+code_aggregate("contaix", egress="/tmp/contaix_code.md")
 ```
 
 ### Files → markdown
@@ -87,10 +87,10 @@ from contaix import bytes_to_markdown, bytes_store_to_markdown_store
 from dol import Files
 
 # Single file (auto-detects format)
-md = bytes_to_markdown(open('report.pdf', 'rb').read(), input_format='pdf')
+md = bytes_to_markdown(open("report.pdf", "rb").read(), input_format="pdf")
 
 # A whole folder
-src = Files('/path/to/documents')
+src = Files("/path/to/documents")
 target = {}
 bytes_store_to_markdown_store(src, target)
 ```
@@ -120,11 +120,11 @@ list(extract_urls("[OpenAI](https://openai.com) and https://anthropic.com"))
 # -> [('OpenAI', 'https://openai.com'), ('https://anthropic.com', 'https://anthropic.com')]
 
 # Verify they resolve
-verify_urls(['https://openai.com', 'https://anthropic.com'])
+verify_urls(["https://openai.com", "https://anthropic.com"])
 # -> {'https://openai.com': 200, 'https://anthropic.com': 200}
 
 # Download as PDFs (delegates to pdfdol)
-download_articles(some_md_string, save_dir='~/Downloads/articles')
+download_articles(some_md_string, save_dir="~/Downloads/articles")
 ```
 
 ## Package Map
@@ -945,6 +945,13 @@ Example:
 ... )
 ```
 
+### Module Attributes
+
+| [`NON_CONTENT_TAGS`](_autosummary/contaix.web.html.md#contaix.web.NON_CONTENT_TAGS)          | Tags whose *content* is never part of the document text.                                                                                 |
+|----------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| [`HTML_TO_MARKDOWN_DEFAULTS`](_autosummary/contaix.web.html.md#contaix.web.HTML_TO_MARKDOWN_DEFAULTS) | Defaults for the HTML->Markdown conversion (the same ones `scraped` uses).                                                               |
+| [`DEEP_HTML_RECURSION_LIMIT`](_autosummary/contaix.web.html.md#contaix.web.DEEP_HTML_RECURSION_LIMIT) | Recursion limit used (temporarily) to retry a page nested too deeply for the default one: `markdownify` recurses once per nesting level. |
+
 ### Functions
 
 | [`extract_rsc_page_content`](_autosummary/contaix.web.html.md#contaix.web.extract_rsc_page_content)(rsc_text)                 | Extract page content from RSC flight data.                              |
@@ -955,13 +962,29 @@ Example:
 | [`fetch_page`](_autosummary/contaix.web.html.md#contaix.web.fetch_page)(url, \*[, cache_dir, force, timeout])   | Fetch a page's HTML content, with optional disk caching.                |
 | [`fetch_pages`](_autosummary/contaix.web.html.md#contaix.web.fetch_pages)(urls, \*[, cache_dir, force, verbose]) | Fetch multiple pages with caching.                                      |
 | [`find_llms_full_url`](_autosummary/contaix.web.html.md#contaix.web.find_llms_full_url)(url, \*[, timeout])             | Probe for a publisher-provided single-doc bundle.                       |
-| [`html_to_clean_markdown`](_autosummary/contaix.web.html.md#contaix.web.html_to_clean_markdown)(html, \*[, ...])            | Convert HTML to clean markdown using html2text.                         |
+| [`html_to_clean_markdown`](_autosummary/contaix.web.html.md#contaix.web.html_to_clean_markdown)(html, \*[, ...])            | Convert HTML to clean markdown (via `markdownify`, MIT-licensed).       |
 | [`is_nextjs_site`](_autosummary/contaix.web.html.md#contaix.web.is_nextjs_site)(html)                               | Detect if a page is served by Next.js (App Router).                     |
 | [`list_site_pages`](_autosummary/contaix.web.html.md#contaix.web.list_site_pages)(url)                               | List all pages found in a documentation site's navigation.              |
 | [`parse_rsc_flight`](_autosummary/contaix.web.html.md#contaix.web.parse_rsc_flight)(rsc_text)                         | Parse RSC flight data into a dict mapping keys to parsed JSON data.     |
 | [`rsc_tree_to_markdown`](_autosummary/contaix.web.html.md#contaix.web.rsc_tree_to_markdown)(node, \*[, \_registry, ...])  | Recursively extract markdown from a React Server Component tree node.   |
 | [`site_to_markdown`](_autosummary/contaix.web.html.md#contaix.web.site_to_markdown)(url, \*[, cache_dir, ...])        | Download a documentation site and produce a single aggregated markdown. |
 | [`url_to_cache_key`](_autosummary/contaix.web.html.md#contaix.web.url_to_cache_key)(url)                              | Convert a URL to a filesystem-safe cache key.                           |
+
+### contaix.web.DEEP_HTML_RECURSION_LIMIT *= 100000*
+
+Recursion limit used (temporarily) to retry a page nested too deeply for the
+default one: `markdownify` recurses once per nesting level. Python < 3.11
+spends C stack on every Python call, so a high limit would segfault there.
+
+### contaix.web.HTML_TO_MARKDOWN_DEFAULTS *= {'bullets': '\*', 'escape_asterisks': False, 'escape_underscores': False, 'heading_style': 'ATX'}*
+
+Defaults for the HTML->Markdown conversion (the same ones `scraped` uses).
+Any of them can be overridden by keyword in [`html_to_clean_markdown()`](_autosummary/contaix.web.html.md#contaix.web.html_to_clean_markdown).
+
+### contaix.web.NON_CONTENT_TAGS *= ('head', 'script', 'style', 'noscript')*
+
+Tags whose *content* is never part of the document text. `markdownify` drops
+`script`/`style` but would keep `<title>`, so the whole head goes first.
 
 ### contaix.web.extract_rsc_page_content(rsc_text)
 
@@ -1074,15 +1097,26 @@ Tries, in order:
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### contaix.web.html_to_clean_markdown(html, , body_width=0, ignore_images=True, include_links=True, \*\*html2text_options)
+### contaix.web.html_to_clean_markdown(html, , body_width=0, ignore_images=True, include_links=True, \*\*markdownify_options)
 
-Convert HTML to clean markdown using html2text.
+Convert HTML to clean markdown (via `markdownify`, MIT-licensed).
 
 * **Parameters:**
   * **html** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Raw HTML content.
-  * **body_width** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – Line width for wrapping. 0 = no wrapping.
+  * **body_width** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – Kept for backward compatibility. Only `0` (no wrapping, the default)
+    is supported; any other value raises `ValueError`.
   * **ignore_images** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to skip image tags.
-  * **include_links** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to include hyperlinks in output.
+  * **include_links** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to include hyperlinks in output (`False` keeps the link text only).
+  * **\*\*markdownify_options** – Options for `markdownify.MarkdownConverter`, overriding
+    [`HTML_TO_MARKDOWN_DEFAULTS`](_autosummary/contaix.web.html.md#contaix.web.HTML_TO_MARKDOWN_DEFAULTS). Unknown names raise `TypeError`
+    (`MarkdownConverter` would silently ignore them), in particular the
+    `html2text` options this function accepted before (`ignore_links`,
+    `unicode_snob`, …).
+  * **href='u'>c</a></p>"****)** ( *>>> html_to_clean_markdown* *(* *"<h1>Hi</h1><p>a <b>b</b> <a*)
+  * **[****c****]****(****u****)****'** ( *'# Hinna b*)
+  * **href='u'>c</a></p>"** ( *>>> html_to_clean_markdown* *(* *"<p>a <a*)
+  * **include_links=False****)**
+  * **c'** ( *'a*)
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
@@ -1194,18 +1228,18 @@ Convert a URL to a filesystem-safe cache key.
 
 # About this build
 
-This documentation was built on **2026-09-22 13:47 UTC** from commit <a href="https://github.com/thorwhalen/contaix/commit/8e7afad3f150efc4765bd12934b61891243261b5"><code>8e7afad</code></a> on branch <code>main</code>, for **contaix 0.0.19** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-12 23:13 UTC** from commit <a href="https://github.com/thorwhalen/contaix/commit/94df689b5ca308f965abccd487c7c75d9b0c4702"><code>94df689</code></a> on branch <code>main</code>, for **contaix 0.0.20** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.19) is behind the latest release on PyPI (0.0.20): `pip install contaix` gives newer code than these docs describe.
+- The documented version (0.0.20) is behind the latest release on PyPI (0.0.21): `pip install contaix` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/contaix/commit/8e7afad3f150efc4765bd12934b61891243261b5"><code>8e7afad3f150efc4765bd12934b61891243261b5</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/contaix/commit/94df689b5ca308f965abccd487c7c75d9b0c4702"><code>94df689b5ca308f965abccd487c7c75d9b0c4702</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1216,9 +1250,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/contaix</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/contaix/actions/runs/35735523995">35735523995</a>   |
+| Run          | <a href="https://github.com/thorwhalen/contaix/actions/runs/38320812825">38320812825</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>8e7afad3f150efc4765bd12934b61891243261b5</code> (in the history of the built commit) |
+| Event commit | <code>94df689b5ca308f965abccd487c7c75d9b0c4702</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1227,7 +1261,7 @@ The documentation and the package may be misaligned:
 | epythet  | 0.2.12  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
-| Python   | 3.12.14 |
+| Python   | 3.12.15 |
 
 ## Configuration as resolved
 
@@ -1243,13 +1277,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/contaix/0.0.20/">0.0.20</a>, newer than the documented version (0.0.19).
+Latest release: <a href="https://pypi.org/project/contaix/0.0.21/">0.0.21</a>, newer than the documented version (0.0.20).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/contaix && cd contaix
-git checkout 8e7afad3f150efc4765bd12934b61891243261b5
+git checkout 94df689b5ca308f965abccd487c7c75d9b0c4702
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

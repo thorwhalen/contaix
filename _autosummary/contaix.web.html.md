@@ -21,6 +21,13 @@ Example:
 ... )
 ```
 
+### Module Attributes
+
+| [`NON_CONTENT_TAGS`](#contaix.web.NON_CONTENT_TAGS)          | Tags whose *content* is never part of the document text.                                                                                 |
+|----------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| [`HTML_TO_MARKDOWN_DEFAULTS`](#contaix.web.HTML_TO_MARKDOWN_DEFAULTS) | Defaults for the HTML->Markdown conversion (the same ones `scraped` uses).                                                               |
+| [`DEEP_HTML_RECURSION_LIMIT`](#contaix.web.DEEP_HTML_RECURSION_LIMIT) | Recursion limit used (temporarily) to retry a page nested too deeply for the default one: `markdownify` recurses once per nesting level. |
+
 ### Functions
 
 | [`extract_rsc_page_content`](#contaix.web.extract_rsc_page_content)(rsc_text)                 | Extract page content from RSC flight data.                              |
@@ -31,13 +38,29 @@ Example:
 | [`fetch_page`](#contaix.web.fetch_page)(url, \*[, cache_dir, force, timeout])   | Fetch a page's HTML content, with optional disk caching.                |
 | [`fetch_pages`](#contaix.web.fetch_pages)(urls, \*[, cache_dir, force, verbose]) | Fetch multiple pages with caching.                                      |
 | [`find_llms_full_url`](#contaix.web.find_llms_full_url)(url, \*[, timeout])             | Probe for a publisher-provided single-doc bundle.                       |
-| [`html_to_clean_markdown`](#contaix.web.html_to_clean_markdown)(html, \*[, ...])            | Convert HTML to clean markdown using html2text.                         |
+| [`html_to_clean_markdown`](#contaix.web.html_to_clean_markdown)(html, \*[, ...])            | Convert HTML to clean markdown (via `markdownify`, MIT-licensed).       |
 | [`is_nextjs_site`](#contaix.web.is_nextjs_site)(html)                               | Detect if a page is served by Next.js (App Router).                     |
 | [`list_site_pages`](#contaix.web.list_site_pages)(url)                               | List all pages found in a documentation site's navigation.              |
 | [`parse_rsc_flight`](#contaix.web.parse_rsc_flight)(rsc_text)                         | Parse RSC flight data into a dict mapping keys to parsed JSON data.     |
 | [`rsc_tree_to_markdown`](#contaix.web.rsc_tree_to_markdown)(node, \*[, \_registry, ...])  | Recursively extract markdown from a React Server Component tree node.   |
 | [`site_to_markdown`](#contaix.web.site_to_markdown)(url, \*[, cache_dir, ...])        | Download a documentation site and produce a single aggregated markdown. |
 | [`url_to_cache_key`](#contaix.web.url_to_cache_key)(url)                              | Convert a URL to a filesystem-safe cache key.                           |
+
+### contaix.web.DEEP_HTML_RECURSION_LIMIT *= 100000*
+
+Recursion limit used (temporarily) to retry a page nested too deeply for the
+default one: `markdownify` recurses once per nesting level. Python < 3.11
+spends C stack on every Python call, so a high limit would segfault there.
+
+### contaix.web.HTML_TO_MARKDOWN_DEFAULTS *= {'bullets': '\*', 'escape_asterisks': False, 'escape_underscores': False, 'heading_style': 'ATX'}*
+
+Defaults for the HTML->Markdown conversion (the same ones `scraped` uses).
+Any of them can be overridden by keyword in [`html_to_clean_markdown()`](#contaix.web.html_to_clean_markdown).
+
+### contaix.web.NON_CONTENT_TAGS *= ('head', 'script', 'style', 'noscript')*
+
+Tags whose *content* is never part of the document text. `markdownify` drops
+`script`/`style` but would keep `<title>`, so the whole head goes first.
 
 ### contaix.web.extract_rsc_page_content(rsc_text)
 
@@ -150,15 +173,26 @@ Tries, in order:
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str) | [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### contaix.web.html_to_clean_markdown(html, , body_width=0, ignore_images=True, include_links=True, \*\*html2text_options)
+### contaix.web.html_to_clean_markdown(html, , body_width=0, ignore_images=True, include_links=True, \*\*markdownify_options)
 
-Convert HTML to clean markdown using html2text.
+Convert HTML to clean markdown (via `markdownify`, MIT-licensed).
 
 * **Parameters:**
   * **html** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Raw HTML content.
-  * **body_width** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – Line width for wrapping. 0 = no wrapping.
+  * **body_width** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – Kept for backward compatibility. Only `0` (no wrapping, the default)
+    is supported; any other value raises `ValueError`.
   * **ignore_images** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to skip image tags.
-  * **include_links** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to include hyperlinks in output.
+  * **include_links** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to include hyperlinks in output (`False` keeps the link text only).
+  * **\*\*markdownify_options** – Options for `markdownify.MarkdownConverter`, overriding
+    [`HTML_TO_MARKDOWN_DEFAULTS`](#contaix.web.HTML_TO_MARKDOWN_DEFAULTS). Unknown names raise `TypeError`
+    (`MarkdownConverter` would silently ignore them), in particular the
+    `html2text` options this function accepted before (`ignore_links`,
+    `unicode_snob`, …).
+  * **href='u'>c</a></p>"****)** ( *>>> html_to_clean_markdown* *(* *"<h1>Hi</h1><p>a <b>b</b> <a*)
+  * **[****c****]****(****u****)****'** ( *'# Hinna b*)
+  * **href='u'>c</a></p>"** ( *>>> html_to_clean_markdown* *(* *"<p>a <a*)
+  * **include_links=False****)**
+  * **c'** ( *'a*)
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
