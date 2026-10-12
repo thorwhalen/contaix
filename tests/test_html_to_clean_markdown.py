@@ -185,3 +185,25 @@ def test_inline_content_after_a_non_nested_list_is_not_glued():
         "<div><ul><li>next batch</li></ul><span>Ten sheets</span></div>"
     )
     assert "batchTen" not in md and "Ten sheets" in md
+
+
+def test_only_heading_permalinks_are_dropped_not_real_section_signs():
+    assert html_to_clean_markdown("<p>See <a href='#fn1'>§</a> 3 of the act</p>") == (
+        "See [§](#fn1) 3 of the act"
+    )
+    assert html_to_clean_markdown("<p>Issue <a href='#'>#</a></p>") == "Issue <#>"
+
+
+def test_link_destinations_with_spaces_and_parens_stay_valid():
+    assert (
+        html_to_clean_markdown('<a href="my file.html">x</a>') == "[x](my%20file.html)"
+    )
+    assert html_to_clean_markdown('<a href="/a)b">y</a>') == "[y](/a%29b)"
+
+
+def test_deep_nesting_is_not_quadratic_in_prepare():
+    import time
+
+    start = time.perf_counter()
+    html_to_clean_markdown("<p><font>x " * 600 + "end")
+    assert time.perf_counter() - start < 10

@@ -21,6 +21,7 @@ Example::
 
 import os
 import re
+import sys
 import json
 import hashlib
 from pathlib import Path
@@ -395,12 +396,16 @@ HTML_TO_MARKDOWN_DEFAULTS = {
 }
 
 #: Recursion limit used (temporarily) to retry a page nested too deeply for the
-#: default one: ``markdownify`` recurses once per nesting level.
-DEEP_HTML_RECURSION_LIMIT = 20_000
+#: default one: ``markdownify`` recurses once per nesting level. Python < 3.11
+#: spends C stack on every Python call, so a high limit would segfault there.
+DEEP_HTML_RECURSION_LIMIT = 100_000 if sys.version_info >= (3, 11) else 3_000
 
 #: Permalink-anchor texts (Sphinx ``headerlink``, MkDocs ``toclink``, ...) that
 #: carry no content and would otherwise become ``[¶](#section)`` on every heading.
 _PERMALINK_TEXTS = frozenset({"¶", "#", "§", "🔗"})
+_PERMALINK_CLASSES = frozenset(
+    {"headerlink", "toclink", "anchor", "permalink", "header-anchor"}
+)
 
 _BLOCK_TAGS = ("div", "p", "ul", "ol", "dl", "table", "pre", "blockquote", "section")
 _INLINE_TAGS = frozenset(
@@ -493,14 +498,31 @@ def _prepare_soup(soup) -> None:
 
     for tag in soup.find_all(NON_CONTENT_TAGS):
         tag.decompose()
-    # Permalink anchors on headings are noise, not content.
+    # Permalink anchors on headings are noise, not content ("see § 3" is content).
     for a in soup.find_all("a", href=True):
-        if a.get_text(strip=True) in _PERMALINK_TEXTS and a["href"].startswith("#"):
+        if (
+            a.get_text(strip=True) in _PERMALINK_TEXTS
+            and a["href"].startswith("#")
+            and (
+                _PERMALINK_CLASSES.intersection(a.get("class") or ())
+                or a.find_parent(_HEADING_TAGS + ("dt",)) is not None
+            )
+        ):
             a.decompose()
+    # Bare markdown link destinations break on spaces and parentheses.
+    for a in soup.find_all("a", href=True):
+        a["href"] = re.sub(
+            r"[ ()]", lambda m: f"%{ord(m.group()):02X}", a["href"].strip()
+        )
     # Source newlines/indentation are not significant outside <pre>; left in, a
     # line starting with "# " or "- " would turn a paragraph into a heading/list.
+    verbatim = {
+        id(string)
+        for el in soup.find_all(("pre", "textarea"))
+        for string in el.find_all(string=True)
+    }
     for text in soup.find_all(string=True):
-        if type(text) is NavigableString and not text.find_parent(("pre", "textarea")):
+        if type(text) is NavigableString and id(text) not in verbatim:
             text.replace_with(re.sub(r"[ \t\n\r\f]+", " ", text))
     # Inline content right after a list would be glued onto its last item.
     for sub in soup.find_all(("ul", "ol", "dl")):
@@ -554,7 +576,6 @@ def html_to_clean_markdown(
     >>> html_to_clean_markdown("<p>a <a href='u'>c</a></p>", include_links=False)
     'a c'
     """
-    import sys
     from markdownify import MarkdownConverter
 
     if body_width:
