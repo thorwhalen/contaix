@@ -75,7 +75,7 @@ Thin wrapper around `dn.src` for file format conversion.
 contaix
   ├── scraped (web scraping via Scrapy)
   │     ├── scrapy
-  │     ├── html2text
+  │     ├── markdownify
   │     └── graze (URL/path utilities)
   ├── dol (storage abstractions)
   ├── dn (document conversion)
