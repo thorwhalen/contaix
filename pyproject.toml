@@ -41,8 +41,10 @@ dependencies = [
     "dol",
     "dn[html]>=0.0.9",
     "lkj",
-    "scraped",
-    "html2text",
+    "scraped>=0.0.15",  # first release without html2text
+    "markdownify>=1.0",  # MIT; replaced html2text (GPL-3.0-or-later)
+    "beautifulsoup4",
+    "lxml",  # BSD; spec-compliant parsing (omitted </li>, </td> ... end tags)
     "hubcap",
 ]
 

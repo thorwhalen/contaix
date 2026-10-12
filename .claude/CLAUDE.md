@@ -24,7 +24,7 @@ packages' `data/skills/` — a follow-up may retire/repoint it.)
 
 ## Dependencies
 
-**Required:** dol, dn[html], lkj, scraped, html2text, hubcap
+**Required:** dol, dn[html], lkj, scraped, markdownify, beautifulsoup4, lxml, hubcap
 **Optional:** pdfdol (for PDF article downloading), dn[all] (for all format converters)
 
 Markdown repair functions live in **dn.repair** (contaix re-exports them).

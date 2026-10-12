@@ -163,7 +163,7 @@ Or switch to the `contaix_web_aggregate` skill for full manual control.
 | `list_site_pages(url)` | Flat list of `{path, title, url, group, tab}` dicts |
 | `fetch_page(url, cache_dir=...)` | Fetch HTML with disk caching |
 | `fetch_nextjs_rsc(url, cache_dir=...)` | Fetch via Next.js RSC flight endpoint |
-| `html_to_clean_markdown(html)` | Convert HTML to markdown via html2text |
+| `html_to_clean_markdown(html)` | Convert HTML to markdown via markdownify |
 | `extract_rsc_page_content(rsc)` | Extract markdown from RSC flight data |
 | `is_nextjs_site(html)` | Detect Next.js App Router sites |
 

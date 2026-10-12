@@ -21,6 +21,7 @@ Example::
 
 import os
 import re
+import sys
 import json
 import hashlib
 from pathlib import Path
@@ -30,7 +31,6 @@ from urllib.parse import urlparse, urljoin
 from typing import Iterator
 
 import requests
-import html2text
 
 
 # ---------------------------------------------------------------------------
@@ -382,36 +382,242 @@ def is_nextjs_site(html: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
+#: Tags whose *content* is never part of the document text. ``markdownify`` drops
+#: ``script``/``style`` but would keep ``<title>``, so the whole head goes first.
+NON_CONTENT_TAGS = ("head", "script", "style", "noscript")
+
+#: Defaults for the HTML->Markdown conversion (the same ones ``scraped`` uses).
+#: Any of them can be overridden by keyword in :func:`html_to_clean_markdown`.
+HTML_TO_MARKDOWN_DEFAULTS = {
+    "heading_style": "ATX",  # "# Title", not the underlined setext form
+    "bullets": "*",
+    "escape_underscores": False,  # keeps identifiers like ``foo_bar`` readable
+    "escape_asterisks": False,
+}
+
+#: Recursion limit used (temporarily) to retry a page nested too deeply for the
+#: default one: ``markdownify`` recurses once per nesting level. Python < 3.11
+#: spends C stack on every Python call, so a high limit would segfault there.
+DEEP_HTML_RECURSION_LIMIT = 100_000 if sys.version_info >= (3, 11) else 3_000
+
+#: Permalink-anchor texts (Sphinx ``headerlink``, MkDocs ``toclink``, ...) that
+#: carry no content and would otherwise become ``[¶](#section)`` on every heading.
+_PERMALINK_TEXTS = frozenset({"¶", "#", "§", "🔗"})
+_PERMALINK_CLASSES = frozenset(
+    {"headerlink", "toclink", "anchor", "permalink", "header-anchor"}
+)
+
+_BLOCK_TAGS = ("div", "p", "ul", "ol", "dl", "table", "pre", "blockquote", "section")
+_INLINE_TAGS = frozenset(
+    "a b i u em strong span code small font label abbr cite mark sub sup".split()
+)
+_HEADING_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
+
+#: An opening/closing code fence (any indentation: fences nest in list items).
+_CODE_FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
+
+
+def _collapse_blank_runs(markdown: str) -> str:
+    """Collapse runs of blank lines to one, *outside fenced code blocks*.
+
+    Whitespace inside code is content (two blank lines between top-level ``def``s
+    is PEP 8), so fenced regions pass through untouched; an unterminated fence
+    protects everything after it. A closing fence must use the opening fence's
+    character and be at least as long (CommonMark).
+
+    >>> _collapse_blank_runs("a\\n\\n\\n\\nb\\n")
+    'a\\n\\nb\\n'
+    >>> _collapse_blank_runs("```\\na\\n\\n\\n\\nb\\n```\\n")
+    '```\\na\\n\\n\\n\\nb\\n```\\n'
+    >>> _collapse_blank_runs("````\\n```\\n\\n\\n\\n```\\n````\\n")
+    '````\\n```\\n\\n\\n\\n```\\n````\\n'
+    """
+    out, chunk, fence = [], [], ""
+
+    def flush(is_code):
+        text = "".join(chunk)
+        out.append(text if is_code else re.sub(r"\n{3,}", "\n\n", text))
+        chunk.clear()
+
+    for line in markdown.splitlines(keepends=True):
+        match = _CODE_FENCE_RE.match(line)
+        if not fence and match:
+            flush(False)
+            fence = match.group(1)
+            chunk.append(line)
+        elif fence:
+            chunk.append(line)
+            closes = (
+                match
+                and match.group(1)[0] == fence[0]
+                and len(match.group(1)) >= len(fence)
+                and not line.strip().strip(fence[0])
+            )
+            if closes:
+                flush(True)
+                fence = ""
+        else:
+            chunk.append(line)
+    flush(bool(fence))
+    return "".join(out)
+
+
+def _make_converter(**options):
+    """A ``MarkdownConverter`` whose ``<pre>`` fences outgrow any backticks in the code."""
+    from markdownify import MarkdownConverter
+
+    class _Converter(MarkdownConverter):
+        def convert_pre(self, el, text, *args, **kwargs):
+            out = super().convert_pre(el, text, *args, **kwargs)
+            longest = max(
+                (len(run) for run in re.findall(r"`+", text or "")), default=0
+            )
+            if out and longest >= 3:
+                fence = "`" * (longest + 1)
+                head, _, tail = out.partition("```")
+                body, _, rest = tail.rpartition("\n```")
+                out = f"{head}{fence}{body}\n{fence}{rest}"
+            return out
+
+    return _Converter(**options)
+
+
+def _parse_html(html: str):
+    """Parse leniently like a browser (``lxml``: omitted ``</li>``/``</td>`` ... work)."""
+    from bs4 import BeautifulSoup, FeatureNotFound
+
+    try:
+        return BeautifulSoup(html, "lxml")
+    except FeatureNotFound:  # pragma: no cover - lxml is a declared dependency
+        return BeautifulSoup(html, "html.parser")
+
+
+def _prepare_soup(soup) -> None:
+    """Fix the shapes ``markdownify`` renders badly (in place)."""
+    from bs4 import NavigableString
+
+    for tag in soup.find_all(NON_CONTENT_TAGS):
+        tag.decompose()
+    # Permalink anchors on headings are noise, not content ("see § 3" is content).
+    for a in soup.find_all("a", href=True):
+        if (
+            a.get_text(strip=True) in _PERMALINK_TEXTS
+            and a["href"].startswith("#")
+            and (
+                _PERMALINK_CLASSES.intersection(a.get("class") or ())
+                or a.find_parent(_HEADING_TAGS + ("dt",)) is not None
+            )
+        ):
+            a.decompose()
+    # Bare markdown link destinations break on spaces and parentheses.
+    for a in soup.find_all("a", href=True):
+        a["href"] = re.sub(
+            r"[ ()]", lambda m: f"%{ord(m.group()):02X}", a["href"].strip()
+        )
+    # Source newlines/indentation are not significant outside <pre>; left in, a
+    # line starting with "# " or "- " would turn a paragraph into a heading/list.
+    verbatim = {
+        id(string)
+        for el in soup.find_all(("pre", "textarea"))
+        for string in el.find_all(string=True)
+    }
+    for text in soup.find_all(string=True):
+        if type(text) is NavigableString and id(text) not in verbatim:
+            text.replace_with(re.sub(r"[ \t\n\r\f]+", " ", text))
+    # Inline content right after a list would be glued onto its last item.
+    for sub in soup.find_all(("ul", "ol", "dl")):
+        sibling = sub.next_sibling
+        if sibling is not None and sibling.get_text(strip=True):
+            if isinstance(sibling, NavigableString) or sibling.name in _INLINE_TAGS:
+                sub.insert_after(soup.new_tag("br"))
+    # `<a><h2>T</h2></a>` would render as `[## T](url)`: put the link inside.
+    for a in soup.find_all("a", href=True):
+        if a.find(_BLOCK_TAGS + _HEADING_TAGS) is None:
+            continue
+        for heading in a.find_all(_HEADING_TAGS):
+            if heading.find("a") is None:
+                link = soup.new_tag("a", href=a["href"])
+                link.extend(list(heading.contents))
+                heading.append(link)
+        if a.find(_HEADING_TAGS) is not None:
+            a.unwrap()
+
+
 def html_to_clean_markdown(
     html: str,
     *,
     body_width: int = 0,
     ignore_images: bool = True,
     include_links: bool = True,
-    **html2text_options,
+    **markdownify_options,
 ) -> str:
-    """Convert HTML to clean markdown using html2text.
+    """Convert HTML to clean markdown (via ``markdownify``, MIT-licensed).
 
     Parameters
     ----------
     html : str
         Raw HTML content.
     body_width : int
-        Line width for wrapping. 0 = no wrapping.
+        Kept for backward compatibility. Only ``0`` (no wrapping, the default)
+        is supported; any other value raises ``ValueError``.
     ignore_images : bool
         Whether to skip image tags.
     include_links : bool
-        Whether to include hyperlinks in output.
+        Whether to include hyperlinks in output (``False`` keeps the link text only).
+    **markdownify_options
+        Options for ``markdownify.MarkdownConverter``, overriding
+        :data:`HTML_TO_MARKDOWN_DEFAULTS`. Unknown names raise ``TypeError``
+        (``MarkdownConverter`` would silently ignore them), in particular the
+        ``html2text`` options this function accepted before (``ignore_links``,
+        ``unicode_snob``, ...).
+
+    >>> html_to_clean_markdown("<h1>Hi</h1><p>a <b>b</b> <a href='u'>c</a></p>")
+    '# Hi\\n\\na **b** [c](u)'
+    >>> html_to_clean_markdown("<p>a <a href='u'>c</a></p>", include_links=False)
+    'a c'
     """
-    converter = html2text.HTML2Text()
-    converter.body_width = body_width
-    converter.ignore_images = ignore_images
-    converter.ignore_links = not include_links
-    converter.protect_links = True
-    converter.wrap_links = False
-    for key, value in html2text_options.items():
-        setattr(converter, key, value)
-    return converter.handle(html).strip()
+    from markdownify import MarkdownConverter
+
+    if body_width:
+        raise ValueError(
+            "body_width is not supported: markdownify never wraps lines. "
+            "Pass body_width=0 (the default)."
+        )
+    known = {k for k in vars(MarkdownConverter.DefaultOptions) if not k.startswith("_")}
+    if unknown := sorted(set(markdownify_options) - known):
+        raise TypeError(
+            f"Unknown markdownify option(s): {', '.join(unknown)}. "
+            f"Valid options are: {', '.join(sorted(known))}."
+        )
+    options = {**HTML_TO_MARKDOWN_DEFAULTS, **markdownify_options}
+    excluded = [
+        t for t, skip in (("img", ignore_images), ("a", not include_links)) if skip
+    ]
+    if excluded:
+        if options.get(
+            "convert"
+        ):  # markdownify forbids `strip` together with `convert`
+            options["convert"] = [t for t in options["convert"] if t not in excluded]
+        else:
+            strip = options.get("strip") or []
+            options["strip"] = [
+                *([strip] if isinstance(strip, str) else strip),
+                *excluded,
+            ]
+
+    soup = _parse_html(html)
+    _prepare_soup(soup)
+    converter = _make_converter(**options)
+    try:
+        markdown = converter.convert_soup(soup)
+    except RecursionError:  # very deeply nested page: retry with a higher limit
+        previous = sys.getrecursionlimit()
+        sys.setrecursionlimit(max(previous, DEEP_HTML_RECURSION_LIMIT))
+        try:
+            markdown = converter.convert_soup(soup)
+        finally:
+            sys.setrecursionlimit(previous)
+    return _collapse_blank_runs(markdown).strip()
 
 
 # ---------------------------------------------------------------------------
@@ -1191,13 +1397,13 @@ def _auto_extract_content(html: str) -> str:
     """Automatically choose the best content extraction method.
 
     1. Try RSC payload extraction (for Next.js sites)
-    2. Fall back to html2text on the full HTML
+    2. Fall back to the HTML->markdown converter on the full HTML
     """
     rsc_content = extract_rsc_page_content(html)
     if rsc_content and len(rsc_content.strip()) > 100:
         return rsc_content
 
-    # Fallback: html2text on full HTML, trying to extract main content
+    # Fallback: convert the full HTML, trying to extract main content
     return _extract_main_content_html(html)
 
 
