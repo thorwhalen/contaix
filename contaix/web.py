@@ -556,6 +556,8 @@ def _only_child(tag):
     ]
     if len(kids) != 1 or getattr(kids[0], "name", None) is None:
         return None
+    if kids[0].name == "pre":
+        return None  # a ``code_language_callback`` reads the wrapper's attributes
     if inline or kids[0].name in _BLOCK_TAGS + _HEADING_TAGS:
         return kids[0]
     return None
@@ -668,7 +670,11 @@ def _opens_a_line(text) -> bool:
             elif getattr(sibling, "name", None) is not None:
                 if sibling.name in _LINE_BREAK_TAGS:
                     return True
-                if sibling.get_text(strip=True) or sibling.find("img") is not None:
+                if (
+                    sibling.get_text(strip=True)
+                    or sibling.name == "img"
+                    or sibling.find("img") is not None
+                ):
                     return False  # inline content before it on the line
                 # an empty inline tag (``<a id=x></a>``) renders nothing: look further back
         parent = node.parent

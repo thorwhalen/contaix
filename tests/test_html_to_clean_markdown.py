@@ -333,3 +333,16 @@ def test_the_whole_inline_run_after_a_list_is_one_paragraph(html, expected):
 def test_a_nbsp_inside_code_does_not_lose_its_protection():
     md = html_to_clean_markdown("<pre>a&nbsp;b\n<div>- x&nbsp;y</div></pre>")
     assert "\\" not in md and "- x y" in md
+
+
+def test_an_image_before_text_makes_it_mid_line():
+    md = html_to_clean_markdown("<p><img src=a alt=b> - x</p>", ignore_images=False)
+    assert md == "![b](a) - x"
+
+
+def test_a_wrapper_of_a_code_block_keeps_its_attributes_for_the_language_callback():
+    html = '<div class="highlight-python"><div class="highlight"><pre>x = 1</pre></div></div>'
+    md = html_to_clean_markdown(
+        html, code_language_callback=lambda el: " ".join(el.parent["class"])
+    )
+    assert md.startswith("```highlight\n")
