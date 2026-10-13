@@ -538,8 +538,8 @@ def _escape_line_start(text: str) -> str:
         return text
     marker = m.group()
     if marker[0].isdigit():
-        return f"{marker[:-1]}\\{marker[-1]}{text[m.end():]}"
-    return f"\\{marker}{text[m.end():]}"
+        return f"{marker[:-1]}\\{marker[-1]}{text[m.end() :]}"
+    return f"\\{marker}{text[m.end() :]}"
 
 
 def _only_child(tag):
