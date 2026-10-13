@@ -207,3 +207,22 @@ def test_deep_nesting_is_not_quadratic_in_prepare():
     start = time.perf_counter()
     html_to_clean_markdown("<p><font>x " * 600 + "end")
     assert time.perf_counter() - start < 10
+
+
+def test_concurrent_deep_pages_leave_the_recursion_limit_untouched():
+    import sys
+    import threading
+
+    html = "<div>" * 1500 + "x" + "</div>" * 1500
+    before = sys.getrecursionlimit()
+    results = []
+    threads = [
+        threading.Thread(target=lambda: results.append(html_to_clean_markdown(html)))
+        for _ in range(4)
+    ]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert len(results) == 4 and all("x" in r for r in results)
+    assert sys.getrecursionlimit() == before

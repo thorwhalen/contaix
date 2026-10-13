@@ -22,6 +22,7 @@ Example::
 import os
 import re
 import sys
+import threading
 import json
 import hashlib
 from pathlib import Path
@@ -400,6 +401,10 @@ HTML_TO_MARKDOWN_DEFAULTS = {
 #: spends C stack on every Python call, so a high limit would segfault there.
 DEEP_HTML_RECURSION_LIMIT = 100_000 if sys.version_info >= (3, 11) else 3_000
 
+#: Serialises the temporary raise of the (process-wide) recursion limit, so two
+#: threads retrying deep pages cannot leave the raised value behind as "previous".
+_recursion_limit_lock = threading.Lock()
+
 #: Permalink-anchor texts (Sphinx ``headerlink``, MkDocs ``toclink``, ...) that
 #: carry no content and would otherwise become ``[¶](#section)`` on every heading.
 _PERMALINK_TEXTS = frozenset({"¶", "#", "§", "🔗"})
@@ -611,12 +616,13 @@ def html_to_clean_markdown(
     try:
         markdown = converter.convert_soup(soup)
     except RecursionError:  # very deeply nested page: retry with a higher limit
-        previous = sys.getrecursionlimit()
-        sys.setrecursionlimit(max(previous, DEEP_HTML_RECURSION_LIMIT))
-        try:
-            markdown = converter.convert_soup(soup)
-        finally:
-            sys.setrecursionlimit(previous)
+        with _recursion_limit_lock:  # the limit is process-wide: one raiser at a time
+            previous = sys.getrecursionlimit()
+            sys.setrecursionlimit(max(previous, DEEP_HTML_RECURSION_LIMIT))
+            try:
+                markdown = converter.convert_soup(soup)
+            finally:
+                sys.setrecursionlimit(previous)
     return _collapse_blank_runs(markdown).strip()
 
 
