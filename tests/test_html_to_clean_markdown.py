@@ -226,3 +226,75 @@ def test_concurrent_deep_pages_leave_the_recursion_limit_untouched():
         t.join()
     assert len(results) == 4 and all("x" in r for r in results)
     assert sys.getrecursionlimit() == before
+
+
+# ---------------------------------------------------------------------------
+# Residual differences from html2text (thorwhalen/contaix#7)
+# ---------------------------------------------------------------------------
+
+
+def test_nbsp_in_code_and_headings_is_a_plain_space():
+    assert html_to_clean_markdown("<pre>a&nbsp;=&nbsp;1</pre>") == "```\na = 1\n```"
+    assert html_to_clean_markdown("<h2>A&nbsp;B</h2>") == "## A B"
+    assert "\xa0" in html_to_clean_markdown("<p>a&nbsp;b</p>")  # prose keeps it
+
+
+def test_duplicate_title_with_nbsp_is_stripped():
+    from contaix.web import _strip_duplicate_title
+
+    assert _strip_duplicate_title("# My\xa0Title\n\nbody", "My Title") == "body"
+    assert _strip_duplicate_title("# My  Title\n\nbody", "my\xa0title") == "body"
+
+
+@pytest.mark.parametrize(
+    "html, expected",
+    [
+        ("<p>- not a list</p>", "\\- not a list"),
+        ("<p>1. step</p>", "1\\. step"),
+        ("<p># not a heading</p>", "\\# not a heading"),
+        ("<div>&gt; not a quote</div>", "\\> not a quote"),
+        ("<p>a<br>- b</p>", "a  \n\\- b"),
+        ("<ul><li>- x</li></ul>", "* \\- x"),
+        ("<p>a - b and 1. c</p>", "a - b and 1. c"),  # not at the start of a line
+        ("<p><b>- x</b></p>", "**- x**"),  # starts with the markers, not the text
+        ("<p>-1 and #hash</p>", "-1 and #hash"),
+        ("<pre>- code\n1. code</pre>", "```\n- code\n1. code\n```"),
+    ],
+)
+def test_text_that_would_open_a_list_heading_or_quote_is_escaped(html, expected):
+    assert html_to_clean_markdown(html) == expected
+
+
+def test_line_start_escaping_can_be_left_to_markdownify():
+    assert html_to_clean_markdown("<p>- x</p>", escape_misc=True) == "\\- x"
+
+
+def test_inline_text_after_a_list_is_a_paragraph_without_a_stray_line():
+    md = html_to_clean_markdown("<ul><li>a</li></ul>tail <b>bold</b> end<p>next</p>")
+    assert md == "* a\n\ntail **bold** end\n\nnext"
+    assert all(line.strip() or not line for line in md.split("\n"))
+
+
+def test_deeply_nested_wrappers_are_flattened_cheaply():
+    import time
+
+    n = 5000
+    html = "<div>" * n + "<p>deep</p>" + "</div>" * n
+    start = time.perf_counter()
+    assert html_to_clean_markdown(html) == "deep"
+    assert time.perf_counter() - start < 5  # was ~8 s
+
+
+@pytest.mark.parametrize(
+    "html, expected",
+    [
+        ("<div><div><p>a</p></div></div>", "a"),
+        ("<div> <section>\n<p>a</p></section> </div><p>b</p>", "a\n\nb"),
+        ("<p>x <span><span><b>y</b></span></span> z</p>", "x **y** z"),
+        # a wrapper with text of its own, or an inline child of a block, is kept
+        ("<div>t<div><p>a</p></div></div>", "t\n\na"),
+        ("<p>a</p><div><b>b</b></div><p>c</p>", "a\n\n**b**\n\nc"),
+    ],
+)
+def test_wrapper_flattening_does_not_change_the_rendering(html, expected):
+    assert html_to_clean_markdown(html) == expected

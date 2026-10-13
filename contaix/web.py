@@ -412,6 +412,21 @@ _PERMALINK_CLASSES = frozenset(
     {"headerlink", "toclink", "anchor", "permalink", "header-anchor"}
 )
 
+#: Containers whose only job is nesting: one with a single element child and no text of
+#: its own renders exactly as that child, so :func:`_prepare_soup` unwraps it (this is what
+#: keeps ``markdownify``'s per-level cost from adding up on deeply nested pages).
+_WRAPPER_TAGS = ("div", "span", "section", "article", "main", "font", "center")
+
+#: Where a line of text may start in the rendered markdown: a marker there (``- ``,
+#: ``1. ``, ``# ``, ``> ``) would turn plain text into a list, heading or quote.
+_LINE_START_CONTAINERS = frozenset(
+    "p div li dd dt blockquote section article main center body".split()
+)
+_LINE_START_MARKER_RE = re.compile(r"^(?:[-+*>]|#{1,6}|\d{1,9}[.)])(?=\s|$)")
+
+#: Inline tags that render as their content alone (no markers around it).
+_TRANSPARENT_INLINE_TAGS = frozenset({"span", "font", "label"})
+
 _BLOCK_TAGS = ("div", "p", "ul", "ol", "dl", "table", "pre", "blockquote", "section")
 _INLINE_TAGS = frozenset(
     "a b i u em strong span code small font label abbr cite mark sub sup".split()
@@ -497,12 +512,75 @@ def _parse_html(html: str):
         return BeautifulSoup(html, "html.parser")
 
 
-def _prepare_soup(soup) -> None:
-    """Fix the shapes ``markdownify`` renders badly (in place)."""
+def _escape_line_start(text: str) -> str:
+    r"""Backslash-escape a list/heading/quote marker at the start of ``text``.
+
+    >>> for t in ("- a", "1. a", "# a", "> a", "a - b", "-1"):
+    ...     print(_escape_line_start(t))
+    \- a
+    1\. a
+    \# a
+    \> a
+    a - b
+    -1
+    """
+    m = _LINE_START_MARKER_RE.match(text)
+    if m is None:
+        return text
+    marker = m.group()
+    if marker[0].isdigit():
+        return f"{marker[:-1]}\\{marker[-1]}{text[m.end():]}"
+    return f"\\{marker}{text[m.end():]}"
+
+
+def _only_child(tag):
+    """The one element ``tag`` merely wraps (see :func:`_unwrap_wrapper_chains`), else ``None``."""
+    from bs4 import NavigableString
+
+    if tag.name not in _WRAPPER_TAGS:
+        return None
+    inline = tag.name in ("span", "font")
+    kids = [
+        c
+        for c in tag.contents
+        if inline or not (type(c) is NavigableString and not c.strip())
+    ]
+    if len(kids) != 1 or getattr(kids[0], "name", None) is None:
+        return None
+    if inline or kids[0].name in _BLOCK_TAGS + _HEADING_TAGS:
+        return kids[0]
+    return None
+
+
+def _unwrap_wrapper_chains(soup) -> None:
+    """Replace each chain of containers that only nest (:data:`_WRAPPER_TAGS`) by its innermost element, in place.
+
+    A block wrapper holding just one block element (and whitespace), or an inline wrapper
+    holding just one element, renders as that element alone. Each chain is replaced once,
+    so a page nested thousands of levels deep of such wrappers costs one step, not one per level.
+    """
+    for head in soup.find_all(_WRAPPER_TAGS):
+        if head.parent is None or _only_child(head.parent) is head:
+            continue  # gone, or inside a chain whose head replaces it
+        inner = _only_child(head)
+        if inner is None:
+            continue
+        while (child := _only_child(inner)) is not None:
+            inner = child
+        head.replace_with(inner.extract())
+
+
+def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
+    """Fix the shapes ``markdownify`` renders badly (in place).
+
+    ``escape_line_start`` backslash-escapes text that would otherwise open a list, heading
+    or quote (the converter's own ``escape_misc`` is off, being too noisy).
+    """
     from bs4 import NavigableString
 
     for tag in soup.find_all(NON_CONTENT_TAGS):
         tag.decompose()
+    _unwrap_wrapper_chains(soup)
     # Permalink anchors on headings are noise, not content ("see § 3" is content).
     for a in soup.find_all("a", href=True):
         if (
@@ -529,12 +607,32 @@ def _prepare_soup(soup) -> None:
     for text in soup.find_all(string=True):
         if type(text) is NavigableString and id(text) not in verbatim:
             text.replace_with(re.sub(r"[ \t\n\r\f]+", " ", text))
-    # Inline content right after a list would be glued onto its last item.
+    # A non-breaking space is not a character of code (it makes pasted code invalid) and
+    # would keep a heading from matching the page title: it is a plain space there.
+    for el in soup.find_all(("pre", "textarea") + _HEADING_TAGS):
+        for text in el.find_all(string=True):
+            if type(text) is NavigableString and "\xa0" in text:
+                text.replace_with(text.replace("\xa0", " "))
+    # Inline content right after a list would be glued onto its last item: it becomes a
+    # paragraph of its own.
     for sub in soup.find_all(("ul", "ol", "dl")):
         sibling = sub.next_sibling
-        if sibling is not None and sibling.get_text(strip=True):
-            if isinstance(sibling, NavigableString) or sibling.name in _INLINE_TAGS:
-                sub.insert_after(soup.new_tag("br"))
+        if sibling is None or not sibling.get_text(strip=True):
+            continue
+        if not (isinstance(sibling, NavigableString) or sibling.name in _INLINE_TAGS):
+            continue
+        run, node = [], sibling
+        while node is not None and (
+            isinstance(node, NavigableString) or node.name in _INLINE_TAGS
+        ):
+            run.append(node)
+            node = node.next_sibling
+        paragraph = soup.new_tag("p")
+        sub.insert_after(paragraph)
+        for node in run:
+            paragraph.append(node.extract())
+    if escape_line_start:
+        _escape_line_starts(soup, verbatim)
     # `<a><h2>T</h2></a>` would render as `[## T](url)`: put the link inside.
     for a in soup.find_all("a", href=True):
         if a.find(_BLOCK_TAGS + _HEADING_TAGS) is None:
@@ -546,6 +644,42 @@ def _prepare_soup(soup) -> None:
                 heading.append(link)
         if a.find(_HEADING_TAGS) is not None:
             a.unwrap()
+
+
+def _opens_a_line(text) -> bool:
+    """Whether ``text`` starts a line of the rendered markdown: nothing but whitespace
+    precedes it in its block container (looking through inline wrappers like ``<b>``), or
+    only a ``<br>`` / block element does."""
+    from bs4 import NavigableString
+
+    node = text
+    while True:
+        for sibling in node.previous_siblings:
+            if type(sibling) is NavigableString:
+                if sibling.strip():
+                    return False
+            elif getattr(sibling, "name", None) is not None:
+                return sibling.name not in _INLINE_TAGS
+        parent = node.parent
+        if parent is None:
+            return False
+        if parent.name in _LINE_START_CONTAINERS:
+            return True
+        if parent.name not in _TRANSPARENT_INLINE_TAGS:
+            return False  # e.g. <b>: the line starts with its ``**``, not with the text
+        node = parent
+
+
+def _escape_line_starts(soup, verbatim: set) -> None:
+    """Escape marker-looking text at the start of a block (see :func:`_escape_line_start`)."""
+    from bs4 import NavigableString
+
+    for text in soup.find_all(string=True):
+        if type(text) is not NavigableString or id(text) in verbatim:
+            continue
+        stripped = text.lstrip()
+        if _LINE_START_MARKER_RE.match(stripped) and _opens_a_line(text):
+            text.replace_with(_escape_line_start(stripped))
 
 
 def html_to_clean_markdown(
@@ -611,7 +745,7 @@ def html_to_clean_markdown(
             ]
 
     soup = _parse_html(html)
-    _prepare_soup(soup)
+    _prepare_soup(soup, escape_line_start=not options.get("escape_misc"))
     converter = _make_converter(**options)
     try:
         markdown = converter.convert_soup(soup)
@@ -1439,6 +1573,11 @@ def _extract_main_content_html(html: str) -> str:
     return html_to_clean_markdown(html)
 
 
+def _normalise_title(text: str) -> str:
+    """``text`` as compared for a duplicated title: NBSP and whitespace runs as one space, case-folded."""
+    return " ".join(text.replace("\xa0", " ").split()).lower()
+
+
 def _strip_duplicate_title(content: str, title: str) -> str:
     """Remove a leading H1 from content if it duplicates the page title."""
     if not title:
@@ -1446,8 +1585,7 @@ def _strip_duplicate_title(content: str, title: str) -> str:
     # Match a leading # Title line
     match = re.match(r"^#\s+(.+?)(?:\n|$)", content.strip())
     if match:
-        h1_text = match.group(1).strip()
-        if h1_text.lower() == title.lower():
+        if _normalise_title(match.group(1)) == _normalise_title(title):
             return content.strip()[match.end() :].strip()
     return content
 
