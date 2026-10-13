@@ -424,6 +424,15 @@ _LINE_START_CONTAINERS = frozenset(
 )
 _LINE_START_MARKER_RE = re.compile(r"^(?:[-+*>]|#{1,6}|\d{1,9}[.)])(?=\s|$)")
 
+#: Tags that end a line (and so start a new one): blocks, their parts, ``<br>`` and ``<hr>``.
+_LINE_BREAK_TAGS = frozenset(
+    "div p ul ol dl table pre blockquote section article main header footer nav aside "
+    "form fieldset figure address details center li dd dt tr tbody thead tfoot hr br "
+    "h1 h2 h3 h4 h5 h6".split()
+)
+#: Tags that end a paragraph of inline content (``<br>`` does not: it is inside one).
+_BLOCK_END_TAGS = _LINE_BREAK_TAGS - {"br"}
+
 #: Inline tags that render as their content alone (no markers around it).
 _TRANSPARENT_INLINE_TAGS = frozenset({"span", "font", "label"})
 
@@ -597,6 +606,12 @@ def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
         a["href"] = re.sub(
             r"[ ()]", lambda m: f"%{ord(m.group()):02X}", a["href"].strip()
         )
+    # A non-breaking space is not a character of code (it makes pasted code invalid) and
+    # would keep a heading from matching the page title: it is a plain space there.
+    for el in soup.find_all(("pre", "textarea") + _HEADING_TAGS):
+        for text in el.find_all(string=True):
+            if type(text) is NavigableString and "\xa0" in text:
+                text.replace_with(text.replace("\xa0", " "))
     # Source newlines/indentation are not significant outside <pre>; left in, a
     # line starting with "# " or "- " would turn a paragraph into a heading/list.
     verbatim = {
@@ -607,24 +622,16 @@ def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
     for text in soup.find_all(string=True):
         if type(text) is NavigableString and id(text) not in verbatim:
             text.replace_with(re.sub(r"[ \t\n\r\f]+", " ", text))
-    # A non-breaking space is not a character of code (it makes pasted code invalid) and
-    # would keep a heading from matching the page title: it is a plain space there.
-    for el in soup.find_all(("pre", "textarea") + _HEADING_TAGS):
-        for text in el.find_all(string=True):
-            if type(text) is NavigableString and "\xa0" in text:
-                text.replace_with(text.replace("\xa0", " "))
     # Inline content right after a list would be glued onto its last item: it becomes a
     # paragraph of its own.
     for sub in soup.find_all(("ul", "ol", "dl")):
         sibling = sub.next_sibling
         if sibling is None or not sibling.get_text(strip=True):
             continue
-        if not (isinstance(sibling, NavigableString) or sibling.name in _INLINE_TAGS):
+        if getattr(sibling, "name", None) in _BLOCK_END_TAGS:
             continue
         run, node = [], sibling
-        while node is not None and (
-            isinstance(node, NavigableString) or node.name in _INLINE_TAGS
-        ):
+        while node is not None and getattr(node, "name", None) not in _BLOCK_END_TAGS:
             run.append(node)
             node = node.next_sibling
         paragraph = soup.new_tag("p")
@@ -659,7 +666,11 @@ def _opens_a_line(text) -> bool:
                 if sibling.strip():
                     return False
             elif getattr(sibling, "name", None) is not None:
-                return sibling.name not in _INLINE_TAGS
+                if sibling.name in _LINE_BREAK_TAGS:
+                    return True
+                if sibling.get_text(strip=True) or sibling.find("img") is not None:
+                    return False  # inline content before it on the line
+                # an empty inline tag (``<a id=x></a>``) renders nothing: look further back
         parent = node.parent
         if parent is None:
             return False
@@ -679,7 +690,8 @@ def _escape_line_starts(soup, verbatim: set) -> None:
             continue
         stripped = text.lstrip()
         if _LINE_START_MARKER_RE.match(stripped) and _opens_a_line(text):
-            text.replace_with(_escape_line_start(stripped))
+            lead = text[: len(text) - len(stripped)]
+            text.replace_with(lead + _escape_line_start(stripped))
 
 
 def html_to_clean_markdown(

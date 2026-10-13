@@ -298,3 +298,38 @@ def test_deeply_nested_wrappers_are_flattened_cheaply():
 )
 def test_wrapper_flattening_does_not_change_the_rendering(html, expected):
     assert html_to_clean_markdown(html) == expected
+
+
+@pytest.mark.parametrize(
+    "html, expected",
+    [
+        ("<p>Press <kbd>Ctrl</kbd> + <kbd>C</kbd></p>", "Press `Ctrl` + `C`"),
+        ("<p>see <q>quote</q> - he said</p>", 'see "quote" - he said'),
+        ("<p><a id='x'></a>- item</p>", "\\- item"),
+        ("<p><span class='icon'></span>1. step</p>", "1\\. step"),
+    ],
+)
+def test_escaping_only_at_the_real_start_of_a_line(html, expected):
+    assert html_to_clean_markdown(html) == expected
+
+
+def test_text_after_an_image_is_mid_line():
+    md = html_to_clean_markdown("<p>Value<img src=x alt=y> - z</p>", ignore_images=False)
+    assert md == "Value![y](x) - z"
+
+
+@pytest.mark.parametrize(
+    "html, expected",
+    [
+        ("<ul><li>a</li></ul>tail<br>after br", "* a\n\ntail  \nafter br"),
+        ("<ul><li>a</li></ul>tail<kbd>K</kbd> after", "* a\n\ntail`K` after"),
+        ("<ul><li>a</li></ul>tail<h2>H</h2>", "* a\n\ntail\n\n## H"),
+    ],
+)
+def test_the_whole_inline_run_after_a_list_is_one_paragraph(html, expected):
+    assert html_to_clean_markdown(html) == expected
+
+
+def test_a_nbsp_inside_code_does_not_lose_its_protection():
+    md = html_to_clean_markdown("<pre>a&nbsp;b\n<div>- x&nbsp;y</div></pre>")
+    assert "\\" not in md and "- x y" in md
