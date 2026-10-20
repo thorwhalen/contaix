@@ -741,9 +741,9 @@ def _escape_line_starts(soup, verbatim: set, *, include_links: bool = True) -> N
         if type(text) is not NavigableString or id(text) in verbatim:
             continue
         stripped = text.lstrip()
-        looks_like_markup = _LINE_START_MARKER_RE.match(stripped) or _RULE_LINE_RE.match(
-            stripped.rstrip()
-        )
+        looks_like_markup = _LINE_START_MARKER_RE.match(
+            stripped
+        ) or _RULE_LINE_RE.match(stripped.rstrip())
         if looks_like_markup and _opens_a_line(text, transparent=transparent):
             lead = text[: len(text) - len(stripped)]
             text.replace_with(lead + _escape_line_start(stripped))
