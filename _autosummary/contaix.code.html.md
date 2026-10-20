@@ -34,12 +34,12 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Manages aggregation and saves of the code of local packages
 
-#### multiple_pkgs_code(name=None, pkgs=(), , pkg_secion_marker='#', section_sepator='\\\\n\\\\n\\\\n')
+#### multiple_pkgs_code(name=None, pkgs=(), , pkg_secion_marker='#', section_sepator='\\n\\n\\n')
 
 Aggregates the code of multiple local packages in separate sections.
 Saves the result to a file if a name is provided.
 
-#### save_multiple_pkgs_code(name=None, pkgs=(), , pkg_secion_marker='#', section_sepator='\\\\n\\\\n\\\\n')
+#### save_multiple_pkgs_code(name=None, pkgs=(), , pkg_secion_marker='#', section_sepator='\\n\\n\\n')
 
 Aggregates the code of multiple local packages in separate sections.
 Saves the result to a file if a name is provided.
@@ -62,7 +62,7 @@ or, to save multiple package’s code in a single file, in a specific folder.
 >>> PackageCodeContexts('some/folder/path').save_multiple_pkgs_code(['aix', 'dol'])
 ```
 
-### contaix.code.code_aggregate(code_src, \*, egress=<function identity>, kv_to_item=<function <lambda>>, keys_filt='\\\\\\\\.py$', keys_exclude=None, include_readme=<function \_readme_from_parent_dir>, \*\*store_aggregate_kwargs)
+### contaix.code.code_aggregate(code_src, \*, egress=<function identity>, kv_to_item=<function <lambda>>, keys_filt='\\\\.py$', keys_exclude=None, include_readme=<function \_readme_from_parent_dir>, \*\*store_aggregate_kwargs)
 
 Aggregates all code segments from the given code source (folder, github url, store).
 
@@ -70,13 +70,13 @@ This is useful when you want to use AI to search and respond to questions about 
 specific code base.
 
 * **Parameters:**
-  * **code_src** (`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Mapping`](https://docs.python.org/3/library/typing.html#typing.Mapping)]) – A dictionary where keys are references to the code (e.g., paths)
+  * **code_src** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Mapping`](https://docs.python.org/3/library/typing.html#typing.Mapping)]) – A dictionary where keys are references to the code (e.g., paths)
     and values are code snippets or content.
-  * **egress** (`Union`[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – A function to apply to the aggregate before returning.
+  * **egress** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – A function to apply to the aggregate before returning.
     If a string, the aggregate will be saved to the file.
   * **kv_to_item** (*Callable*) – A function that converts a key-value pairs to the
     items that should be aggregated.
-  * **keys_filt** (`Union`[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – A function or regex string to filter the keys of the code store.
+  * **keys_filt** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – A function or regex string to filter the keys of the code store.
     If a string, it will be compiled to a regex pattern.
   * **keys_exclude** – Optional regex string, iterable of regex strings, or `path->bool`
     predicate identifying keys to *exclude* from the aggregate (applied
@@ -159,7 +159,7 @@ Returns True if and only if name is the name of a local package.
 * **Return type:**
   [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
-### contaix.code.iter_pruned_aggregate_lines(lines, , exclude=('(^|/)node_modules/', '(^|/)\\\\\\\\.git/', '(^|/)bower_components/', '(^|/)(dist|build|out|target|\\\\\\\\.next|\\\\\\\\.nuxt|\\\\\\\\.turbo|\\\\\\\\.cache|\\\\\\\\.parcel-cache|coverage|_\_pycache_\_|\\\\\\\\.pytest_cache|\\\\\\\\.mypy_cache|\\\\\\\\.tox|\\\\\\\\.venv|venv|site-packages|vendor)/', '(^|/)(package-lock\\\\\\\\.json|yarn\\\\\\\\.lock|pnpm-lock\\\\\\\\.yaml|npm-shrinkwrap\\\\\\\\.json|poetry\\\\\\\\.lock|Pipfile\\\\\\\\.lock|Cargo\\\\\\\\.lock|composer\\\\\\\\.lock|Gemfile\\\\\\\\.lock|go\\\\\\\\.sum)$', '\\\\\\\\.min\\\\\\\\.(js|mjs|cjs|css)$', '\\\\\\\\.(js|mjs|cjs|css)\\\\\\\\.map$', '\\\\\\\\.map$'), header_prefix='## ', fence='\`\`\`', on_drop=None)
+### contaix.code.iter_pruned_aggregate_lines(lines, , exclude=('(^|/)node_modules/', '(^|/)\\\\.git/', '(^|/)bower_components/', '(^|/)(dist|build|out|target|\\\\.next|\\\\.nuxt|\\\\.turbo|\\\\.cache|\\\\.parcel-cache|coverage|_\_pycache_\_|\\\\.pytest_cache|\\\\.mypy_cache|\\\\.tox|\\\\.venv|venv|site-packages|vendor)/', '(^|/)(package-lock\\\\.json|yarn\\\\.lock|pnpm-lock\\\\.yaml|npm-shrinkwrap\\\\.json|poetry\\\\.lock|Pipfile\\\\.lock|Cargo\\\\.lock|composer\\\\.lock|Gemfile\\\\.lock|go\\\\.sum)$', '\\\\.min\\\\.(js|mjs|cjs|css)$', '\\\\.(js|mjs|cjs|css)\\\\.map$', '\\\\.map$'), header_prefix='## ', fence='\`\`\`', on_drop=None)
 
 Stream `lines` of an aggregated-code markdown, yielding only the lines that
 belong to sections whose header path does *not* match `exclude`.
@@ -210,7 +210,7 @@ True
 False
 ```
 
-### contaix.code.prune_code_aggregate(src, \*, exclude=('(^|/)node_modules/', '(^|/)\\\\\\\\.git/', '(^|/)bower_components/', '(^|/)(dist|build|out|target|\\\\\\\\.next|\\\\\\\\.nuxt|\\\\\\\\.turbo|\\\\\\\\.cache|\\\\\\\\.parcel-cache|coverage|_\_pycache_\_|\\\\\\\\.pytest_cache|\\\\\\\\.mypy_cache|\\\\\\\\.tox|\\\\\\\\.venv|venv|site-packages|vendor)/', '(^|/)(package-lock\\\\\\\\.json|yarn\\\\\\\\.lock|pnpm-lock\\\\\\\\.yaml|npm-shrinkwrap\\\\\\\\.json|poetry\\\\\\\\.lock|Pipfile\\\\\\\\.lock|Cargo\\\\\\\\.lock|composer\\\\\\\\.lock|Gemfile\\\\\\\\.lock|go\\\\\\\\.sum)$', '\\\\\\\\.min\\\\\\\\.(js|mjs|cjs|css)$', '\\\\\\\\.(js|mjs|cjs|css)\\\\\\\\.map$', '\\\\\\\\.map$'), egress=<function identity>, header_prefix='## ', fence='\`\`\`', on_drop=None)
+### contaix.code.prune_code_aggregate(src, \*, exclude=('(^|/)node_modules/', '(^|/)\\\\.git/', '(^|/)bower_components/', '(^|/)(dist|build|out|target|\\\\.next|\\\\.nuxt|\\\\.turbo|\\\\.cache|\\\\.parcel-cache|coverage|_\_pycache_\_|\\\\.pytest_cache|\\\\.mypy_cache|\\\\.tox|\\\\.venv|venv|site-packages|vendor)/', '(^|/)(package-lock\\\\.json|yarn\\\\.lock|pnpm-lock\\\\.yaml|npm-shrinkwrap\\\\.json|poetry\\\\.lock|Pipfile\\\\.lock|Cargo\\\\.lock|composer\\\\.lock|Gemfile\\\\.lock|go\\\\.sum)$', '\\\\.min\\\\.(js|mjs|cjs|css)$', '\\\\.(js|mjs|cjs|css)\\\\.map$', '\\\\.map$'), egress=<function identity>, header_prefix='## ', fence='\`\`\`', on_drop=None)
 
 Remove bloated sections (vendored deps, build output, lockfiles, minified
 bundles, …) from an aggregated-code markdown.
@@ -221,10 +221,10 @@ included a `node_modules/` tree). It streams, so it handles arbitrarily large
 files.
 
 * **Parameters:**
-  * **src** (`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Iterable`](https://docs.python.org/3/library/typing.html#typing.Iterable)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]]) – The aggregate as a markdown string, a path to a markdown file, or any
+  * **src** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Iterable`](https://docs.python.org/3/library/typing.html#typing.Iterable)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]]) – The aggregate as a markdown string, a path to a markdown file, or any
     iterable of lines.
   * **exclude** – Sections to drop (see `iter_pruned_aggregate_lines`).
-  * **egress** (`Union`[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – What to do with the result. The default (`identity`) returns the
+  * **egress** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – What to do with the result. The default (`identity`) returns the
     pruned markdown as a string. Pass a filepath string to stream the result to
     that file (memory-safe for huge inputs) and return the filepath.
   * **header_prefix** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Aggregate format markers (see `iter_pruned_aggregate_lines`).
@@ -248,7 +248,7 @@ False
 Will resolve code_src to a Mapping whose values are the code strings
 
 * **Parameters:**
-  * **code_src** (`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Mapping`](https://docs.python.org/3/library/typing.html#typing.Mapping)]) – The source of the code. Can be an explicit `Mapping`,
+  * **code_src** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Mapping`](https://docs.python.org/3/library/typing.html#typing.Mapping)]) – The source of the code. Can be an explicit `Mapping`,
     a directory path string,
     a GitHub URL,
     or an imported package (must contain a \_\_path_\_ atribute)
@@ -271,7 +271,7 @@ If the input is a github URL, this repository will be DOWNLOAD to a local
 temporary directory and the path of that directory will be returned.
 
 * **Parameters:**
-  **code_src** (`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Mapping`](https://docs.python.org/3/library/typing.html#typing.Mapping)]) – The source of the code. Can be
+  **code_src** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Mapping`](https://docs.python.org/3/library/typing.html#typing.Mapping)]) – The source of the code. Can be
   a directory path string,
   a GitHub URL,
   or an imported package (must contain a \_\_path_\_ atribute)

@@ -212,14 +212,14 @@ List all pages found in a documentation site’s navigation.
 
 Returns a list of dicts with keys: path, title, url, group, tab.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)]
-
 ```pycon
 >>> pages = list_site_pages('https://platform.claude.com/docs/en/home')
 >>> len(pages)
 89
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)]
 
 ### contaix.web.parse_rsc_flight(rsc_text)
 
@@ -259,7 +259,7 @@ are resolved via `_registry` (from [`parse_rsc_flight()`](#contaix.web.parse_rsc
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
-### contaix.web.site_to_markdown(url, , cache_dir=None, output_file=None, tab_filter=None, page_fetcher=None, content_extractor=None, section_separator='\\\\n\\\\n---\\\\n\\\\n', collapse_blank_lines=True, use_llms_full=True, verbose=False)
+### contaix.web.site_to_markdown(url, , cache_dir=None, output_file=None, tab_filter=None, page_fetcher=None, content_extractor=None, section_separator='\\n\\n---\\n\\n', collapse_blank_lines=True, use_llms_full=True, verbose=False)
 
 Download a documentation site and produce a single aggregated markdown.
 
@@ -289,10 +289,10 @@ Download a documentation site and produce a single aggregated markdown.
 
 Convert a URL to a filesystem-safe cache key.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> url_to_cache_key('https://example.com/docs/en/foo')
 'example.com__docs__en__foo.html'
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
