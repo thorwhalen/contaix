@@ -371,3 +371,14 @@ def test_plain_rendering_inline_tags_do_not_hide_a_line_start(tag):
 def test_unlinked_anchor_does_not_hide_a_line_start():
     out = html_to_clean_markdown("<ul><li><a href='#i'>1. Intro</a></li></ul>", include_links=False)
     assert "1\\. Intro" in out
+
+
+def test_deep_retry_runs_on_a_big_stack_and_restores_process_state():
+    import sys
+    import threading
+
+    limit, stack = sys.getrecursionlimit(), threading.stack_size()
+    n = 6000
+    html = "".join(f"<div>t{i}<span>" for i in range(n)) + "x" + "</span></div>" * n
+    assert html_to_clean_markdown(html).startswith("t0")
+    assert (sys.getrecursionlimit(), threading.stack_size()) == (limit, stack)
