@@ -442,6 +442,9 @@ _INLINE_TAGS = frozenset(
 )
 _HEADING_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
 
+#: Whitespace that is not significant outside ``<pre>``.
+_WHITESPACE_RUN_RE = re.compile(r"[ \t\n\r\f]+")
+
 #: An opening/closing code fence (any indentation: fences nest in list items).
 _CODE_FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
 
@@ -570,7 +573,7 @@ def _unwrap_wrapper_chains(soup) -> None:
     holding just one element, renders as that element alone. Each chain is replaced once,
     so a page nested thousands of levels deep of such wrappers costs one step, not one per level.
     """
-    for head in soup.find_all(_WRAPPER_TAGS):
+    for head in _tags_under(soup, _WRAPPER_TAGS):
         if head.parent is None or _only_child(head.parent) is head:
             continue  # gone, or inside a chain whose head replaces it
         inner = _only_child(head)
@@ -581,6 +584,31 @@ def _unwrap_wrapper_chains(soup) -> None:
         head.replace_with(inner.extract())
 
 
+def _tags_under(el, names, *, with_href: bool = False) -> list:
+    """The tags named in ``names`` below ``el``, in document order.
+
+    A plain walk of ``el.descendants``: much cheaper on large pages than
+    ``find_all``, whose per-node filter machinery dominated the pre-pass.
+    """
+    return [
+        d
+        for d in el.descendants
+        if getattr(d, "name", None) in names and (not with_href or d.has_attr("href"))
+    ]
+
+
+def _strings_under(el) -> list:
+    """The plain text nodes below ``el`` (a cheap stand-in for ``el.find_all(string=True)``)."""
+    from bs4 import NavigableString
+
+    return [d for d in el.descendants if type(d) is NavigableString]
+
+
+def _has_descendant(el, names) -> bool:
+    """Whether a tag named in ``names`` is below ``el`` (a cheap ``el.find(names) is not None``)."""
+    return any(getattr(d, "name", None) in names for d in el.descendants)
+
+
 def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
     """Fix the shapes ``markdownify`` renders badly (in place).
 
@@ -589,11 +617,11 @@ def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
     """
     from bs4 import NavigableString
 
-    for tag in soup.find_all(NON_CONTENT_TAGS):
+    for tag in _tags_under(soup, NON_CONTENT_TAGS):
         tag.decompose()
     _unwrap_wrapper_chains(soup)
     # Permalink anchors on headings are noise, not content ("see § 3" is content).
-    for a in soup.find_all("a", href=True):
+    for a in _tags_under(soup, ("a",), with_href=True):
         if (
             a.get_text(strip=True) in _PERMALINK_TEXTS
             and a["href"].startswith("#")
@@ -604,29 +632,31 @@ def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
         ):
             a.decompose()
     # Bare markdown link destinations break on spaces and parentheses.
-    for a in soup.find_all("a", href=True):
+    for a in _tags_under(soup, ("a",), with_href=True):
         a["href"] = re.sub(
             r"[ ()]", lambda m: f"%{ord(m.group()):02X}", a["href"].strip()
         )
     # A non-breaking space is not a character of code (it makes pasted code invalid) and
     # would keep a heading from matching the page title: it is a plain space there.
-    for el in soup.find_all(("pre", "textarea") + _HEADING_TAGS):
-        for text in el.find_all(string=True):
-            if type(text) is NavigableString and "\xa0" in text:
+    for el in _tags_under(soup, ("pre", "textarea") + _HEADING_TAGS):
+        for text in _strings_under(el):
+            if "\xa0" in text:
                 text.replace_with(text.replace("\xa0", " "))
     # Source newlines/indentation are not significant outside <pre>; left in, a
     # line starting with "# " or "- " would turn a paragraph into a heading/list.
     verbatim = {
         id(string)
-        for el in soup.find_all(("pre", "textarea"))
-        for string in el.find_all(string=True)
+        for el in _tags_under(soup, ("pre", "textarea"))
+        for string in _strings_under(el)
     }
-    for text in soup.find_all(string=True):
+    for text in _strings_under(soup):
         if type(text) is NavigableString and id(text) not in verbatim:
-            text.replace_with(re.sub(r"[ \t\n\r\f]+", " ", text))
+            collapsed = _WHITESPACE_RUN_RE.sub(" ", text)
+            if collapsed != text:  # most nodes are already clean: skip the tree surgery
+                text.replace_with(collapsed)
     # Inline content right after a list would be glued onto its last item: it becomes a
     # paragraph of its own.
-    for sub in soup.find_all(("ul", "ol", "dl")):
+    for sub in _tags_under(soup, ("ul", "ol", "dl")):
         sibling = sub.next_sibling
         if sibling is None or not sibling.get_text(strip=True):
             continue
@@ -643,8 +673,8 @@ def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
     if escape_line_start:
         _escape_line_starts(soup, verbatim)
     # `<a><h2>T</h2></a>` would render as `[## T](url)`: put the link inside.
-    for a in soup.find_all("a", href=True):
-        if a.find(_BLOCK_TAGS + _HEADING_TAGS) is None:
+    for a in _tags_under(soup, ("a",), with_href=True):
+        if not _has_descendant(a, _BLOCK_TAGS + _HEADING_TAGS):
             continue
         for heading in a.find_all(_HEADING_TAGS):
             if heading.find("a") is None:
@@ -691,7 +721,7 @@ def _escape_line_starts(soup, verbatim: set) -> None:
     """Escape marker-looking text at the start of a block (see :func:`_escape_line_start`)."""
     from bs4 import NavigableString
 
-    for text in soup.find_all(string=True):
+    for text in _strings_under(soup):
         if type(text) is not NavigableString or id(text) in verbatim:
             continue
         stripped = text.lstrip()
