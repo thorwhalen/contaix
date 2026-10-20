@@ -401,7 +401,9 @@ HTML_TO_MARKDOWN_DEFAULTS = {
 #: spends C stack on every Python call, so the retry runs in a thread with
 #: :data:`DEEP_HTML_THREAD_STACK_BYTES` of stack, which makes the high limit safe there too.
 DEEP_HTML_RECURSION_LIMIT = 100_000
-DEEP_HTML_THREAD_STACK_BYTES = 512 * 1024 * 1024  # virtual: only touched pages cost memory
+DEEP_HTML_THREAD_STACK_BYTES = (
+    512 * 1024 * 1024
+)  # virtual: only touched pages cost memory
 
 #: Serialises the temporary raise of the (process-wide) recursion limit, so two
 #: threads retrying deep pages cannot leave the raised value behind as "previous".
