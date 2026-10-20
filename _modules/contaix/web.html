@@ -281,6 +281,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scraped.html_markdown</span><span class="w"> </span><span class="kn">import</span> <span class="n">NON_CONTENT_TAGS</span><span class="p">,</span> <span class="n">HTML_TO_MARKDOWN_DEFAULTS</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -650,25 +651,19 @@
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 
-<span class="c1">#: Tags whose *content* is never part of the document text. ``markdownify`` drops</span>
-<span class="c1">#: ``script``/``style`` but would keep ``&lt;title&gt;``, so the whole head goes first.</span>
-<span class="n">NON_CONTENT_TAGS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"head"</span><span class="p">,</span> <span class="s2">"script"</span><span class="p">,</span> <span class="s2">"style"</span><span class="p">,</span> <span class="s2">"noscript"</span><span class="p">)</span>
-
-<span class="c1">#: Defaults for the HTML-&gt;Markdown conversion (the same ones ``scraped`` uses).</span>
-<span class="c1">#: Any of them can be overridden by keyword in :func:`html_to_clean_markdown`.</span>
-<span class="n">HTML_TO_MARKDOWN_DEFAULTS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"heading_style"</span><span class="p">:</span> <span class="s2">"ATX"</span><span class="p">,</span>  <span class="c1"># "# Title", not the underlined setext form</span>
-    <span class="s2">"bullets"</span><span class="p">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"escape_underscores"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># keeps identifiers like ``foo_bar`` readable</span>
-    <span class="s2">"escape_asterisks"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">}</span>
+<span class="c1"># The tags dropped before conversion (``NON_CONTENT_TAGS``) and the markdownify</span>
+<span class="c1"># defaults (``HTML_TO_MARKDOWN_DEFAULTS``) are imported from ``scraped.html_markdown``:</span>
+<span class="c1"># one source of truth for both converters. contaix adds its own cleaning passes on top</span>
+<span class="c1"># (thorwhalen/scraped#25 tracks moving them into scraped so this can delegate fully).</span>
 
 <span class="c1">#: Recursion limit used (temporarily) to retry a page nested too deeply for the</span>
 <span class="c1">#: default one: ``markdownify`` recurses once per nesting level. Python &lt; 3.11</span>
 <span class="c1">#: spends C stack on every Python call, so the retry runs in a thread with</span>
 <span class="c1">#: :data:`DEEP_HTML_THREAD_STACK_BYTES` of stack, which makes the high limit safe there too.</span>
 <span class="n">DEEP_HTML_RECURSION_LIMIT</span> <span class="o">=</span> <span class="mi">100_000</span>
-<span class="n">DEEP_HTML_THREAD_STACK_BYTES</span> <span class="o">=</span> <span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>  <span class="c1"># virtual: only touched pages cost memory</span>
+<span class="n">DEEP_HTML_THREAD_STACK_BYTES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
+<span class="p">)</span>  <span class="c1"># virtual: only touched pages cost memory</span>
 
 <span class="c1">#: Serialises the temporary raise of the (process-wide) recursion limit, so two</span>
 <span class="c1">#: threads retrying deep pages cannot leave the raised value behind as "previous".</span>
@@ -2035,7 +2030,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=1d9216c3"></script>
+</div><script src="../../_static/documentation_options.js?v=3d238c28"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

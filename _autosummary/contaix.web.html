@@ -278,12 +278,6 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.NON_CONTENT_TAGS" title="contaix.web.NON_CONTENT_TAGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NON_CONTENT_TAGS</span></code></a></p></td>
-<td><p>Tags whose <em>content</em> is never part of the document text.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#contaix.web.HTML_TO_MARKDOWN_DEFAULTS" title="contaix.web.HTML_TO_MARKDOWN_DEFAULTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></code></a></p></td>
-<td><p>Defaults for the HTML-&gt;Markdown conversion (the same ones <code class="docutils literal notranslate"><span class="pre">scraped</span></code> uses).</p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#contaix.web.DEEP_HTML_RECURSION_LIMIT" title="contaix.web.DEEP_HTML_RECURSION_LIMIT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEEP_HTML_RECURSION_LIMIT</span></code></a></p></td>
 <td><p>Recursion limit used (temporarily) to retry a page nested too deeply for the default one: <code class="docutils literal notranslate"><span class="pre">markdownify</span></code> recurses once per nesting level.</p></td>
 </tr>
@@ -346,20 +340,6 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 default one: <code class="docutils literal notranslate"><span class="pre">markdownify</span></code> recurses once per nesting level. Python &lt; 3.11
 spends C stack on every Python call, so the retry runs in a thread with
 <code class="xref py py-data docutils literal notranslate"><span class="pre">DEEP_HTML_THREAD_STACK_BYTES</span></code> of stack, which makes the high limit safe there too.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="contaix.web.HTML_TO_MARKDOWN_DEFAULTS">
-<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'bullets':</span> <span class="pre">'*',</span> <span class="pre">'escape_asterisks':</span> <span class="pre">False,</span> <span class="pre">'escape_underscores':</span> <span class="pre">False,</span> <span class="pre">'heading_style':</span> <span class="pre">'ATX'}</span></span><a class="headerlink" href="#contaix.web.HTML_TO_MARKDOWN_DEFAULTS" title="Link to this definition">¶</a></dt>
-<dd><p>Defaults for the HTML-&gt;Markdown conversion (the same ones <code class="docutils literal notranslate"><span class="pre">scraped</span></code> uses).
-Any of them can be overridden by keyword in <a class="reference internal" href="#contaix.web.html_to_clean_markdown" title="contaix.web.html_to_clean_markdown"><code class="xref py py-func docutils literal notranslate"><span class="pre">html_to_clean_markdown()</span></code></a>.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="contaix.web.NON_CONTENT_TAGS">
-<span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">NON_CONTENT_TAGS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('head',</span> <span class="pre">'script',</span> <span class="pre">'style',</span> <span class="pre">'noscript')</span></span><a class="headerlink" href="#contaix.web.NON_CONTENT_TAGS" title="Link to this definition">¶</a></dt>
-<dd><p>Tags whose <em>content</em> is never part of the document text. <code class="docutils literal notranslate"><span class="pre">markdownify</span></code> drops
-<code class="docutils literal notranslate"><span class="pre">script</span></code>/<code class="docutils literal notranslate"><span class="pre">style</span></code> but would keep <code class="docutils literal notranslate"><span class="pre">&lt;title&gt;</span></code>, so the whole head goes first.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -528,7 +508,7 @@ is supported; any other value raises <code class="docutils literal notranslate">
 <li><p><strong>ignore_images</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to skip image tags.</p></li>
 <li><p><strong>include_links</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to include hyperlinks in output (<code class="docutils literal notranslate"><span class="pre">False</span></code> keeps the link text only).</p></li>
 <li><p><strong>**markdownify_options</strong> – Options for <code class="docutils literal notranslate"><span class="pre">markdownify.MarkdownConverter</span></code>, overriding
-<a class="reference internal" href="#contaix.web.HTML_TO_MARKDOWN_DEFAULTS" title="contaix.web.HTML_TO_MARKDOWN_DEFAULTS"><code class="xref py py-data docutils literal notranslate"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></code></a>. Unknown names raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>
+<code class="xref py py-data docutils literal notranslate"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></code>. Unknown names raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>
 (<code class="docutils literal notranslate"><span class="pre">MarkdownConverter</span></code> would silently ignore them), in particular the
 <code class="docutils literal notranslate"><span class="pre">html2text</span></code> options this function accepted before (<code class="docutils literal notranslate"><span class="pre">ignore_links</span></code>,
 <code class="docutils literal notranslate"><span class="pre">unicode_snob</span></code>, …).</p></li>
@@ -724,8 +704,6 @@ Otherwise, returns the output file path.</p>
             <ul>
 <li><a class="reference internal" href="#">contaix.web</a><ul>
 <li><a class="reference internal" href="#contaix.web.DEEP_HTML_RECURSION_LIMIT"><code class="docutils literal notranslate"><span class="pre">DEEP_HTML_RECURSION_LIMIT</span></code></a></li>
-<li><a class="reference internal" href="#contaix.web.HTML_TO_MARKDOWN_DEFAULTS"><code class="docutils literal notranslate"><span class="pre">HTML_TO_MARKDOWN_DEFAULTS</span></code></a></li>
-<li><a class="reference internal" href="#contaix.web.NON_CONTENT_TAGS"><code class="docutils literal notranslate"><span class="pre">NON_CONTENT_TAGS</span></code></a></li>
 <li><a class="reference internal" href="#contaix.web.extract_rsc_page_content"><code class="docutils literal notranslate"><span class="pre">extract_rsc_page_content()</span></code></a></li>
 <li><a class="reference internal" href="#contaix.web.extract_site_nav"><code class="docutils literal notranslate"><span class="pre">extract_site_nav()</span></code></a></li>
 <li><a class="reference internal" href="#contaix.web.fetch_llms_full"><code class="docutils literal notranslate"><span class="pre">fetch_llms_full()</span></code></a></li>
@@ -751,7 +729,7 @@ Otherwise, returns the output file path.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1d9216c3"></script>
+</div><script src="../_static/documentation_options.js?v=3d238c28"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

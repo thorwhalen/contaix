@@ -23,10 +23,8 @@ Example:
 
 ### Module Attributes
 
-| [`NON_CONTENT_TAGS`](#contaix.web.NON_CONTENT_TAGS)          | Tags whose *content* is never part of the document text.                                                                                 |
-|----------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| [`HTML_TO_MARKDOWN_DEFAULTS`](#contaix.web.HTML_TO_MARKDOWN_DEFAULTS) | Defaults for the HTML->Markdown conversion (the same ones `scraped` uses).                                                               |
-| [`DEEP_HTML_RECURSION_LIMIT`](#contaix.web.DEEP_HTML_RECURSION_LIMIT) | Recursion limit used (temporarily) to retry a page nested too deeply for the default one: `markdownify` recurses once per nesting level. |
+| [`DEEP_HTML_RECURSION_LIMIT`](#contaix.web.DEEP_HTML_RECURSION_LIMIT)   | Recursion limit used (temporarily) to retry a page nested too deeply for the default one: `markdownify` recurses once per nesting level.   |
+|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
 
 ### Functions
 
@@ -52,16 +50,6 @@ Recursion limit used (temporarily) to retry a page nested too deeply for the
 default one: `markdownify` recurses once per nesting level. Python < 3.11
 spends C stack on every Python call, so the retry runs in a thread with
 `DEEP_HTML_THREAD_STACK_BYTES` of stack, which makes the high limit safe there too.
-
-### contaix.web.HTML_TO_MARKDOWN_DEFAULTS *= {'bullets': '\*', 'escape_asterisks': False, 'escape_underscores': False, 'heading_style': 'ATX'}*
-
-Defaults for the HTML->Markdown conversion (the same ones `scraped` uses).
-Any of them can be overridden by keyword in [`html_to_clean_markdown()`](#contaix.web.html_to_clean_markdown).
-
-### contaix.web.NON_CONTENT_TAGS *= ('head', 'script', 'style', 'noscript')*
-
-Tags whose *content* is never part of the document text. `markdownify` drops
-`script`/`style` but would keep `<title>`, so the whole head goes first.
 
 ### contaix.web.extract_rsc_page_content(rsc_text)
 
@@ -185,7 +173,7 @@ Convert HTML to clean markdown (via `markdownify`, MIT-licensed).
   * **ignore_images** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to skip image tags.
   * **include_links** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to include hyperlinks in output (`False` keeps the link text only).
   * **\*\*markdownify_options** – Options for `markdownify.MarkdownConverter`, overriding
-    [`HTML_TO_MARKDOWN_DEFAULTS`](#contaix.web.HTML_TO_MARKDOWN_DEFAULTS). Unknown names raise `TypeError`
+    `HTML_TO_MARKDOWN_DEFAULTS`. Unknown names raise `TypeError`
     (`MarkdownConverter` would silently ignore them), in particular the
     `html2text` options this function accepted before (`ignore_links`,
     `unicode_snob`, …).

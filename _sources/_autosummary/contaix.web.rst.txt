@@ -8,8 +8,6 @@ contaix.web
 
    .. autosummary::
    
-      NON_CONTENT_TAGS
-      HTML_TO_MARKDOWN_DEFAULTS
       DEEP_HTML_RECURSION_LIMIT
    
    .. rubric:: Functions
