@@ -4,12 +4,6 @@ contaix.web
 .. automodule:: contaix.web
 
    
-   .. rubric:: Module Attributes
-
-   .. autosummary::
-   
-      DEEP_HTML_RECURSION_LIMIT
-   
    .. rubric:: Functions
 
    .. autosummary::

@@ -21,11 +21,6 @@ Example:
 ... )
 ```
 
-### Module Attributes
-
-| [`DEEP_HTML_RECURSION_LIMIT`](#contaix.web.DEEP_HTML_RECURSION_LIMIT)   | Recursion limit used (temporarily) to retry a page nested too deeply for the default one: `markdownify` recurses once per nesting level.   |
-|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-
 ### Functions
 
 | [`extract_rsc_page_content`](#contaix.web.extract_rsc_page_content)(rsc_text)                 | Extract page content from RSC flight data.                              |
@@ -43,13 +38,6 @@ Example:
 | [`rsc_tree_to_markdown`](#contaix.web.rsc_tree_to_markdown)(node, \*[, \_registry, ...])  | Recursively extract markdown from a React Server Component tree node.   |
 | [`site_to_markdown`](#contaix.web.site_to_markdown)(url, \*[, cache_dir, ...])        | Download a documentation site and produce a single aggregated markdown. |
 | [`url_to_cache_key`](#contaix.web.url_to_cache_key)(url)                              | Convert a URL to a filesystem-safe cache key.                           |
-
-### contaix.web.DEEP_HTML_RECURSION_LIMIT *= 100000*
-
-Recursion limit used (temporarily) to retry a page nested too deeply for the
-default one: `markdownify` recurses once per nesting level. Python < 3.11
-spends C stack on every Python call, so the retry runs in a thread with
-`DEEP_HTML_THREAD_STACK_BYTES` of stack, which makes the high limit safe there too.
 
 ### contaix.web.extract_rsc_page_content(rsc_text)
 
@@ -165,6 +153,9 @@ Tries, in order:
 ### contaix.web.html_to_clean_markdown(html, , body_width=0, ignore_images=True, include_links=True, \*\*markdownify_options)
 
 Convert HTML to clean markdown (via `markdownify`, MIT-licensed).
+
+A thin wrapper over `scraped.html_markdown.html_to_markdown_str()` (with the
+`lxml` parser and no trailing newline), which owns the cleaning passes.
 
 * **Parameters:**
   * **html** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Raw HTML content.

@@ -1,4 +1,4 @@
-> built 2026-10-20 15:58 UTC from 48975e7 (main) · contaix 0.0.26. Details: build_info.json
+> built 2026-10-20 17:27 UTC from 4d671b2 (main) · contaix 0.0.27. Details: build_info.json
 
 # index.html.md
 
@@ -945,11 +945,6 @@ Example:
 ... )
 ```
 
-### Module Attributes
-
-| [`DEEP_HTML_RECURSION_LIMIT`](_autosummary/contaix.web.html.md#contaix.web.DEEP_HTML_RECURSION_LIMIT)   | Recursion limit used (temporarily) to retry a page nested too deeply for the default one: `markdownify` recurses once per nesting level.   |
-|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-
 ### Functions
 
 | [`extract_rsc_page_content`](_autosummary/contaix.web.html.md#contaix.web.extract_rsc_page_content)(rsc_text)                 | Extract page content from RSC flight data.                              |
@@ -967,13 +962,6 @@ Example:
 | [`rsc_tree_to_markdown`](_autosummary/contaix.web.html.md#contaix.web.rsc_tree_to_markdown)(node, \*[, \_registry, ...])  | Recursively extract markdown from a React Server Component tree node.   |
 | [`site_to_markdown`](_autosummary/contaix.web.html.md#contaix.web.site_to_markdown)(url, \*[, cache_dir, ...])        | Download a documentation site and produce a single aggregated markdown. |
 | [`url_to_cache_key`](_autosummary/contaix.web.html.md#contaix.web.url_to_cache_key)(url)                              | Convert a URL to a filesystem-safe cache key.                           |
-
-### contaix.web.DEEP_HTML_RECURSION_LIMIT *= 100000*
-
-Recursion limit used (temporarily) to retry a page nested too deeply for the
-default one: `markdownify` recurses once per nesting level. Python < 3.11
-spends C stack on every Python call, so the retry runs in a thread with
-`DEEP_HTML_THREAD_STACK_BYTES` of stack, which makes the high limit safe there too.
 
 ### contaix.web.extract_rsc_page_content(rsc_text)
 
@@ -1089,6 +1077,9 @@ Tries, in order:
 ### contaix.web.html_to_clean_markdown(html, , body_width=0, ignore_images=True, include_links=True, \*\*markdownify_options)
 
 Convert HTML to clean markdown (via `markdownify`, MIT-licensed).
+
+A thin wrapper over `scraped.html_markdown.html_to_markdown_str()` (with the
+`lxml` parser and no trailing newline), which owns the cleaning passes.
 
 * **Parameters:**
   * **html** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Raw HTML content.
@@ -1217,18 +1208,18 @@ Convert a URL to a filesystem-safe cache key.
 
 # About this build
 
-This documentation was built on **2026-10-20 15:58 UTC** from commit <a href="https://github.com/thorwhalen/contaix/commit/48975e7d6a6d7c690d1269edf61b48a7b51384af"><code>48975e7</code></a> on branch <code>main</code>, for **contaix 0.0.26** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 17:27 UTC** from commit <a href="https://github.com/thorwhalen/contaix/commit/4d671b2e12974432589aa64f773d4bb90d13777b"><code>4d671b2</code></a> on branch <code>main</code>, for **contaix 0.0.27** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.26) is behind the latest release on PyPI (0.0.27): `pip install contaix` gives newer code than these docs describe.
+- The documented version (0.0.27) is behind the latest release on PyPI (0.0.28): `pip install contaix` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/contaix/commit/48975e7d6a6d7c690d1269edf61b48a7b51384af"><code>48975e7d6a6d7c690d1269edf61b48a7b51384af</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/contaix/commit/4d671b2e12974432589aa64f773d4bb90d13777b"><code>4d671b2e12974432589aa64f773d4bb90d13777b</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1239,15 +1230,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/contaix</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/contaix/actions/runs/39453010281">39453010281</a>   |
+| Run          | <a href="https://github.com/thorwhalen/contaix/actions/runs/39465927232">39465927232</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>48975e7d6a6d7c690d1269edf61b48a7b51384af</code> (in the history of the built commit) |
+| Event commit | <code>4d671b2e12974432589aa64f773d4bb90d13777b</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.21  |
+| epythet  | 0.2.22  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -1266,14 +1257,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/contaix/0.0.27/">0.0.27</a>, newer than the documented version (0.0.26).
+Latest release: <a href="https://pypi.org/project/contaix/0.0.28/">0.0.28</a>, newer than the documented version (0.0.27).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/contaix && cd contaix
-git checkout 48975e7d6a6d7c690d1269edf61b48a7b51384af
-pip install "epythet==0.2.21"
+git checkout 4d671b2e12974432589aa64f773d4bb90d13777b
+pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
