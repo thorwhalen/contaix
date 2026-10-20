@@ -398,8 +398,10 @@ HTML_TO_MARKDOWN_DEFAULTS = {
 
 #: Recursion limit used (temporarily) to retry a page nested too deeply for the
 #: default one: ``markdownify`` recurses once per nesting level. Python < 3.11
-#: spends C stack on every Python call, so a high limit would segfault there.
-DEEP_HTML_RECURSION_LIMIT = 100_000 if sys.version_info >= (3, 11) else 3_000
+#: spends C stack on every Python call, so the retry runs in a thread with
+#: :data:`DEEP_HTML_THREAD_STACK_BYTES` of stack, which makes the high limit safe there too.
+DEEP_HTML_RECURSION_LIMIT = 100_000
+DEEP_HTML_THREAD_STACK_BYTES = 512 * 1024 * 1024  # virtual: only touched pages cost memory
 
 #: Serialises the temporary raise of the (process-wide) recursion limit, so two
 #: threads retrying deep pages cannot leave the raised value behind as "previous".
@@ -749,6 +751,38 @@ def _escape_line_starts(soup, verbatim: set, *, include_links: bool = True) -> N
             text.replace_with(lead + _escape_line_start(stripped))
 
 
+def _convert_deep(converter, soup) -> str:
+    """Convert ``soup`` in a big-stack thread under a raised recursion limit.
+
+    Both the recursion limit and ``threading.stack_size`` are process-wide, so one
+    raiser at a time (``_recursion_limit_lock``); both are restored afterwards.
+    """
+    result: list = []
+
+    def work():
+        try:
+            result.append((converter.convert_soup(soup), None))
+        except BaseException as e:  # re-raised in the caller's thread
+            result.append((None, e))
+
+    with _recursion_limit_lock:
+        previous_limit = sys.getrecursionlimit()
+        previous_stack = threading.stack_size()
+        sys.setrecursionlimit(max(previous_limit, DEEP_HTML_RECURSION_LIMIT))
+        try:
+            threading.stack_size(DEEP_HTML_THREAD_STACK_BYTES)
+            thread = threading.Thread(target=work, daemon=True)
+            thread.start()
+            thread.join()
+        finally:
+            threading.stack_size(previous_stack)
+            sys.setrecursionlimit(previous_limit)
+    markdown, error = result[0]
+    if error is not None:
+        raise error
+    return markdown
+
+
 def html_to_clean_markdown(
     html: str,
     *,
@@ -821,13 +855,7 @@ def html_to_clean_markdown(
     try:
         markdown = converter.convert_soup(soup)
     except RecursionError:  # very deeply nested page: retry with a higher limit
-        with _recursion_limit_lock:  # the limit is process-wide: one raiser at a time
-            previous = sys.getrecursionlimit()
-            sys.setrecursionlimit(max(previous, DEEP_HTML_RECURSION_LIMIT))
-            try:
-                markdown = converter.convert_soup(soup)
-            finally:
-                sys.setrecursionlimit(previous)
+        markdown = _convert_deep(converter, soup)
     return _collapse_blank_runs(markdown).strip()
 
 
