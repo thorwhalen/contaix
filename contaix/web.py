@@ -423,6 +423,9 @@ _LINE_START_CONTAINERS = frozenset(
     "p div li dd dt blockquote section article main center body".split()
 )
 _LINE_START_MARKER_RE = re.compile(r"^(?:[-+*>]|#{1,6}|\d{1,9}[.)])(?=\s|$)")
+#: A whole line that markdown reads as a rule (``---``, ``* * *``, ``___``) or as a setext
+#: underline (``===``, ``---`` under a ``<br>``-separated title).
+_RULE_LINE_RE = re.compile(r"^([-*_=])(?:\s*\1){2,}$")
 
 #: Tags that end a line (and so start a new one): blocks, their parts, ``<br>`` and ``<hr>``.
 _LINE_BREAK_TAGS = frozenset(
@@ -434,7 +437,9 @@ _LINE_BREAK_TAGS = frozenset(
 _BLOCK_END_TAGS = _LINE_BREAK_TAGS - {"br"}
 
 #: Inline tags that render as their content alone (no markers around it).
-_TRANSPARENT_INLINE_TAGS = frozenset({"span", "font", "label"})
+_TRANSPARENT_INLINE_TAGS = frozenset(
+    {"span", "font", "label", "small", "abbr", "sub", "sup"}
+)
 
 _BLOCK_TAGS = ("div", "p", "ul", "ol", "dl", "table", "pre", "blockquote", "section")
 _INLINE_TAGS = frozenset(
@@ -527,7 +532,7 @@ def _parse_html(html: str):
 def _escape_line_start(text: str) -> str:
     r"""Backslash-escape a list/heading/quote marker at the start of ``text``.
 
-    >>> for t in ("- a", "1. a", "# a", "> a", "a - b", "-1"):
+    >>> for t in ("- a", "1. a", "# a", "> a", "a - b", "-1", "---", "* * *", "==="):
     ...     print(_escape_line_start(t))
     \- a
     1\. a
@@ -535,7 +540,12 @@ def _escape_line_start(text: str) -> str:
     \> a
     a - b
     -1
+    \---
+    \* * *
+    \===
     """
+    if _RULE_LINE_RE.match(text.strip()):
+        return f"\\{text}"
     m = _LINE_START_MARKER_RE.match(text)
     if m is None:
         return text
@@ -609,11 +619,14 @@ def _has_descendant(el, names) -> bool:
     return any(getattr(d, "name", None) in names for d in el.descendants)
 
 
-def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
+def _prepare_soup(
+    soup, *, escape_line_start: bool = True, include_links: bool = True
+) -> None:
     """Fix the shapes ``markdownify`` renders badly (in place).
 
     ``escape_line_start`` backslash-escapes text that would otherwise open a list, heading
-    or quote (the converter's own ``escape_misc`` is off, being too noisy).
+    or quote (the converter's own ``escape_misc`` is off, being too noisy). With
+    ``include_links=False`` an ``<a>`` renders as its text alone, so it is transparent.
     """
     from bs4 import NavigableString
 
@@ -671,7 +684,7 @@ def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
         for node in run:
             paragraph.append(node.extract())
     if escape_line_start:
-        _escape_line_starts(soup, verbatim)
+        _escape_line_starts(soup, verbatim, include_links=include_links)
     # `<a><h2>T</h2></a>` would render as `[## T](url)`: put the link inside.
     for a in _tags_under(soup, ("a",), with_href=True):
         if not _has_descendant(a, _BLOCK_TAGS + _HEADING_TAGS):
@@ -685,7 +698,7 @@ def _prepare_soup(soup, *, escape_line_start: bool = True) -> None:
             a.unwrap()
 
 
-def _opens_a_line(text) -> bool:
+def _opens_a_line(text, *, transparent=_TRANSPARENT_INLINE_TAGS) -> bool:
     """Whether ``text`` starts a line of the rendered markdown: nothing but whitespace
     precedes it in its block container (looking through inline wrappers like ``<b>``), or
     only a ``<br>`` / block element does."""
@@ -712,20 +725,26 @@ def _opens_a_line(text) -> bool:
             return False
         if parent.name in _LINE_START_CONTAINERS:
             return True
-        if parent.name not in _TRANSPARENT_INLINE_TAGS:
+        if parent.name not in transparent:
             return False  # e.g. <b>: the line starts with its ``**``, not with the text
         node = parent
 
 
-def _escape_line_starts(soup, verbatim: set) -> None:
+def _escape_line_starts(soup, verbatim: set, *, include_links: bool = True) -> None:
     """Escape marker-looking text at the start of a block (see :func:`_escape_line_start`)."""
     from bs4 import NavigableString
 
+    transparent = _TRANSPARENT_INLINE_TAGS | (
+        frozenset() if include_links else frozenset({"a"})
+    )
     for text in _strings_under(soup):
         if type(text) is not NavigableString or id(text) in verbatim:
             continue
         stripped = text.lstrip()
-        if _LINE_START_MARKER_RE.match(stripped) and _opens_a_line(text):
+        looks_like_markup = _LINE_START_MARKER_RE.match(stripped) or _RULE_LINE_RE.match(
+            stripped.rstrip()
+        )
+        if looks_like_markup and _opens_a_line(text, transparent=transparent):
             lead = text[: len(text) - len(stripped)]
             text.replace_with(lead + _escape_line_start(stripped))
 
@@ -793,7 +812,11 @@ def html_to_clean_markdown(
             ]
 
     soup = _parse_html(html)
-    _prepare_soup(soup, escape_line_start=not options.get("escape_misc"))
+    _prepare_soup(
+        soup,
+        escape_line_start=not options.get("escape_misc"),
+        include_links=include_links,
+    )
     converter = _make_converter(**options)
     try:
         markdown = converter.convert_soup(soup)

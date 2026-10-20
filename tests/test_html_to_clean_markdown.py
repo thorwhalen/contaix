@@ -346,3 +346,28 @@ def test_a_wrapper_of_a_code_block_keeps_its_attributes_for_the_language_callbac
         html, code_language_callback=lambda el: " ".join(el.parent["class"])
     )
     assert md.startswith("```highlight\n")
+
+
+def test_text_that_looks_like_a_rule_stays_text():
+    out = html_to_clean_markdown("<p>one</p><p>---</p><p>***</p><p>___</p><p>two</p>")
+    assert out.splitlines().count("---") == 0 and "\\---" in out and "\\***" in out and "\\___" in out
+
+
+def test_setext_look_alike_after_a_br_stays_text():
+    out = html_to_clean_markdown("<p>Title<br>===</p><p>Other<br>---</p>")
+    assert "\\===" in out and "\\---" in out
+
+
+def test_real_rules_are_still_rules():
+    assert "---" in html_to_clean_markdown("<p>a</p><hr><p>b</p>").replace("\\---", "")
+
+
+@pytest.mark.parametrize("tag", ["small", "abbr", "sub", "sup"])
+def test_plain_rendering_inline_tags_do_not_hide_a_line_start(tag):
+    out = html_to_clean_markdown(f"<ul><li><{tag}>1. Intro</{tag}></li></ul>")
+    assert out == "* 1\\. Intro" or out == "- 1\\. Intro"
+
+
+def test_unlinked_anchor_does_not_hide_a_line_start():
+    out = html_to_clean_markdown("<ul><li><a href='#i'>1. Intro</a></li></ul>", include_links=False)
+    assert "1\\. Intro" in out
