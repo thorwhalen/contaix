@@ -32,6 +32,7 @@ from urllib.parse import urlparse, urljoin
 from typing import Iterator
 
 import requests
+from scraped.html_markdown import NON_CONTENT_TAGS, HTML_TO_MARKDOWN_DEFAULTS
 
 
 # ---------------------------------------------------------------------------
@@ -383,18 +384,10 @@ def is_nextjs_site(html: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
-#: Tags whose *content* is never part of the document text. ``markdownify`` drops
-#: ``script``/``style`` but would keep ``<title>``, so the whole head goes first.
-NON_CONTENT_TAGS = ("head", "script", "style", "noscript")
-
-#: Defaults for the HTML->Markdown conversion (the same ones ``scraped`` uses).
-#: Any of them can be overridden by keyword in :func:`html_to_clean_markdown`.
-HTML_TO_MARKDOWN_DEFAULTS = {
-    "heading_style": "ATX",  # "# Title", not the underlined setext form
-    "bullets": "*",
-    "escape_underscores": False,  # keeps identifiers like ``foo_bar`` readable
-    "escape_asterisks": False,
-}
+# The tags dropped before conversion (``NON_CONTENT_TAGS``) and the markdownify
+# defaults (``HTML_TO_MARKDOWN_DEFAULTS``) are imported from ``scraped.html_markdown``:
+# one source of truth for both converters. contaix adds its own cleaning passes on top
+# (thorwhalen/scraped#25 tracks moving them into scraped so this can delegate fully).
 
 #: Recursion limit used (temporarily) to retry a page nested too deeply for the
 #: default one: ``markdownify`` recurses once per nesting level. Python < 3.11
