@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-20T10:35:36Z",
+  "built_at": "2026-10-20T10:49:47Z",
   "package": {
     "name": "contaix",
-    "version": "0.0.24",
+    "version": "0.0.25",
     "display_name": "contaix",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "6073f7aae8c4e5ad08ab30744ad4b1ce1cd3dda5",
-    "short_commit": "6073f7a",
+    "commit": "01c6e3243f7e50cdc3523e8d8592a14afdf924f7",
+    "short_commit": "01c6e32",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/contaix",
-    "commit_url": "https://github.com/thorwhalen/contaix/commit/6073f7aae8c4e5ad08ab30744ad4b1ce1cd3dda5",
+    "commit_url": "https://github.com/thorwhalen/contaix/commit/01c6e3243f7e50cdc3523e8d8592a14afdf924f7",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/contaix",
-    "sha": "6073f7aae8c4e5ad08ab30744ad4b1ce1cd3dda5",
+    "sha": "01c6e3243f7e50cdc3523e8d8592a14afdf924f7",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "39408816768",
-    "run_url": "https://github.com/thorwhalen/contaix/actions/runs/39408816768",
+    "run_id": "39410457810",
+    "run_url": "https://github.com/thorwhalen/contaix/actions/runs/39410457810",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -61,15 +61,13 @@
   "pypi": {
     "checked": true,
     "latest": "0.0.25",
-    "relation": "behind",
+    "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/contaix && cd contaix\ngit checkout 6073f7aae8c4e5ad08ab30744ad4b1ce1cd3dda5\npip install \"epythet==0.2.19\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/contaix && cd contaix\ngit checkout 01c6e3243f7e50cdc3523e8d8592a14afdf924f7\npip install \"epythet==0.2.19\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": false,
-    "notes": [
-      "The documented version (0.0.24) is behind the latest release on PyPI (0.0.25): `pip install contaix` gives newer code than these docs describe."
-    ]
+    "aligned": true,
+    "notes": []
   }
 }

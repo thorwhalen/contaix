@@ -665,8 +665,10 @@
 
 <span class="c1">#: Recursion limit used (temporarily) to retry a page nested too deeply for the</span>
 <span class="c1">#: default one: ``markdownify`` recurses once per nesting level. Python &lt; 3.11</span>
-<span class="c1">#: spends C stack on every Python call, so a high limit would segfault there.</span>
-<span class="n">DEEP_HTML_RECURSION_LIMIT</span> <span class="o">=</span> <span class="mi">100_000</span> <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span> <span class="k">else</span> <span class="mi">3_000</span>
+<span class="c1">#: spends C stack on every Python call, so the retry runs in a thread with</span>
+<span class="c1">#: :data:`DEEP_HTML_THREAD_STACK_BYTES` of stack, which makes the high limit safe there too.</span>
+<span class="n">DEEP_HTML_RECURSION_LIMIT</span> <span class="o">=</span> <span class="mi">100_000</span>
+<span class="n">DEEP_HTML_THREAD_STACK_BYTES</span> <span class="o">=</span> <span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>  <span class="c1"># virtual: only touched pages cost memory</span>
 
 <span class="c1">#: Serialises the temporary raise of the (process-wide) recursion limit, so two</span>
 <span class="c1">#: threads retrying deep pages cannot leave the raised value behind as "previous".</span>
@@ -1008,12 +1010,44 @@
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NavigableString</span> <span class="ow">or</span> <span class="nb">id</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">in</span> <span class="n">verbatim</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">stripped</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-        <span class="n">looks_like_markup</span> <span class="o">=</span> <span class="n">_LINE_START_MARKER_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_RULE_LINE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
-            <span class="n">stripped</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">looks_like_markup</span> <span class="o">=</span> <span class="n">_LINE_START_MARKER_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+            <span class="n">stripped</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="n">_RULE_LINE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">stripped</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">looks_like_markup</span> <span class="ow">and</span> <span class="n">_opens_a_line</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="n">transparent</span><span class="p">):</span>
             <span class="n">lead</span> <span class="o">=</span> <span class="n">text</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">stripped</span><span class="p">)]</span>
             <span class="n">text</span><span class="o">.</span><span class="n">replace_with</span><span class="p">(</span><span class="n">lead</span> <span class="o">+</span> <span class="n">_escape_line_start</span><span class="p">(</span><span class="n">stripped</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_convert_deep</span><span class="p">(</span><span class="n">converter</span><span class="p">,</span> <span class="n">soup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert ``soup`` in a big-stack thread under a raised recursion limit.</span>
+
+<span class="sd">    Both the recursion limit and ``threading.stack_size`` are process-wide, so one</span>
+<span class="sd">    raiser at a time (``_recursion_limit_lock``); both are restored afterwards.</span>
+<span class="sd">    """</span>
+    <span class="n">result</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">work</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">converter</span><span class="o">.</span><span class="n">convert_soup</span><span class="p">(</span><span class="n">soup</span><span class="p">),</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># re-raised in the caller's thread</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="n">_recursion_limit_lock</span><span class="p">:</span>
+        <span class="n">previous_limit</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getrecursionlimit</span><span class="p">()</span>
+        <span class="n">previous_stack</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">stack_size</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">previous_limit</span><span class="p">,</span> <span class="n">DEEP_HTML_RECURSION_LIMIT</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">threading</span><span class="o">.</span><span class="n">stack_size</span><span class="p">(</span><span class="n">DEEP_HTML_THREAD_STACK_BYTES</span><span class="p">)</span>
+            <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">work</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">threading</span><span class="o">.</span><span class="n">stack_size</span><span class="p">(</span><span class="n">previous_stack</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="n">previous_limit</span><span class="p">)</span>
+    <span class="n">markdown</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">error</span>
+    <span class="k">return</span> <span class="n">markdown</span>
 
 
 <div class="viewcode-block" id="html_to_clean_markdown">
@@ -1090,13 +1124,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">markdown</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert_soup</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">RecursionError</span><span class="p">:</span>  <span class="c1"># very deeply nested page: retry with a higher limit</span>
-        <span class="k">with</span> <span class="n">_recursion_limit_lock</span><span class="p">:</span>  <span class="c1"># the limit is process-wide: one raiser at a time</span>
-            <span class="n">previous</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getrecursionlimit</span><span class="p">()</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">previous</span><span class="p">,</span> <span class="n">DEEP_HTML_RECURSION_LIMIT</span><span class="p">))</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">markdown</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert_soup</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
-            <span class="k">finally</span><span class="p">:</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="n">previous</span><span class="p">)</span>
+        <span class="n">markdown</span> <span class="o">=</span> <span class="n">_convert_deep</span><span class="p">(</span><span class="n">converter</span><span class="p">,</span> <span class="n">soup</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_collapse_blank_runs</span><span class="p">(</span><span class="n">markdown</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 
 
@@ -2007,7 +2035,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=b4d262a5"></script>
+</div><script src="../../_static/documentation_options.js?v=1d9216c3"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

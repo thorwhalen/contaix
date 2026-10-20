@@ -50,7 +50,8 @@ Example:
 
 Recursion limit used (temporarily) to retry a page nested too deeply for the
 default one: `markdownify` recurses once per nesting level. Python < 3.11
-spends C stack on every Python call, so a high limit would segfault there.
+spends C stack on every Python call, so the retry runs in a thread with
+`DEEP_HTML_THREAD_STACK_BYTES` of stack, which makes the high limit safe there too.
 
 ### contaix.web.HTML_TO_MARKDOWN_DEFAULTS *= {'bullets': '\*', 'escape_asterisks': False, 'escape_underscores': False, 'heading_style': 'ATX'}*
 

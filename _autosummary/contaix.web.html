@@ -344,7 +344,8 @@ fetch_page(url)        # Fetch a single page’s HTML with optional caching</p>
 <span class="sig-prename descclassname"><span class="pre">contaix.web.</span></span><span class="sig-name descname"><span class="pre">DEEP_HTML_RECURSION_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100000</span></span><a class="headerlink" href="#contaix.web.DEEP_HTML_RECURSION_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Recursion limit used (temporarily) to retry a page nested too deeply for the
 default one: <code class="docutils literal notranslate"><span class="pre">markdownify</span></code> recurses once per nesting level. Python &lt; 3.11
-spends C stack on every Python call, so a high limit would segfault there.</p>
+spends C stack on every Python call, so the retry runs in a thread with
+<code class="xref py py-data docutils literal notranslate"><span class="pre">DEEP_HTML_THREAD_STACK_BYTES</span></code> of stack, which makes the high limit safe there too.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -750,7 +751,7 @@ Otherwise, returns the output file path.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b4d262a5"></script>
+</div><script src="../_static/documentation_options.js?v=1d9216c3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
